@@ -1,0 +1,83 @@
+<!--#include file="head.inc?name=Home%20Page" 
+file="side.inc?i=3" -->
+
+<table id="maintab" height=290 align="center"><tr>
+<td align="center" valign="top"><br>
+<table id="header" align="center"><tr><td><b>System :: Config download or upload</b></td></tr></table>
+<br>
+<form method="POST" action="Set_conf.cgi" name="soho" enctype="multipart/form-data">
+<table border="0" width="70%" height="20" align="center">
+<!--<tr><td width="5%"></td>
+<td width="35%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;Character Set Folder:</font></b></td>
+<td width="50%" bgcolor="#FFFFFF">-->
+<!--#i nclude select_show_dir="code_dir" -->
+<!--</td>
+</tr>-->
+<tr><td>Download config file <a href="_Get_conf.cgi"><b><font size="3" color="#0000ff">here</font></b></a></td></tr>
+<tr><td width="5%"></td>
+<tr><td width="35%"><b><font size="3">&nbsp;Config upload File:</font></b></td></tr>
+<tr><td width="50%"><input type=file name=ufile size=30 maxlength=30 value=""></td></tr>
+</table><br>
+
+<table id="info" align="center">
+<tr><td><br>It will rewrite flash-memory and load it to /etc </td></tr>
+</table>
+<table border="0" width="30%" height="20" align="center">
+<tr>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="reset" value="Save"onclick="check_form()">
+&nbsp;&nbsp;<input type="button" name="reset" value="Back" onclick='history.back();'>
+</tr></table></form>
+</body></html>
+<script language="JavaScript">
+function check_form(){
+    un = document.soho.ufile.value;
+    if (check_un()==0){
+        warming_b("File Path");
+        document.form1.ufile.focus();
+        history.go(0);
+        return;
+    }
+//RAW
+//    else if(check_un()==2){
+//        alert("Please don't change the unicode filename!!");
+//        history.go(0);
+//        return;
+//    }else
+//        self.open('charpop.htm','OK','alwaysRaised,resizable,scrollbars,width=275,height=120');
+}
+function check_un(){
+    var ok=1;
+    var count = document.soho.ufile.length;
+    if (un==null||un==""){
+        ok=0;
+    }
+    if(un.search('ntx_chset.h') == -1){
+        ok=2;
+    }
+    return ok;
+}
+function warming_b(){
+    alert(arguments[0]+": Can not be blank!");
+}
+</script>
+
+<!-- CGI: Set_conf.cgi
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=3";
+
+    print "<tr><td><pre>";
+	save_bfile "ufile:10000:/[config_/|/|/|/|/|/|/|/|.tgz/:/dev/mtdblock4"{
+	    my_system "rm -r /etc/*";
+	    my_system "/bin/dd if=/dev/mtdblock4 of=/var/etc.tgz >/dev/null 2>&1; cd /var;tar -xzf etc.tgz -C / > /dev/null 2>&1 || echo \"   *** Restore Config failed ***>>\" ";
+//	    my_system "/bin/dd if=/dev/mtdblock4 of=/var/etc.tgz >/dev/null 2>&1; cd /var;/bin/gunzip etc.tgz;tar -xf etc.tar -C / > /dev/null 2>&1 || echo \"   *** Restore Config failed ***>>\" ";
+	    init;
+	}
+    print "</pre></td></tr></table><a href=\"http://??_srv_ip??:??_srv_port??/admin-config.htm\">Back</a></table></body></html>";
+
+END_CGI -->
+<!-- CGI: _Get_conf.cgi
+//	print "HTTP/1.0 200 OK\nContent-type: application/octet-stream\n Server: thttpd/2.25b\nExpires: 0\n\n";
+	print "HTTP/1.0 200 OK\nContent-Disposition: attachment; filename=";
+	my_system "echo config_`date +%Y%m%d`.tgz";	//End is \n
+	print "Server: thttpd/2.25b\nExpires: 0\n\n";
+
+	get_file "/dev/mtdblock4";
+END_CGI -->

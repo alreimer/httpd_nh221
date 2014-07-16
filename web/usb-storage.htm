@@ -1,0 +1,133 @@
+<!--#include area="16345:AREA-1" -->
+<!--#include file="head.inc?name=Home%20Page" 
+file="side.inc?i=7" -->
+<script src="/js/tools.js"></script>
+
+<table id="maintab" height=290 align="center"><tr>
+<td align="center" valign="top"><br>
+<table id="header" align="center"><tr><td><b>USB :: Storage manager</b></td></tr></table>
+<br>
+<!--<table border="0" width="70%" height="40" align="center">
+
+<tr><td width=2% valign=top></td>
+<td width=80% align=left><font color="#FFFFFF" size=2 face="Arial, Helvetica, sans-serif"><b>Please provide .</b></font></td></tr></table>-->
+
+<!-- need make: show only hard disk info!!-->
+<!-- CGI: _test.cgi
+    write_file "AREA-1:/proc/bus/usb/devices";
+    bind_par "AREA-1";
+    print "<table><tr bgcolor=\"#ff0000\"><td width=140 align=center class=style2>USB 2.0/1.1</td><td width=135 align=center class=style2>Vendor:ProdID</td><td width=135 align=center class=style2>Manufacturer</td><td width=140 align=center class=style2>Device Name</td><td width=140 align=center class=style2>Serial number</td></tr>\n" ;
+    do {
+	set "a = 0";
+	buf_parse_area "/[/*/]\nT:  " {
+	    set "a = 1";
+	}
+	    print "[?/*Cls=08(stor.)?]<tr><td>USB {?/*D:  Ver= /[/*/] ?}</td><td>{?/*P:  Vendor=/[/*/] ?}:{?ProdID=/[/*/] ?}</td><td>{?/*S:  Manufacturer=/[/*/]\n?}</td><td>{?/*S:  Product=/[/*/]\n?}</td><td>{?/*S:  SerialNumber=/[/*/]\n?}</td></tr>\n";
+
+    }	if_set "a == 0";	//stop if set!!!
+    print "</table>";
+END_CGI -->
+<!--#include cgi="_test.cgi" -->
+
+<br>
+<form method="post" name="host_" action="known_usb_stick.cgi">
+<table border="0" width="70%" height="50" align="center">
+<tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;known_usb File:</font></b></td><td></td><td></td></tr>
+<tr><td colspan="4">
+<textarea name="known_usb" cols="80" rows="20" onkeydown="insertTab(this, event);">
+<!-- #include file="/etc/known_usb" -->
+</textarea></td></tr>
+<!--see examples from ftp-conf, ftp-passw, ftp-mod and serv-ftp-->
+<tr><td></td><td>Example...</td>
+<td id="varbox-list-val"><input type="submit" name="save_usb" value="Apply">&nbsp;<input type="reset" value="Cancel"></td><td></td></tr>
+</table></form><br>
+
+<table width="70%"><tr><td><b>mount</b></td></tr>
+<tr><td><pre>
+<!--#include exec="mount"-->
+</pre></td></tr>
+</table>
+
+<!-- TABLE:mnt_point
+#-> parse_file: /etc/known_usb
+while:/[/*/]\n
+if:/ /N#N/*:/[//mnt///!/B/!/*/]/<1:\0/>/\/*.//
+END_TABLE -->
+
+<table border="0" width="70%" height="40" align="center">
+<form method="Get" action="Backup.cgi">
+<tr><td bgcolor="#d6efff"><font color="#000000"><b>BackUp USB disk</b></font></td><td width="30%" bgcolor="#FFFFFF" align="center"><input type="submit" name="reset" value="Yes"></td></tr></form>
+<tr><td align="left" colspan="2"><font size=2>It may take several minutes. USB disk will be copied to HD<br>Please wait and ensure a disk is not removed!</font></td></tr>
+
+<form method="Get" action="MK_folders.cgi" >
+<tr><td bgcolor="#d6efff"><b><font size="3">Make folder(s):</font></b></td><td width="30%"><!--<input type="radio" value="mount" name="flag" checked>mount<input type="radio" value="umount" name="flag">umount--></td></tr>
+<tr><td bgcolor="#ffffff" colspan="2"><!--#include chtbl_stat="nd:mnt_point:" tbl_select="mnt_point" --><input type="submit" name="Apply" value="Make_ALL">&nbsp;<input type="submit" name="Apply" value="Make_ONE"></td></tr></form>
+
+<form method="Get" action="show_folder.cgi" >
+<tr><td bgcolor="#d6efff"><b><font size="3">Show folder content:</font></b></td><td width="30%"><!--<input type="radio" value="mount" name="flag" checked>mount<input type="radio" value="umount" name="flag">umount--></td></tr>
+<tr><td bgcolor="#ffffff" colspan="2"><!--#include chtbl_stat="t:mnt_point:" tbl_select="mnt_point" --><input type="submit" name="Apply" value="OK"></td></tr></form>
+</table>
+
+<table id="info" align="center">
+<tr><td><br>Syslog info <a href="syslog.cgi">here</a></td></tr>
+</table>
+
+</td></tr><tr>
+<td align="center"><br><input type="button" value="Back" onclick="history.back()"></td></tr>
+</table>
+
+<!--</td></tr></table>-->
+</body></html>
+<!-- CGI: known_usb_stick.cgi
+	remove_chars "\r::_#known_usb";
+	save_file "_#known_usb:/etc/known_usb";
+	write_par "_etc_save:1";
+	boot_page "usb-storage.htm";
+END_CGI -->
+<!-- CGI: Backup.cgi
+	get_file "./JavaReturn_.inc?name=Home%20Page&i=7";
+
+	print "<pre>";
+	my_system "/etc/usb_backup.sh &";
+	print "</pre></table><a href=\"usb-storage.htm\">Back</a></table></body></html>";
+END_CGI -->
+<!-- CGI: syslog.cgi
+	get_file "./JavaReturn_.inc?name=Home%20Page&i=7";
+
+	print "<pre>";
+	my_system "tail /var/log/messages";
+	print "</pre></table><a href=\"usb-storage.htm\">Back</a></table></body></html>";
+END_CGI -->
+<!-- CGI: MK_folders.cgi
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=7";
+
+    if "_#Apply:Make_ALL/"{
+	print "<pre>";
+	my_shell "for i in $(echo \"?@-_mnt_point@?\") ; do mkdir -p \"$i\"; [ $? -eq 0 ] && echo \"<tr><td>Dir: $i is made!</td></tr>\"; done ";
+	print "</td></tr></table><a href=\"usb-storage.htm\">Back</a></table></body></html>";
+    }
+    if "_#Apply:Make_ONE/"{
+	nnot "_@mnt_point:/\ "{
+	    print "<pre>False folder ID: ??_#mnt_point??</pre></td></tr></table><a href=\"usb-storage.htm\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+
+    my_shell "mkdir -p \"??_@mnt_point??\"; [ $? -eq 0 ] && echo \"<tr><td><pre>Dir: ??_@mnt_point?? is made!</pre></td></tr>\"; ";
+    print "</td></tr></table><a href=\"usb-storage.htm\">Back</a></table></body></html>";
+    }
+//    boot_page "usb-storage.htm";
+END_CGI -->
+<!-- CGI: show_folder.cgi
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=7";
+
+    if "_#Apply:OK/"{
+	nnot "_@mnt_point:/\ "{
+	    print "<pre>False folder ID: ??_#mnt_point??</pre></td></tr></table><a href=\"usb-storage.htm\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+    print "<pre>";
+    my_shell "ls -l \"??_@mnt_point??\" ";
+    print " </pre></td></tr></table><a href=\"usb-storage.htm\">Back</a></table></body></html>";
+    }
+//    boot_page "usb-storage.htm";
+END_CGI -->

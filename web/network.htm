@@ -1,0 +1,337 @@
+<!--#include par="2:Jumbo_mode:JUMBO:[0-2]" par="17:hostname:HOSTNAME:" par="2:dhcp_client:DHCP_ENABLE:[01]" -->
+<!--#include par="20:ip:IP:^(([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\.){3}([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])$"
+par="20:netmask:NETMASK:^(([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\.){3}([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])$"
+par="20:gateway:GATEWAY:^(([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\.){3}([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])$" -->
+<!--#include par="20:dns_server:DNS_SERVER:^(([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\.){3}([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])$"
+readcfg -->
+<!--#include file="head.inc?name=Home%20Page&body=onload%3D\"check_dhcp()\"" 
+file="side.inc?i=2" -->
+
+<table id="maintab" height=290 align="center"><tr>
+<td align="center" valign="top"><br>
+<table id="header" align="center"><tr><td><b>Networking :: Network</b></td></tr></table>
+<br>
+
+<table border="0" width="70%" height="50" align="center">
+    <colgroup>
+    <col id="varbox-list-name">
+    <col id="varbox-list-val">
+    </colgroup>
+
+    <form method="GET" name="main" action="Set_network.cgi" onSubmit="return check_form()">
+    <tr>
+    <td><b>&nbsp;Jumbo Frame:</b></td>
+    <td>
+	<select name="Jumbo_mode" size="1">
+		<option value="0">Disable</option><!--is 1500-->
+		<option value="1">4000</option>
+		<option value="2">7000</option>
+	</select>
+    </td></tr>
+
+    <tr>
+    <td><b>&nbsp;Host Name:</b></td>
+    <td><input type="text" name="hostname" maxlength="15" size="20" value="??hostname??"></td>
+    </tr>
+    <tr>
+    <td><b>&nbsp;DHCP Enable:</b></td>
+    <td>
+	<input type="radio" name="dhcp_client" value="1" onclick="check_dhcp()">Yes
+        <input type="radio" name="dhcp_client" value="0" onclick="check_dhcp()">No</td>
+    </tr>
+    <tr>
+    <td><b>&nbsp;IP Address:</b></td>
+    <td><input type="text" name="ip" maxlength="15" size="20" value="??ip??"></td>
+    </tr>
+    <tr>
+    <td><b>&nbsp;Subnet Mask:</b></td>
+    <td><input type="text" name="netmask" maxlength="15" size="20" value="??netmask??"></td>
+    </tr>
+    <tr>
+    <td><b>&nbsp;Gateway:</b></td>
+    <td><input type="text" name="gateway" maxlength="15" size="20" value="??gateway??"></td>
+    </tr>
+    <tr>
+    <td><b>&nbsp;DNS Server:</b></td>
+    <td><input type="text" name="dns_server" maxlength="15" size="20" value="??dns_server??"></td>
+    </tr>
+</table>
+
+<table id="info" align="center"><tr><td><br>Please provide Hostname, IP Address, Subnet Mask and Gateway.</td></tr>
+<tr><td><br>More info <a href="network_add.htm">here</a></td></tr>
+</table>
+
+</td></tr><tr>
+<td align="center"><input type="submit" name="save_hostname" value="Apply">&nbsp;<input type="reset" value="Cancel">&nbsp;<input type="button" value="Back" onclick="history.back()"></form></td>
+</tr>
+</table>
+<script language="javascript">
+function check_form(){
+hn=document.main.hostname.value;
+ip=document.main.ip.value;
+sm=document.main.netmask.value;
+gw=document.main.gateway.value;
+dns=document.main.dns_server.value;
+if(check_hn()==0){document.main.hostname.focus();return false;}
+if(check_ip()==0){alert("Error!!! Not a legal IP address!");document.main.ip.focus();return false;}
+if(check_sm()==0){alert("Error!!! Not a legal Subnet Mask!");document.main.netmask.focus();return false;}
+if(check_gw()==0){alert("Error!!! Not a legal IP Mask!");document.main.gateway.focus();return false;}
+if(check_domain()==0){alert("IP Setting Error: IP & Gateway isn't in the same domain!");document.main.ip.focus();return false;}
+if(check_dns()==0){alert("Error!!! Not a legal DNS address!");document.main.dns_server.focus();return false;}
+return true;
+}
+
+function check_hn(){
+var ok_hn=1;
+if(hn==null||hn==""){
+    alert("Hostname ERROR: Can not be blank!");
+    ok_hn=0;
+}else{
+    var temp_u;
+    for(var i=0;i<hn.length; i++){
+	temp_u = hn.charCodeAt(i);
+	    if (temp_u==39||temp_u < 33 || temp_u > 126){
+		alert("Hostname ERROR: Can not be a ' character, a space character or control character!");
+		ok_hn=0;break;
+	    }
+    }
+}
+return ok_hn;
+}
+
+function check_ip(){
+var ok=1;
+str = ip.split(".");
+if (ip == null || ip=="" || ip=="127.0.0.1")
+    ok=0;
+else if (str.length!=4)ok=0;
+    else if (str[0]==224||str[0]==239||str[0]==1) ok=0;
+	else{
+	    for (i=0; i<str.length; i++){
+		if ( str[i]==null || str[i]=="" || isNaN(str[i]) || parseInt(str[i])<0 || parseInt(str[i])>255){
+		    ok = 0;break;
+		}
+		if (parseInt(str[i])==0 ){
+		    if (i==0 || i==3){
+			ok=0;break;
+		    }
+		}
+		if (parseInt(str[i])==255 && i==0){
+		    ok=0;break;
+		}
+	    }
+	}
+	return ok;
+}
+
+function check_dns(){
+var ok=1;
+str = dns.split(".");
+if (dns == null || dns=="" || dns=="127.0.0.1") ok=0;
+    else if (str.length!=4) ok=0;
+	else if (str[0]==224||str[0]==239||str[0]==1) ok=0;
+	    else{
+		for (i=0; i<str.length; i++){
+		    if ( str[i]==null || str[i]=="" || isNaN(str[i]) || parseInt(str[i])<0 || parseInt(str[i])>255){
+			ok = 0;break;
+		    }
+		    if (parseInt(str[i])==0 ){
+			if (i==0 || i==3){
+			    ok=0;break;
+			}
+		    }
+		    if (parseInt(str[i])==255 && i==0){
+			ok=0;break;
+		    }
+		}
+	    }
+	    return ok;
+}
+
+function check_sm(){
+var ok=1;
+str = sm.split(".");
+if (sm == null || sm=="" ) ok=0;
+    else if (str.length!=4) ok=0;
+	else{
+	    for (i=0; i<str.length; i++){
+		if ( str[i]==null || str[i]=="" || isNaN(str[i]) || parseInt(str[i])<0 || parseInt(str[i])>255){
+		    ok = 0;break;
+		}
+		if (parseInt(str[i])!=0 && parseInt(str[i])!=128 && parseInt(str[i])!=192 && parseInt(str[i])!=224 && parseInt(str[i])!= 240 && parseInt(str[i])!=248 && parseInt(str[i])!=252 && parseInt(str[i])!=254 && parseInt(str[i])!=255 ){
+		    ok=0;break;
+		}
+		if (parseInt(str[i])==0){
+		    if (i==0){
+			ok=0;break;
+		    }
+		}
+	    }
+	}
+	return ok;
+}
+
+function check_gw(){
+var ok=1;
+str = gw.split(".");
+if (gw == null || gw=="" ) ok=0;
+    else if (str.length!=4) ok=0; 
+	else{
+	    for (i=0; i<str.length; i++){
+		if ( str[i]==null || str[i]=="" || isNaN(str[i]) || parseInt(str[i])<0 || parseInt(str[i])>255){
+		    ok = 0;break;
+		}
+		if (parseInt(str[i])==0 ){
+		    if (i==0 || i==3){
+			ok=0;break;
+		    }
+		}
+		if (parseInt(str[i])==255 && i==0){
+		    ok=0;break;
+		}
+	    }
+	}
+	return ok;
+}
+
+function check_domain(){
+var ok_domain=1;
+var s1=ip;
+var s2=gw;
+var s3=sm;
+var ss1,ss2,ss3;
+for(var i=0;i<4&&ok_domain==1;i++){
+    var index1=s1.indexOf(".");
+    var index2=s2.indexOf(".");
+    var index3=s3.indexOf(".");
+    if (i!=3){
+	ss1=s1.substring(0,index1);
+	ss2=s2.substring(0,index2);
+	ss3=s3.substring(0,index3);
+    }else{
+	ss1=s1;
+	ss2=s2;
+	ss3=s3;
+    }
+    s1=s1.substr(index1+1);
+    s2=s2.substr(index2+1);
+    s3=s3.substr(index3+1);
+    var num1=parseInt(ss1);
+    var num2=parseInt(ss2);
+    var num3=parseInt(ss3);
+    if((num1&num3)!=(num2&num3)){
+	ok_domain=0;break;
+    }
+}
+return ok_domain;
+}
+
+function check_dhcp(){
+    if(document.main.dhcp_client[0].checked){
+        document.main.ip.disabled = true;
+        document.main.netmask.disabled = true;
+        document.main.gateway.disabled = true;
+        document.main.dns_server.disabled = true;
+    }else if(document.main.dhcp_client[1].checked){
+        document.main.ip.disabled = false;
+        document.main.netmask.disabled = false;
+        document.main.gateway.disabled = false;
+        document.main.dns_server.disabled = false;
+    }
+}
+</script>
+</body></html>
+
+<!-- CGI: Set_network.cgi
+/* do not provide redirection after DHCP-enbl*/
+    set "a=0"; //change_net=0;
+    set "b=0"; // change_all=0;
+
+    remove_chars ";\"<>`'|::_#hostname";
+    fill_cfg "dhcp_client:hostname:Jumbo_mode"; //	cfg_parseargs1(data);
+
+	if_changed "dhcp_client"{
+		set "b=1"; //change_all = 1;
+	}
+	if_changed "Jumbo_mode"{
+		set "a=1"; //change_net = 1;
+	}
+	if_changed "hostname"{	//restart only network
+	    set "a=1"; //change_net = 1;
+	    change_line "/etc/hosts:/*/?hostname?/:??ip?? ??_%hostname?? #httpd\n";
+	}
+	
+	if "_&dhcp_client:0/" {
+	    fill_cfg "ip:netmask:gateway:dns_server";
+	    if_changed "ip" {	//restart all upto network
+//		set "a=1"; //change_net = 1;
+		set "b=1"; //change_all = 1;
+		change_line "/etc/hosts:/ /?ip?/:??_%ip?? ??_&hostname??  #httpd\n";
+	    }
+
+	    if_changed "netmask"{
+		set "a=1"; //change_net = 1;
+	    }
+	    if_changed "gateway"{
+		set "a=1"; //change_net = 1;
+	    }
+
+	    if_changed "dns_server" {	//only write in resolver.
+		change_line "/etc/resolv.conf:/ nameserver:nameserver  ??_%dns_server??\n";
+	    }
+	}
+	
+    if_set "b == 1" { //(change_all)
+	    get_file "./Waitpage_h.htm";
+	    
+	    print "<tr><td><table width=\"550\">\n
+		<tr bgcolor=\"#D8D8D8\"><td height=\"30\" class=\"header\" colspan=2>&nbsp;&nbsp;IP Redirection</td></tr>\n
+		<tr bgcolor=\"#FFFFFF\"><td width=150>&nbsp;&nbsp;IP Address</td><td width=400>&nbsp;&nbsp;<font color=#ff0000>??_&ip??</font></td></tr>\n
+		<tr bgcolor=\"#FFFFFF\"><td>&nbsp;&nbsp;Subnet Mask</td><td>&nbsp;&nbsp;<font color=#ff0000>??_&netmask??</font></td></tr>\n
+		<tr bgcolor=\"#FFFFFF\"><td>&nbsp;&nbsp;Gateway</td><td>&nbsp;&nbsp;<font color=#ff0000>??_&gateway??</font></td></tr>\n
+		<tr bgcolor=\"#FFFFFF\"><td>&nbsp;&nbsp;DNS Server</td><td>&nbsp;&nbsp;<font color=#ff0000>??_&dns_server??</font></td></tr>\n
+		</table></td></tr>\n";
+	if "_&dhcp_client:0/" {
+	    print "<tr><td><font size=2>\n
+		<br>* Your browser communicates with the web server via the LAN connection,<br>and changing the IP address may temporarily disrupt this communication.\n
+		<br><BR>* If you changed NAS IP address to other network segment, you must make <br>sure that you have the gateway ip configured properly.\n
+		<form name=\"host\"><br><BR>* In <input type=\"text\" name=\"time\" value=\"40\" size=\"3\" readonly> seconds, this page will be directed to <a href=\"http://??_&ip??:??_srv_port??\\\" target=\"_top\">http://??_&ip??:??_srv_port??</a></form>
+		<br>Please wait ....\n
+		</font></td></tr>\n";
+	}
+	if "_&dhcp_client:1/" {
+	    print "<tr><td><font color=#ff0000 size=2>\n
+		<br> DHCP client is enabled. All values are undefined!
+		</font></td></tr>\n";
+	}
+	    print "</table></td></tr>\n
+		</body></html>\n";
+	if "_&dhcp_client:0/" {
+    	    print "<script language=\"javascript\">
+	    sec = document.host.time.value;
+	    settime();
+	    function settime(){
+	    if (sec > 0) {
+	    sec--;
+	    document.host.time.value = sec;
+	    timerId = setTimeout(\"settime()\", 1000);
+	    }else{
+	    top.location.href=(\"http://??_&ip??:??_srv_port??\");}}
+	    </script>";
+	}
+	savecfg;
+	init;
+
+	system "/etc/init.d/rc 3\ 2 stop; /etc/init.d/rc 2\ 3 start &";
+
+    }
+    if_set "b == 0" {
+	savecfg;
+	if_set "a == 1" {
+        init;
+
+	    system "/etc/init.d/S20network restart";
+	}
+	boot_page "network.htm";
+    }
+END_CGI -->

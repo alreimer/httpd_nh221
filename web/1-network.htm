@@ -1,0 +1,53 @@
+<!--#include file="head.inc?name=Home%20Page" 
+file="side.inc?i=2" -->
+
+<table id="maintab" height=290 align="center">
+<tr>
+	<td align="center" valign="top"><br>
+<table id="header" align="center"><tr><td width="602">Networking<br></td></tr></table>
+<br>
+<table id="options" height="100" align="center">
+<tr>
+	<td id="td_link"><a href="network.htm">Network Settings</a>&nbsp;&nbsp;<a href="network_add.htm">Add</a></td>
+</tr>
+<tr>
+	<td id="td_help">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Host Name, IP, DHCP Settings</td>
+</tr>
+<tr>
+	<td id="td_link"><a href="network-secip.htm">IP Filter</a></td>
+</tr>
+<tr>
+	<td id="td_help">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Check if IP address is legal to access through SAMBA and FTP</td>
+</tr>
+<tr>
+	<td id="td_link"><a href="network-secmac.htm">MAC Filter</a></td>
+</tr>
+<tr>
+	<td id="td_help">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Check if MAC address is legal to access through SAMBA and FTP</td>
+</tr>
+<tr>
+	<td id="td_link"><a href="network-dyndns.htm">Dynamic DNS</a></td>
+</tr>
+<tr>
+	<td id="td_help">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dynamic DNS Setting</td>
+</tr>
+<tr>
+	<td id="td_link"><a href="info.cgi">Ifconfig, route</a></td>
+</tr>
+<tr>
+	<td id="td_help">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;More information about network</td>
+</tr>
+</table><br>
+</td></tr></table>
+</body></html>
+<!-- CGI: info.cgi
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=2";
+
+    print "</table><tr>ifconfig -a :</tr><tr><pre>";
+    my_system "ifconfig -a";
+    print "</pre></tr><tr>route :</tr><tr><pre>";
+    my_system "route -e";
+    print "</pre></tr></table></body></html>";
+
+END_CGI -->
+

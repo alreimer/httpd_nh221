@@ -1,0 +1,46 @@
+#HTTPD_DOCUMENT_ROOT = /htdocs
+CFLAGS = -I../include
+
+ifeq ($(TYPE_SYSTEM),.longshine)
+	CFLAGS = -DNH221 -DNH240 -DLONGSHINE
+endif
+ifeq ($(TYPE_SYSTEM),.nh240)
+	CFLAGS = -DNH221 -DNH240
+endif
+ifdef M_LARGEFILE
+	CFLAGS += -DEXT3
+endif
+ifdef M_NH220
+    CFLAGS += -DNH220
+endif
+
+OBJS =	httpd_torrent.o httpd_scripts.o copy.o httpd.o cservice.o bg_color.o parser.o
+OBJS1 = parser.o pnmd.o
+OBJS2 = ide_ioctl.o
+
+#CFLAGS := $(CFLAGS) -DHTTPD_DOCUMENT_ROOT=\"$(HTTPD_DOCUMENT_ROOT)\"
+#CFLAGS := $(CFLAGS)
+#CFLAGS := $(CFLAGS) -DHTTPD_MAX_ACCEPT
+
+all: httpd pnmd config_sync ide_ioctl
+
+httpd: $(OBJS)
+	${LD} $(LDFLAGS) -o httpd ${LIBS} ${OBJS} ${LDADD}
+
+pnmd: $(OBJS1)
+	${LD} $(LDFLAGS) -o pnmd ${LIBS} ${OBJS1} ${LDADD}
+
+ide_ioctl: $(OBJS2)
+	${LD} $(LDFLAGS) -o ide_ioctl ${LIBS} ${OBJS2} ${LDADD}
+
+config_sync: checkupgrade.o
+	$(LD) $(LDFLAGS) -o $@ ${LIBS} checkupgrade.o ${LDADD}
+
+clean:
+	rm -f *.[oa] *.elf *~ core httpd pnmd *.gdb
+
+install: all
+	$(CP) httpd pnmd config_sync ide_ioctl $(DESTSBIN)
+
+
+

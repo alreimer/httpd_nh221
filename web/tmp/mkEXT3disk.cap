@@ -1,0 +1,49 @@
+: Assuming 33MHz system bus speed for PIO modes; override with idebus=xx
+sandpoint_ide_probe: error: cannot find PCI-to-IDE device
+SCSI subsystem driver Revision: 1.00
+ata1: SATA max UDMA/100 cmd 0xC5002C80 ctl 0xC5002C8A bmdma 0xC5002C00 irq 18
+ata2: SATA max UDMA/100 cmd 0xC5002CC0 ctl 0xC5002CCA bmdma 0xC5002C08 irq 18
+ata1: dev 0 ATA-8, max UDMA/133, 3907029168 sectors: LBA48
+ata1: dev 0 configured for UDMA/100
+ata2: no device found (phy stat 00000000)
+scsi0 : sata_sil
+scsi1 : sata_sil
+  Vendor: ATA       Model: ST2000DM001-1CH1  Rev: CC24
+  Type:   Direct-Access                      ANSI SCSI revision: 05
+Attached scsi disk sda at scsi0, channel 0, id 0, lun 0
+scsi: fn_scsi_storage_pnp [/etc/usb_storage.sh sda 1 255 serial_unknown]
+fn_scsi_storage_pnp: error[-2]: failed to call user-mode shell script [/etc/usb_storage.sh].
+SCSI device sda: 3907029168 512-byte hdwr sectors (2000399 MB)
+Partition check:
+ /dev/scsi/host0/bus0/target0/lun0: unknown partition table
+physmap flash device: 400000 at ffc00000
+ Amd/Fujitsu Extended Query Table v3.3 at 0x0040
+number of CFI chips: 1
+cfi_cmdset_0002: Disabling fast programming due to code brokenness.
+Using physmap partition definition
+Creating 7 MTD partitions on "Physically mapped flash":
+0x00300000-0x00320000 : "Boot-loader"
+0x00000000-0x00004000 : "Boot CFG"
+0x00004000-0x00006000 : "POST Result"
+0x00008000-0x00010000 : "Linux CFG"
+0x00006000-0x00008000 : "Reserved"
+0x00010000-0x00300000 : "squashfs"
+0x00320000-0x00400000 : "kernel"
+MPC10x I2C - interrupt vector 129
+i2c-core.o: adapter MPC10x adapter registered as adapter 0.
+usb.c: registered new driver usbdevfs
+usb.c: registered new driver hub
+md: linear personality registered as nr 1
+md: raid0 personality registered as nr 2
+md: raid1 personality registered as nr 3
+md: raid5 personality registered as nr 4
+
+
+#fdisk -l /dev/sda
+
+Disk /dev/sda: 2000.3 GB, 2000398934016 bytes
+255 heads, 63 sectors/track, 243201 cylinders
+Units = cylinders of 16065 * 512 = 8225280 bytes
+
+Disk /dev/sda doesn't contain a valid partition table
+# 

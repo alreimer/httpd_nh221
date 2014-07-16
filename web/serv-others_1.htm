@@ -1,0 +1,38 @@
+<!-- to danger!-->
+<!--#include file="head.inc?name=Home%20Page" 
+file="side.inc?i=4" -->
+
+<table id="maintab" height=290 align="center"><tr>
+<td align="center" valign="top"><br>
+<table id="header" align="center"><tr><td><b>Services :: Other</b></td></tr></table>
+<br>
+<table border="0" width="70%" height="40" align="center">
+<!-- #include shell=""for i in $(ls /mnt/services/*.htm 2>/dev/null); do echo \"<tr><td><a href=\\\"_load.cgi?val=$i\\\">$i</a></td></tr>\"; done "" -->
+</table>
+
+</body>
+</html>
+<!-- CGI: _load.cgi
+    if "_#val://mnt//services///!/*.//"{	// not pass: /mnt/../../get-file.txt  or /mnt/./file.txt
+      exist_file "_#val"{
+	not "_#val:/l.lhtm/"{
+	    bind_par "_#val";
+	    print "HTTP/1.0 200 OK\nContent-Disposition: attachment; filename={?/L/L?}\n";
+	    print "Server: thttpd/2.25b\nExpires: 0\n\n";
+
+	    load_file "_#val";
+	    exit_cgi ;
+	}
+	print "HTTP/1.0 200 OK\nContent-type: text/html\n Server: thttpd/2.25b\nExpires: 0\n\n";
+	load_file "_#val";
+	exit_cgi ;
+      }
+    }
+	print "HTTP/1.0 404 Not Found
+		Content-type: text/html\n
+		<html>\n<head><title>404 Not Found</title></head>
+		<body bgcolor=\"#cc9999\" text=\"#000000\" link=\"#2020ff\" vlink=\"#4040cc\">
+		<h2>404 Not Found</h2>
+		<p>The requested URL was not found on this server.</p>
+		<p>??_#val??</p></body>\n</html>\n";
+END_CGI -->

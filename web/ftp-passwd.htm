@@ -1,0 +1,76 @@
+<html><head>
+<title>Home Page</title>
+<style type="text/css">
+body {font-family: ArIal, Helvetica, sans-serif}
+p {font-family: Arial, Helvetica, sans-serif}
+td {font-family: Arial, Helvetica, sans-serif}
+</style>
+</head>
+<body>
+<!--<table width=740 height=400 border="0" align="center" bgcolor="#FFFFFF" cellpadding=0 cellspacing=0>
+<tr><td valign=top><table width="100%" cellSpacing=0 cellPadding=0 bgColor=#FFFFFF border="0" align="center" >
+<tr><td width="28%" align=center><IMG src="images/logo.jpg" border=0>
+</td></tr></table>-->
+<script language="JavaScript" src="title.js"></script>
+<table width="100%" border="0">
+<tr><td width="80%"><div align="right"><b></b></div></td>
+  <td width="13%"><div align="right"><b></b></div></td>
+  <td width="10%"><div align="right"><b></b></font></div></td></tr></table>
+<table width=100% border="0" bordercolor="#0066CC" cellpadding="0" cellspacing="0"><tr><td>
+<A href="ShowMainHtml.cgi"><img src="images/home.gif" border="0"></a>
+<a href="network.htm"><img src="images/networking.gif" border="0"></a>
+<a href="administration.htm"><img src="images/admin.gif" border="0"></a>
+<a href="access.htm"><img src="images/Share.gif" border="0"></a>
+<a href="ftp-main.htm"><img src="images/FTP-b.gif" border="0"></a>
+<a href="p2p-main.htm"><img src="images/p2p.gif" border="0"></a>
+<a href="web-server.htm"><img src="images/web.gif" border="0"></a>
+</td></tr></table>
+<table width="100%" border="0" height=290 align="center">
+<tr>
+	<td align="center" valign="top" bgcolor="#181C5B"><br>
+<table width=85% border="0" align="center">
+<tr>
+	<td bgColor=#EBDA0C width="602"><B><FONT face="Arial, Helvetica, sans-serif" color=#000000 size=3>Change "FTP user" login password </FONT></B><br></td></tr></table>
+<br>
+<table border="0" width="75%" height="50" align="center">
+<tr>
+<td width=10% valign=top><font size=2 color="#FFFFFF" face=\"Arial, Helvetica, sans-serif\"><b>Notes:</b></td>
+<td width=100% align=left><font size=2 color="#FFFFFF" face=\"Arial, Helvetica, sans-serif\"><b>Please provide the new password from 6 to 16 characters.<br>Please don't use "ftpuser" as your password.<br>
+</table>
+<form name="form1" method="GET" action="Ch_ftppasswd.cgi" onsubmit="return check_form()">
+<table border="0" width="85%" align="center">
+<tr><table border="0" width="85%" align="center">
+<tr>
+<td width="15%" align="center" rowspan=4><img src="images/user.gif" border=0><br><font color="#FFFFFF">ftpuser</font></td>
+<td width="5%"></td><td width="25%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;FTP User Name:</font></b></td>
+<td width="35%" bgcolor="#FFFFFF">ftpuser<input type="hidden" name="name" value="ftpuser"></td><td width="15%">
+<tr><td width="5%"></td><td width="30%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;New Password:</font></b></td>
+<td width="30%" bgcolor="#FFFFFF"><input type="password" name="n_password" value="" maxlength="16"></td>
+<td width="15%"></td></tr>
+<tr><td width="5%"></td><td width="30%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;Confirm Password:</font></b></td>
+<td width="30%" bgcolor="#FFFFFF"><input type="password" name="c_password" value="" maxlength="16"></td>
+<td width="15%"></td></tr>
+<tr></tr><table border="0" width="30%" align="center">
+<tr><td width="33%"><input type=submit value="Apply"></td>
+<td width=33%><input type=reset value="Undo"></td><br>
+<td width="33%"><input type=button value="Back" onClick="history.back();"></td></tr></table></form></body></html>
+
+<script language="JavaScript">
+function check_form(){
+newp = document.form1.n_password.value;
+ucp = document.form1.c_password.value;
+if (check_newp()==0){warming_b("New Password");document.form1.n_password.focus();return false;}
+if (check_ucp()==0){warming_b("Password Confirm");document.form1.c_password.focus();return false;}
+if (check_newp_char()==0){document.form1.n_password.focus();return false;}
+else if (check_comfirm()==0){warming_com();document.form1.c_password.focus();return false;}return true;};
+
+
+function check_newp(){var ok=1;if (newp==null||newp=="") {ok=0;} return ok;}
+function check_ucp(){var ok=1;if (ucp==null||ucp=="") {ok=0;}return ok;}
+function check_newp_char(){var ok=1;var temp;if(newp.length<6){ok=0;warming_6();return ok;} for(var i=0;i<newp.length;i++){temp=newp.charCodeAt(i);if(temp==58||temp<33||temp>126){warming_char();ok=0;break;}} return ok;}
+function check_comfirm(){var ok=1;if(newp!=ucp){ok=0;}return ok;}	
+function warming_b(){alert(arguments[0]+": Can not be blank!");}
+function warming_6(){alert("New Password ERROR: Must have at least 6 characters!");}
+function warming_char(){alert("New Password ERROR: Can not be a : character, space character or control character!");}
+function warming_com(){alert("Please type correct new password for dobule comfirm!");}	
+</script>

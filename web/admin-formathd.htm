@@ -1,0 +1,211 @@
+<!--#include file="head.inc?name=Home%20Page" 
+file="side.inc?i=3&helper=1" -->
+<script src="/js/tools.js"></script>
+<script language="JavaScript">
+function help_popUp() {
+var g = window.open('http://??_srv_ip??:??_srv_port??/help/admin-formathd.help', 'name', 'toolbar=0,scrollbars=1,location=0,statusbar=1,menubar=0,resizable=1,width=700,height=700');
+}
+</script>
+<table id="maintab" height=290 align="center"><tr>
+<td align="center" valign="top"><br>
+<table id="header" align="center"><tr><td><b>System :: HD Format</b></td></tr></table>
+<table width="70%"><tr><td><b>fdisk -l</b></td></tr>
+<tr><td><pre>
+<!--#include exec="fdisk -l /dev/sda" exec="fdisk -l /dev/sdb" exec="fdisk -l /dev/sdc" exec="fdisk -l /dev/sdd"-->
+</pre></td></tr>
+<tr><td>
+</td></tr>
+<tr><td><b>df -h</b></td></tr>
+<tr><td><pre>
+<!--#include exec="df -h"-->
+</pre></td></tr>
+<tr><td><b>mount</b></td></tr>
+<tr><td><pre>
+<!--#include exec="mount"-->
+</pre></td></tr>
+<tr><td>
+</td></tr>
+<tr><td><b>swap</b></td></tr>
+<tr><td><pre>
+<!--#include file="/proc/swaps"-->
+</pre></td></tr>
+</table>
+<!-- TABLE:mnt_point
+#-> parse_file: /etc/fstab
+while:/[/*/]\n
+if:/ //dev//sd/<1abcd/>/<11234/>/<- 	/>/[/*/]/<1 	/>
+END_TABLE -->
+<!-- TABLE:swap_point
+#-> parse_file: /etc/fstab
+while:/[/*/]\n
+if:/[//dev//sd/<1abcd/>/<11234/>/]/<- 	/>/*/<- 	/>swap/<1 	/>
+END_TABLE -->
+<table border="0" width="70%" align="center">
+    <colgroup>
+    <col id="varbox-list-name">
+    <col id="varbox-list-val">
+    </colgroup>
+<form method="Get" action="del_fdisk.cgi" onsubmit="return double_check()">
+<tr><td><b><font size="3">Delete partitions on disk:</font></b></td><td><input type="text" name="disk" size="10" maxlength="3" value="sda"><input type="submit" name="set" value="Yes"></td></tr></form>
+<form method="Get" action="make_fdisk.cgi" onsubmit="return double_check()">
+<tr><td><b><font size="3">Make partitions on disk:</font></b></td><td><input type="text" name="disk" size="10" maxlength="3" value="sda"><input type="submit" name="set" value="Yes"></td></tr></form>
+<tr><td align="left" bgcolor="#ffffff" colspan="2"><font size=2>Please wait and ensure a safe operating environment.<br></font></td></tr>
+
+<form method="Get" action="format_hd.cgi" onsubmit="return double_check()">
+<tr><td><b><font size="3">Format HD:</font></b></td><td width="30%"><input type="text" name="disk" size="10" maxlength="4" value="sda1"><input type="submit" name="set" value="Yes"></td></tr></form>
+<tr><td align="left" bgcolor="#ffffff" colspan="2"><font size=2>To show logs klick <a href="format_hd_log.cgi">here</a></font></td></tr>
+<form method="Get" action="mount.cgi" >
+<tr><td><b><font size="3">Mount partition:</font></b></td><td><input type="radio" value="mount" name="flag" checked>mount<input type="radio" value="umount" name="flag">umount</td></tr>
+<tr><td bgcolor="#ffffff"></td><td width="30%"><!--#include tbl_select="mnt_point" --><input type="submit" name="set" value="Yes"></td></tr></form>
+<form method="Get" action="mkswap.cgi" >
+<tr><td><b><font size="3">Make Swap:</font></b></td><td width="30%"><!--#include tbl_select="swap_point" --><input type="submit" name="set" value="Yes"></td></tr></form>
+<form method="Get" action="mount_swp.cgi" >
+<tr><td><b><font size="3">Mount Swap:</font></b></td><td><input type="radio" value="mount" name="flag" checked>mount<input type="radio" value="umount" name="flag">umount</td></tr>
+<tr><td bgcolor="#ffffff"></td><td width="30%"><!--#include tbl_select="swap_point" --><input type="submit" name="set" value="Yes"></td></tr></form>
+</table>
+
+<br>
+<form method="post" name="host_" action="set_fstab.cgi" onsubmit="return check_form()">
+<table border="0" width="70%" height="50" align="center">
+<tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;fstab File:</font></b></td><td></td><td></td></tr>
+<tr><td colspan="4">
+<textarea name="fstab" cols="80" rows="20" onkeydown="insertTab(this, event);">
+<!-- #include file="/etc/fstab" -->
+</textarea></td></tr>
+<tr><td></td><td>bla</td>
+<td id="varbox-list-val"><input type="submit" name="save_fstab" value="Apply">&nbsp;<input type="reset" value="Cancel"></td><td></td></tr>
+</table></form>
+
+</td></tr></table>
+<script language="JavaScript">
+function double_check()
+{
+flag=confirm("Confirm: All hard drive data will be erased. Are you sure you want to change info on hard drive?");
+if(flag)
+{ 
+flag2=confirm("Double confirm: All hard drive data will be erased. Are you sure you want to chenge info on hard drive?"); 
+if(flag2)
+{return true;}
+else{return false;}
+}
+else {return false;};
+};
+</script>
+</body></html>
+<!-- CGI: set_fstab.cgi
+    remove_chars "\r::_#fstab";
+    save_file "_#fstab:/etc/fstab";
+    write_par "_etc_save:1";
+    boot_page "admin-formathd.htm";
+END_CGI -->
+<!-- CGI: make_fdisk.cgi
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=3";
+    print "<tr><td><pre>";
+    nnot "_#disk:sd/<1abcd/>/"{
+    print "Unknowen disk name: ??_#disk??</pre></td></tr></table><a href=\"admin-formathd.htm\">Back</a></table></body></html>";
+    exit_cgi ;
+    }
+    
+    my_shell "CYLINDERS=`fdisk -l /dev/??_#disk?? | grep heads | cut -d, -f3 | cut -d' ' -f2`\nC_BYTES=`fdisk -l /dev/??_#disk?? | grep Units | cut -d= -f3 | cut -d' ' -f2`
+C_KBYTES=`expr $C_BYTES / 1024`\n#128MB=131072k=134217728bytes\n#512MB=524288\nSWAP_NUM=`expr 524288 / $C_KBYTES + 1`\nFIRST_PART=`expr $CYLINDERS - $SWAP_NUM - 1`
+fdisk /dev/??_#disk?? <<EOF\nn\np\n1\n1\n$FIRST_PART\nn\np\n2\n\n\nt\n1\n83\nt\n2\n82\nw\nEOF\n
+echo \"CYL: $CYLINDERS , KBYTES: $C_KBYTES , SWAP: $SWAP_NUM , 1PART: $FIRST_PART\"";		// /dev/sda-disk 1-with SWAP
+
+    print "</pre></td></tr></table><a href=\"admin-formathd.htm\">Back</a></table></body></html>";
+END_CGI -->
+<!-- CGI: del_fdisk.cgi
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=3";
+    print "<tr><td><pre>";
+    nnot "_#disk:sd/<1abcd/>/"{
+    print "Unknowen disk name: ??_#disk??</pre></td></tr></table><a href=\"admin-formathd.htm\">Back</a></table></body></html>";
+    exit_cgi ;
+    }
+    
+    my_shell "fdisk /dev/??_#disk?? <<EOF\nd\n1\nd\nw\nEOF\n";
+
+    print "</pre></td></tr></table><a href=\"admin-formathd.htm\">Back</a></table></body></html>";
+END_CGI -->
+<!-- CGI: format_hd.cgi
+    nnot "_#set:Yes/"{	//must be not-exist or not-Yes
+    boot_page "admin-formathd.htm";
+    exit_cgi ;
+    }
+
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=3";
+    print "<tr><td><pre>";
+    nnot "_#disk:sd/<1abcd/>/<11234/>/"{
+    print "Unknowen disk name: ??_#disk??</pre></td></tr></table><a href=\"admin-formathd.htm\">Back</a></table></body></html>";
+    exit_cgi ;
+    }
+    shell "mke2fs -j -m 0 /dev/??_#disk?? 2>&1 | httpd_tty /var/format.log > /dev/null 2>&1 &";
+//    boot_page "format_hd_log.cgi";
+    print "</pre></td></tr></table><a href=\"format_hd_log.cgi\">Logs</a>&nbsp;&nbsp;<a href=\"admin-formathd.htm\">Back</a></table></body></html>";
+END_CGI -->
+<!-- CGI: format_hd_log.cgi
+
+    get_file "./JavaReturn_.inc?name=Home%20Page&header=<meta%20http-equiv%3D\"refresh\"%20content%3D\"10\">&i=3";
+    print "<tr><td><pre>";
+
+    get_file "/var/format.log";
+
+    print "</pre></td></tr></table><a href=\"admin-formathd.htm\">Back</a></table></body></html>";
+END_CGI -->
+<!-- CGI: mount.cgi
+
+    if "_@mnt_point:swap/"{		//need to remove
+	boot_page "admin-formathd.htm";
+	exit_cgi ;
+    }
+
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=3";
+    print "<tr><td><pre>";
+    nnot "_@mnt_point:/\ "{
+    print "False mountpiont: ??_#mnt_point??</pre></td></tr></table><a href=\"admin-formathd.htm\">Back</a></table></body></html>";
+    exit_cgi ;
+    }
+
+    if "_#flag:mount/"{
+    my_shell "mount ??_@mnt_point??
+    [ $? -eq 0 ] && echo \"Device is mounted on : ??_@mnt_point??\"";
+    print "</pre></td></tr></table><a href=\"admin-formathd.htm\">Back</a></table></body></html>";
+    exit_cgi ;
+    }
+    my_shell "umount ??_@mnt_point??
+    [ $? -eq 0 ] && echo \"Device is umounted on : ??_@mnt_point??\"";
+    print "</pre></td></tr></table><a href=\"admin-formathd.htm\">Back</a></table></body></html>";
+
+END_CGI -->
+<!-- CGI: mkswap.cgi
+
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=3";
+    print "<tr><td><pre>";
+    nnot "_@swap_point:/\ "{
+    print "Unknowen disk name: ??_#swap_point??</pre></td></tr></table><a href=\"admin-formathd.htm\">Back</a></table></body></html>";
+    exit_cgi ;
+    }
+
+    shell "mkswap ??_@swap_point??
+    [ $? -eq 0 ] && echo \"Device is formated on : ??_@swap_point??\"";
+    print "</pre></td></tr></table><a href=\"admin-formathd.htm\">Back</a></table></body></html>";
+
+END_CGI -->
+<!-- CGI: mount_swp.cgi
+
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=3";
+    print "<tr><td><pre>";
+    nnot "_@swap_point:/\ "{
+    print "Unknowen disk name: ??_#swap_point??</pre></td></tr></table><a href=\"admin-formathd.htm\">Back</a></table></body></html>";
+    exit_cgi ;
+    }
+
+    if "_#flag:mount/"{
+    my_shell "swapon ??_@swap_point??
+    [ $? -eq 0 ] && echo \"Device is mounted on : ??_@swap_point??\"";
+    print "</pre></td></tr></table><a href=\"admin-formathd.htm\">Back</a></table></body></html>";
+    exit_cgi ;
+    }
+    my_shell "swapoff ??_@swap_point??
+    [ $? -eq 0 ] && echo \"Device is umounted on : ??_@swap_point??\"";
+    print "</pre></td></tr></table><a href=\"admin-formathd.htm\">Back</a></table></body></html>";
+
+END_CGI -->

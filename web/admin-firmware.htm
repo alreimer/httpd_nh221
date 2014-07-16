@@ -1,0 +1,160 @@
+<!--#include area="300:AREA-1" area="513:HEADER" -->
+
+
+<!--Need clearing admin-reset.htm from firmware upload-->
+<!--#include file="head.inc?name=Home%20Page" 
+file="side.inc?i=3" -->
+
+<table id="maintab" height=290 align="center"><tr>
+<td align="center" valign="top"><br>
+<table id="header" align="center"><tr><td><b>System :: Kernel and RootFS download or upload</b></td></tr></table>
+<br>
+<form method="POST" action="Set_kernel.cgi" name="soho" enctype="multipart/form-data">
+<table border="0" width="70%" height="20" align="center">
+<!--<tr><td width="5%"></td>
+<td width="35%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;Character Set Folder:</font></b></td>
+<td width="50%" bgcolor="#FFFFFF">-->
+<!--#i nclude select_show_dir="code_dir" -->
+<!--</td>
+</tr>-->
+<tr><td>Download kernel file <a href="_Get_kernel.cgi"><b><font size="3" color="#0000ff">here</font></b></a></td></tr>
+<tr><td width="5%"></td>
+<tr><td width="35%"><b><font size="3">&nbsp;Kernel upload File:</font></b></td></tr>
+<tr><td width="50%"><input type=file name=ufile size=30 maxlength=30 value=""></td></tr>
+</table><br>
+
+<table border="0" width="30%" height="20" align="center">
+<tr>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="reset" value="Save" onclick="check_form()">
+&nbsp;&nbsp;<input type="button" name="reset" value="Back" onclick='history.back();'>
+</tr></table></form>
+
+<br>
+<form method="POST" action="Set_rootfs.cgi" name="soho1" enctype="multipart/form-data">
+<table border="0" width="70%" height="20" align="center">
+<!--<tr><td width="5%"></td>
+<td width="35%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;Character Set Folder:</font></b></td>
+<td width="50%" bgcolor="#FFFFFF">-->
+<!--#i nclude select_show_dir="code_dir" -->
+<!--</td>
+</tr>-->
+<tr><td>Download rootfs file <a href="_Get_rootfs.cgi"><b><font size="3" color="#0000ff">here</font></b></a></td></tr>
+<tr><td width="5%"></td>
+<tr><td width="35%"><b><font size="3">&nbsp;RootFS upload File:</font></b></td></tr>
+<tr><td width="50%"><input type=file name=ufile size=30 maxlength=30 value=""></td></tr>
+</table><br>
+
+<table border="0" width="30%" height="20" align="center">
+<tr>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="reset" value="Save" onclick="check_form1()">
+&nbsp;&nbsp;<input type="button" name="reset" value="Back" onclick='history.back();'>
+</tr></table></form>
+</body></html>
+<script language="JavaScript">
+function check_form(){
+    un = document.soho.ufile.value;
+    if (check_un()==0){
+        warming_b("File Path");
+        document.form1.ufile.focus();
+        history.go(0);
+        return;
+    }
+//RAW
+//    else if(check_un()==2){
+//        alert("Please don't change the unicode filename!!");
+//        history.go(0);
+//        return;
+//    }else
+//        self.open('charpop.htm','OK','alwaysRaised,resizable,scrollbars,width=275,height=120');
+}
+function check_un(){
+    var ok=1;
+    var count = document.soho.ufile.length;
+    if (un==null||un==""){
+        ok=0;
+    }
+    if(un.search('ntx_chset.h') == -1){
+        ok=2;
+    }
+    return ok;
+}
+function warming_b(){
+    alert(arguments[0]+": Can not be blank!");
+}
+function check_form1(){
+    un = document.soho1.ufile.value;
+    if (check_un1()==0){
+        warming_b("File Path");
+        document.form1.ufile.focus();
+        history.go(0);
+        return;
+    }
+//RAW
+//    else if(check_un()==2){
+//        alert("Please don't change the unicode filename!!");
+//        history.go(0);
+//        return;
+//    }else
+//        self.open('charpop.htm','OK','alwaysRaised,resizable,scrollbars,width=275,height=120');
+}
+function check_un1(){
+    var ok=1;
+    var count = document.soho1.ufile.length;
+    if (un==null||un==""){
+        ok=0;
+    }
+    if(un.search('ntx_chset.h') == -1){
+        ok=2;
+    }
+    return ok;
+}
+</script>
+
+<!-- CGI: Set_kernel.cgi
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=3";
+
+    print "<tr><td><pre>";
+	save_bfile "ufile:300000:/[/*.bin/:/mnt/kernel.bin";
+    print "</pre></td></tr></table><a href=\"admin-firmware.htm\">Back</a></table></body></html>";
+
+END_CGI -->
+<!-- CGI: _Get_kernel.cgi
+        write_file "AREA-1:/proc/version";
+	bind_par "AREA-1";
+
+//	print "HTTP/1.0 200 OK\nContent-type: application/octet-stream\n Server: thttpd/2.25b\nExpires: 0\n\n";
+	print "HTTP/1.0 200 OK\nContent-Disposition: attachment; filename=";
+	print "kernel_{?/*Linux version /[/*/] ?}.bin\n";
+	print "Server: thttpd/2.25b\nExpires: 0\n\n";
+/*MAGICNUM=072377199b107a70483d2dac49d4eebe
+PRODUCT_ID=NH231
+CUSTOMER=ALLNET
+VERSION=V2.02(03-06-2009)
+LINUX=1259770
+ROOT=915364
+RAMDISK2=1458448
+*/
+	write_system "HEADER:echo MAGICNUM=$(md5sum /dev/mtdblock7 | cut -d' ' -f1); echo -e 'PRODUCT_ID=NH231\nCUSTOMER=ALLNET\nVERSION=V2.02(03-06-2009)\n'";
+	print "?@0HEADER@?";
+	get_file "/dev/mtdblock7";
+END_CGI -->
+<!-- CGI: Set_rootfs.cgi
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=3";
+
+    print "<tr><td><pre>";
+	save_bfile "ufile:3000000:/[/*.bin/:/mnt/rootfs.bin";
+    print "</pre></td></tr></table><a href=\"admin-firmware.htm\">Back</a></table></body></html>";
+
+END_CGI -->
+<!-- CGI: _Get_rootfs.cgi
+        write_file "AREA-1:/etc/version";
+	bind_par "AREA-1";
+
+//	print "HTTP/1.0 200 OK\nContent-type: application/octet-stream\n Server: thttpd/2.25b\nExpires: 0\n\n";
+	print "HTTP/1.0 200 OK\nContent-Disposition: attachment; filename=";
+	print "rootfs_{?/*VERSION='/[/*/]'?}.bin\n";
+	print "Server: thttpd/2.25b\nExpires: 0\n\n";
+
+	write_system "HEADER:echo MAGICNUM=$(md5sum /dev/mtdblock6 | cut -d' ' -f1); echo -e 'PRODUCT_ID=NH231\nCUSTOMER=ALLNET\nVERSION=V2.02(03-06-2009)\n'";
+	print "?@0HEADER@?";
+
+	get_file "/dev/mtdblock6";
+END_CGI -->

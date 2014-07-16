@@ -1,0 +1,127 @@
+<html><head>
+<title>Home Page</title>
+<style type="text/css">
+body {font-family: ArIal, Helvetica, sans-serif}
+p {font-family: Arial, Helvetica, sans-serif}
+td {font-family: Arial, Helvetica, sans-serif}
+</style>
+<script language="JavaScript">
+function check_form(){
+    unit=document.host.ftp_unit.value;
+    port=document.host.ftp_port.value;
+    time=document.host.ftp_time.value;
+    if(check_unit()==0){
+        warmming_unit();
+        document.host.ftp_unit.focus();
+        return false;
+    }
+    if(check_port()==0){
+        warmming_port();
+        document.host.ftp_port.focus();
+        return false;
+    }
+    if(check_time()==0){
+        warmming_time();
+        document.host.ftp_time.focus();
+        return false;
+    }
+    function check_unit(){
+        var ok=1;
+        if(unit == null || unit == "" || unit > 5 || unit < 0)
+            ok=0;
+        return ok;
+    }
+    function check_port(){
+        var ok=1;
+        if(port == null || port == "" || port < 1 || port > 65535)
+            ok=0;
+        return ok;
+    }
+    function check_time(){
+        var ok=1;
+        if(time == null || time == "" || time <= 0 || time.indexOf(".") > 0)
+            ok=0;  
+        return ok;
+    }
+    function warmming_unit(){
+        alert("Error!!! Maximum Unit must be between 0 and 5!");
+    }
+    function warmming_port(){
+        alert("Error!!! Port Number must be between 1 and 65535!");
+    }
+    function warmming_time(){
+        alert("Error!!! Timeout must be an interger greater than 0!");
+    }
+    if(document.host.anony[0].checked==true)
+        document.host.anonymity.value = 1;
+    else
+        document.host.anonymity.value = 0;    
+}
+function load_anony(){
+    if(document.host.anonymity.value == 1)
+        document.host.anony[0].checked=true;
+    else
+        document.host.anony[1].checked=true;
+}
+</script>
+</head>
+<body onload="load_anony()">
+<!--<table width=740 height=400 border="0" align="center" bgcolor="#FFFFFF" cellpadding=0 cellspacing=0>
+<tr><td valign=top><table width="100%" cellSpacing=0 cellPadding=0 bgColor=#FFFFFF border="0" align="center" >
+<tr><td width="28%" align=center><IMG src="images/logo.jpg" border=0>
+</td></tr></table>-->
+<script language="JavaScript" src="title.js"></script>
+<table width="100%" border="0">
+<tr><td width="80%"><div align="right"><b></b></div></td>
+<td width="13%"><div align="right"><b></b></div></td>
+<td width="10%"><div align="right"><b></b></font></div></td></tr></table>
+<table width="100%" border="0" height=290 align="center">
+<tr>
+<td align="center" valign="top" bgcolor="#181C5B"><br>
+<table width=85% border="0" align="center">
+<tr>
+<td bgColor=#EBDA0C width="602"><B><FONT face="Arial, Helvetica, sans-serif" color=#000000 size=3>FTP Configuration</FONT></B><br></td></tr></table>
+<br>
+<table border="0" width="75%" height="50" align="center">
+<tr>
+<td width=10% valign=top><font color="#FFFFFF" size=2 face=\"Arial, Helvetica, sans-serif\"><b>Notes:</b></td>
+<td width=100% align=left><font color="#FFFFFF" size=2 face=\"Arial, Helvetica, sans-serif\"><b>1. The maximum number of unit is up to 5.<br>&nbsp;&nbsp;&nbsp;&nbsp; 
+<br>2. The port number is between 1 and 65535.</b></font> 
+</table>
+<form method="GET" name="host" action="Set_FTP.cgi" onsubmit="return check_form()">
+
+<table border="0" width="85%" height="50" align="center">
+<tr>
+<td width="10%"></td>
+<td width="30%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;Maximum Unit Number:</font></b></td>
+<td width="47%" bgcolor="#FFFFFF"><input type="text" name="ftp_unit" maxlength="15" size="20"></td>
+<td width="13%" bgcolor="#181C5B"></td>
+</tr>
+<tr>
+<td width="10%"></td>
+<td width="30%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;Port Number:</font></b></td>
+<td width="47%" bgcolor="#FFFFFF"><input type="text" name="ftp_port" maxlength="15" size="20"></td>
+<td width="13%" bgcolor="#181C5B"></td>
+</tr>
+<tr>
+<td width="10%"></td>
+<td width="30%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;Timeout:</font></b></td>
+<td width="47%" bgcolor="#FFFFFF"><input type="text" name="ftp_time" maxlength="15" size="20">Minutes</td>
+<td width="13%" bgcolor="#181C5B"></td>
+</tr>
+<tr>
+<td width="10%"></td>
+<td width="30%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;Allow Anonymity:</font></b></td>
+<td width="47%" bgcolor="#FFFFFF"><input type="radio" name="anony" value="1">Yes<input type="radio" name="anony" value="0">No</td>
+<td width="13%" bgcolor="#181C5B"></td>
+</tr>
+<input type="hidden" name="anonymity">
+<tr>
+<td align=center colspan=4 width="653"><br><input type="submit" name="save_ftp" value="Apply">&nbsp;<input type="reset" value="Cancel">&nbsp;<input type="button" value="Back" onclick="history.back()"></form></td>
+</tr>
+</table><br>
+</body>
+</html>
+
+
+

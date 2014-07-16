@@ -1,0 +1,81 @@
+<!--#include area="16345:AREA-1" -->
+<!--#include file="head.inc?name=Home%20Page" 
+file="side.inc?i=7&helper=1" -->
+<script src="/js/tools.js"></script>
+<script language="JavaScript">
+function help_popUp() {
+var g = window.open('http://??_srv_ip??:??_srv_port??/help/usb-printcap.help', 'name', 'toolbar=0,scrollbars=1,location=0,statusbar=1,menubar=0,resizable=1,width=700,height=700');
+}
+</script>
+
+<table id="maintab" height=290 align="center"><tr>
+<td align="center" valign="top"><br>
+<table id="header" align="center"><tr><td><b>USB :: Printer Setup</b></td></tr></table>
+<br>
+<!--<table border="0" width="70%" height="40" align="center">
+
+<tr><td width=2% valign=top></td>
+<td width=80% align=left><font color="#FFFFFF" size=2 face="Arial, Helvetica, sans-serif"><b>Please provide .</b></font></td></tr></table>-->
+
+<!-- need make: show only printer info!!-->
+<!-- CGI: _test.cgi
+    write_file "AREA-1:/proc/bus/usb/devices";
+    bind_par "AREA-1";
+    print "<table><tr bgcolor=\"#ff0000\"><td width=140 align=center class=style2>USB 2.0/1.1</td><td width=135 align=center class=style2>Vendor:ProdID</td><td width=135 align=center class=style2>Manufacturer</td><td width=140 align=center class=style2>Device Name</td><td width=140 align=center class=style2>Serial number</td></tr>\n" ;
+    do {
+	set "a = 0";
+	buf_parse_area "/[/*/]\nT:  " {
+	    set "a = 1";
+	}
+	    print "[?/*Cls=07(print)?]<tr><td>USB {?/*D:  Ver= /[/*/] ?}</td><td>{?/*P:  Vendor=/[/*/] ?}:{?ProdID=/[/*/] ?}</td><td>{?/*S:  Manufacturer=/[/*/]\n?}</td><td>{?/*S:  Product=/[/*/]\n?}</td><td>{?/*S:  SerialNumber=/[/*/]\n?}</td></tr>\n";
+
+    }	if_set "a == 0";	//stop if set!!!
+    print "</table>";
+END_CGI -->
+<!--#include cgi="_test.cgi" -->
+
+<br>
+<form method="post" name="host_" action="Set_printcap.cgi">
+<table border="0" width="70%" height="50" align="center">
+<tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;Printcap File:</font></b></td><td></td><td></td></tr>
+<tr><td colspan="4">
+<textarea name="printcap" cols="80" rows="20" onkeydown="insertTab(this, event);">
+<!-- #include file="/etc/printcap" -->
+</textarea></td></tr>
+<!--see examples from ftp-conf, ftp-passw, ftp-mod and serv-ftp-->
+<tr><td></td><td>Example...</td>
+<td id="varbox-list-val"><input type="submit" name="save_usb" value="Apply">&nbsp;<input type="reset" value="Cancel"></td><td></td></tr>
+</table></form><br>
+<!--
+<table width="70%"><tr><td><b>mount</b></td></tr>
+<tr><td><pre> -->
+<!--#inc lude exec="mount"-->
+<!--</pre></td></tr>
+</table>
+-->
+
+<table id="info" align="center">
+<tr><td><br>Syslog info <a href="syslog.cgi">here</a></td></tr>
+</table>
+
+</td></tr><tr>
+<td align="center"><br><input type="button" value="Back" onclick="history.back()"></td></tr>
+</table>
+
+<!--</td></tr></table>-->
+</body></html>
+<!-- CGI: Set_printcap.cgi
+    remove_chars "\r::_#printcap";
+    save_file "_#printcap:/etc/printcap";
+    write_par "_etc_save:1";
+    boot_page "usb-printer.htm";
+END_CGI -->
+<!-- CGI: syslog.cgi
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=7";
+
+    print "<pre>tail var/log/messages:\n";
+    my_system "tail /var/log/messages";
+    print "grep printer:\n";
+    my_system "grep printer /var/log/messages";
+    print "</pre></table><a href=\"usb-printer.htm\">Back</a></table></body></html>";
+END_CGI -->

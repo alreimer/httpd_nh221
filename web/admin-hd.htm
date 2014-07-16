@@ -1,0 +1,76 @@
+<!--#include par="4:sleep_mode:SLEEP_MODE:0|120|180|240|241|242|244|246|248|250"
+par="2:swap_enable:SWAP_ENABLE:[01]" par="2:fsck_enable:FSCK_ENABLE:[01]" readcfg -->
+<!--#include file="head.inc?name=Home%20Page" 
+file="side.inc?i=3" -->
+
+<table id="maintab" height=290 align="center"><tr>
+<td align="center" valign="top"><br>
+<table id="header" align="center"><tr><td><b>System :: HD tunes</b></td></tr></table>
+<br>
+<form method="GET" action="Set_sleepmode.cgi" name="superset" onSubmit="return super_validate()">
+<table border="0" width="70%" height="50" align="center">
+    <colgroup>
+    <col id="varbox-list-name">
+    <col id="varbox-list-val">
+    </colgroup>
+    <tr>
+    <td><b><font size="3">&nbsp;Sleep mode of HD:</font></b></td>
+    <td>    <select name="sleep_mode" size="1">
+		<option value="0">Off
+		</option><option value="120">10 minutes
+		</option><option value="180">15 minutes
+		</option><option value="240">20 minutes
+		</option><option value="241">30 minutes
+		</option><option value="242">1 hour
+		</option><option value="244">2 hours
+		</option><option value="246">3 hours
+		</option><option value="248">4 hours
+		</option><option value="250">5 hours
+		</option>
+</td>
+    </tr>
+    <tr>
+    <td><b><font size="3">&nbsp;Swap Enable:</font></b></td>
+    <td>
+	<input type="radio" name="swap_enable" value="1">Yes
+        <input type="radio" name="swap_enable" value="0">No
+    </td></tr>
+    <tr>
+    <td><b><font size="3">&nbsp;Fsck Enable:</font></b></td>
+    <td>
+	<input type="radio" name="fsck_enable" value="1">Yes
+        <input type="radio" name="fsck_enable" value="0">No
+    </td></tr>
+</table>
+<!--
+<table id="info" align="center"><tr><td><br>Please provide a superuser name and password (between 4-16 characters each). 
+Periodically change the superuser name and password to ensure security.</td></tr></table>
+-->
+</td></tr><tr>
+<td align="center"><input type="submit" name="save_hostname" value="Apply">&nbsp;<input type="reset" name="save_hostname" value="Cancel">&nbsp;<input type="button" value="Back" onclick="history.back()"></td>
+</form>
+</tr>
+</table>
+</body></html>
+<!-- CGI: Set_sleepmode.cgi
+    fill_cfg "sleep_mode:swap_enable:fsck_enable";
+
+    if_changed "swap_enable"{
+	if "_%swap_enable:1/" {
+print "enabled";
+	    system "swapon -a";
+	}
+	if "_%swap_enable:0/" {
+print "not_enabled";
+	    system "swapoff -a";
+	}
+    }
+
+//    if_changed "sleep_mode"{
+//Take fresh value of sleep_mode. Command is getting from init.d/S11mount
+    shell "hdparm -S??_%sleep_mode?? /dev/sda";
+//    }
+
+    savecfg;
+    boot_page "admin-hd.htm";
+END_CGI -->

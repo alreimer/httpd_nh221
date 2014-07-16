@@ -1,0 +1,230 @@
+<html>
+  <head>
+    <title>help</title>
+  </head>
+  <body>
+    <b>/etc/fstab</b> <br>
+
+<p>The following is an example of an fstab file on a typical <span
+ style="text-decoration: underline;">Linux</span> system:</p>
+<div dir="ltr" class="mw-geshi mw-code mw-content-ltr">
+<div class="bash source-bash">
+<pre class="de1"><span class="co0"># device name   mount point     fs-type      options                                             dump-freq pass-num</span><br><span
+ class="re2">LABEL</span>=<span class="sy0">/</span>         <span
+ class="sy0">/</span>               ext4         defaults                                            <span
+ class="nu0">1</span> <span class="nu0">1</span><br><span class="sy0">/</span>dev<span
+ class="sy0">/</span>sda6       none            swap         defaults                                            <span
+ class="nu0">0</span> <span class="nu0">0</span><br>none            <span
+ class="sy0">/</span>dev<span class="sy0">/</span>pts        devpts       <span
+ class="re2">gid</span>=<span class="nu0">5</span>,<span class="re2">mode</span>=<span
+ class="nu0">620</span>                                      <span
+ class="nu0">0</span> <span class="nu0">0</span><br>none            <span
+ class="sy0">/</span>proc           proc         defaults                                            <span
+ class="nu0">0</span> <span class="nu0">0</span><br>none            <span
+ class="sy0">/</span>dev<span class="sy0">/</span>shm        tmpfs        defaults                                            <span
+ class="nu0">0</span> <span class="nu0">0</span><br> <br><span
+ class="co0"># Removable media</span><br><span class="sy0">/</span>dev<span
+ class="sy0">/</span>cdrom      <span class="sy0">/</span>mnt<span
+ class="sy0">/</span>cdrom      udf,iso9660  noauto,owner,ro                                     <span
+ class="nu0">0</span> <span class="nu0">0</span><br> <br><span
+ class="co0"># NTFS Windows 7 partition</span><br><span class="sy0">/</span>dev<span
+ class="sy0">/</span>sda1       <span class="sy0">/</span>mnt<span
+ class="sy0">/</span>Windows    ntfs-3g      quiet,defaults,<span
+ class="re2">locale</span>=en_US.utf8,<span class="re2">umask</span>=<span
+ class="nu0">0</span>,noexec     <span class="nu0">0</span> <span
+ class="nu0">0</span><br> <br><span class="co0"># Partition shared by Windows and Linux</span><br><span
+ class="sy0">/</span>dev<span class="sy0">/</span>sda7       <span
+ class="sy0">/</span>mnt<span class="sy0">/</span>shared     vfat         <span
+ class="re2">umask</span>=000                                           <span
+ class="nu0">0</span> <span class="nu0">0</span><br> <br><span
+ class="co0"># mounting tmpfs</span><br>tmpfs           <span
+ class="sy0">/</span>mnt<span class="sy0">/</span>tmpfschk   tmpfs        <span
+ class="re2">size</span>=100m                                           <span
+ class="nu0">0</span> <span class="nu0">0</span><br> <br><span
+ class="co0"># mounting cifs</span><br><span class="sy0">//</span>pingu<span
+ class="sy0">/</span>ashare  <span class="sy0">/</span>store<span
+ class="sy0">/</span>pingu    cifs         <span class="re2">credentials</span>=<span
+ class="sy0">/</span>root<span class="sy0">/</span>smbpass.txt                       <span
+ class="nu0">0</span> <span class="nu0">0</span><br> <br><span
+ class="co0"># mounting NFS</span><br>pingu:<span class="sy0">/</span>store    <span
+ class="sy0">/</span>store          nfs          rw                                                  <span
+ class="nu0">0</span> <span class="nu0">0</span>
+</pre>
+</div>
+</div>
+<p>The columns are as follows (separated by spaces or tabs):</p>
+<ol>
+  <li>The <i>device name</i> or other means of locating the partition
+or data source.</li>
+  <li>The <i>mount point</i>, where the data is to be attached to the
+filesystem. For <a href="http://en.wikipedia.org/wiki/Paging"
+ title="Paging">swap</a> files &amp; devices, this should be set to <i>none</i>.</li>
+  <li>The <i>filesystem type</i>, or the algorithm used to interpret
+the filesystem.</li>
+  <li><i>Options</i>, including if the filesystem should be <a
+ href="http://en.wikipedia.org/wiki/Mount_%28computing%29"
+ title="Mount (computing)">mounted</a> at boot.</li>
+  <li><i>dump-freq</i> adjusts the archiving schedule for the partition
+(used by <a href="http://en.wikipedia.org/wiki/Dump_%28program%29"
+ title="Dump (program)">dump</a>).</li>
+  <li><i>pass-num</i> Controls the order in which <a
+ href="http://en.wikipedia.org/wiki/Fsck" title="Fsck">fsck</a>
+checks the device/partition for errors at boot time. The root device
+should be 1. Other partitions should be either 2 (to check after root)
+or 0 (to disable checking for that partition altogether).</li>
+</ol>
+<p>A value of zero in either of the last 2 columns disables the
+corresponding feature. For the whitespace character in paths the
+character code "\040" is used.</p>
+<h2><span class="mw-headline" id="Common_options_to_all_filesystems">Common
+options to all filesystems</span><span class="mw-editsection"><span
+ class="mw-editsection-bracket"></span><span
+ class="mw-editsection-bracket"></span></span></h2>
+<p>As the filesystems in <code>/etc/fstab</code> will eventually be
+mounted using mount(8) it is not surprising that the options field
+simply contains a comma-separated list of options which will be passed
+directly to mount when it tries to mount the filesystem.</p>
+<p>The options common to all filesystems are:</p>
+<dl>
+  <dt><code>auto / noauto</code></dt>
+  <dd>With the auto option, the device will be mounted automatically at
+bootup or when the mount -a command is issued. auto is the default
+option. If you do not want the device to be mounted automatically, use
+the noauto option in /etc/fstab. With noauto, the device can be only
+mounted explicitly.</dd>
+  <dt><code>dev / nodev</code></dt>
+  <dd>Interpret/do not interpret block special devices on the
+filesystem.</dd>
+  <dt><code>exec / noexec</code></dt>
+  <dd>exec lets you execute binaries that are on that partition,
+whereas
+noexec does not let you do that. noexec might be useful for a partition
+that contains no binaries, like /var, or contains binaries you do not
+want to execute on your system, or that cannot even be executed on your
+system, as might be the case of a Windows partition.</dd>
+  <dt><code>rw / ro</code></dt>
+  <dd>Mount the filesystem in either read write or read only mode.
+Explictly defining a file system as rw can alleviate some problems in
+file systems that default to read only, as can be the case with
+floppies or <a href="http://en.wikipedia.org/wiki/Ntfs" title="Ntfs"
+ class="mw-redirect">Ntfs</a> partitions.</dd>
+  <dt><code>sync / async</code></dt>
+  <dd>How the input and output to the filesystem should be done. sync
+means it is done synchronously. If you look at the example fstab, you
+will notice that this is the option used with the floppy. In plain
+English, this means that when you, for example, copy a file to the
+floppy, the changes are physically written to the floppy at the same
+time you issue the copy command.</dd>
+  <dt><code>suid / nosuid</code></dt>
+  <dd>Permit/Block the operation of <a
+ href="http://en.wikipedia.org/wiki/Setuid" title="Setuid">suid</a>,
+and <a href="http://en.wikipedia.org/wiki/Setgid" title="Setgid"
+ class="mw-redirect">sgid</a> bits.</dd>
+  <dt><code>user / users / nouser</code></dt>
+  <dd><code>user</code> permits any user to mount the filesystem. This
+automatically implies noexec, nosuid, nodev unless overridden. If <code>nouser</code>
+is specified, only root can mount the filesystem. If <code>users</code>
+is specified, every user in group <i>users</i> will be able to unmount
+the volume.</dd>
+  <dt><code>defaults</code></dt>
+  <dd>Use default settings. Default settings are defined per file
+system
+at the file system level. For ext3 file systems these can be set with
+the tune2fs command. The normal default for Ext3 file systems is
+equivalent to <code>rw,suid,dev,exec,auto,nouser,async</code>(no acl
+support). Modern Red Hat based systems set acl support as default on
+the root file system but not on user created Ext3 file systems. Some
+file systems such as XFS enable acls by default. Default file system
+mount attributes can be overridden in /etc/fstab.</dd>
+  <dt><code>owner (Linux-specific)</code></dt>
+  <dd>Permit the owner of device to mount.</dd>
+  <dt><code>atime / noatime / relatime / strictatime (Linux-specific)</code></dt>
+  <dd>The Unix <a href="http://en.wikipedia.org/wiki/Stat_%28Unix%29"
+ title="Stat (Unix)" class="mw-redirect">stat</a> structure records
+when files are last accessed (atime), modified (mtime), and changed
+(ctime). One result is that <a
+ href="http://en.wikipedia.org/wiki/Atime_%28Unix%29"
+ title="Atime (Unix)" class="mw-redirect">atime</a> is written every
+time a file is <i>read,</i>
+which has been heavily criticized for causing performance degradation
+and increased wear. However, atime is used by some applications and
+desired by some users, and thus is configurable as atime (update on
+access), noatime (do not update), or (in Linux) relatime (update atime
+if older than mtime). Through Linux 2.6.29, atime was the default; as
+of 2.6.30 (9 June 2009), relatime is the default.<sup id="cite_ref-1"
+ class="reference"><a
+ href="http://en.wikipedia.org/wiki/Fstab#cite_note-1"><span>[</span>1<span>]</span></a></sup></dd>
+</dl>
+<h2><span class="mw-headline" id="Filesystem_specific_options">Filesystem
+specific options</span><span class="mw-editsection"><span
+ class="mw-editsection-bracket"></span></span></h2>
+<p>There are many options for the specific filesystems supported by
+mount. Listed below are some of the more commonly used. The full list
+may be found in the documentation for mount. Note that these are for
+Linux; traditional UNIX-like systems have generally provided similar
+functionality but with slightly different syntax.</p>
+<h3><span class="mw-headline" id="ext2">ext2</span><span
+ class="mw-editsection"><span class="mw-editsection-bracket"></span><span
+ class="mw-editsection-bracket"></span></span></h3>
+<dl>
+  <dt><code>check={none, normal, strict}</code></dt>
+  <dd>Sets the fsck checking level.</dd>
+  <dt><code>debug</code></dt>
+  <dd>Print debugging info on each remount .</dd>
+  <dt><code>sb=n</code></dt>
+  <dd>n is the block which should be used as the superblock for the fs.</dd>
+</dl>
+<h3><span class="mw-headline" id="fat">fat</span><span
+ class="mw-editsection"><span class="mw-editsection-bracket"></span><span
+ class="mw-editsection-bracket"></span></span></h3>
+<dl>
+  <dt><code>check={r[elaxed], n[ormal], s[trict]}</code></dt>
+  <dd>Not the same as ext2, but rather deals with allowed filenames.
+See mount(8).</dd>
+  <dt><code>conv={b[inary], t[ext], a[uto]}</code></dt>
+  <dd>Performs DOS &lt;---&gt; UNIX text file conversions
+automatically. See mount(8).</dd>
+</dl>
+<h3><span class="mw-headline" id="fat.2C_ntfs">fat, ntfs</span><span
+ class="mw-editsection"><span class="mw-editsection-bracket"></span><span
+ class="mw-editsection-bracket"></span></span></h3>
+<dl>
+  <dt><code>windows_names</code></dt>
+  <dd>Linux filesystems have a larger set of allowed characters in
+filenames. <code>windows_names</code>
+restricts the set of allowed characters for the volume to only those
+acceptable by Windows. Note: though FAT/NTFS are the most common use
+case, this feature is not specifically restricted to those filesystem
+types.</dd>
+  <dt><code>uid=n, gid=n</code></dt>
+  <dd>Sets the user identifier, <a
+ href="http://en.wikipedia.org/wiki/User_identifier_%28Unix%29"
+ title="User identifier (Unix)" class="mw-redirect">uid</a>, and group
+identifier, <a
+ href="http://en.wikipedia.org/wiki/Group_identifier_%28Unix%29"
+ title="Group identifier (Unix)" class="mw-redirect">gid</a>, for all
+files on the filesystem.</dd>
+  <dt><code>umask=nnn, dmask=nnn, fmask=nnn</code></dt>
+  <dd>Sets the user file creation mode mask, <a
+ href="http://en.wikipedia.org/wiki/Umask" title="Umask">umask</a>, the
+same for directories only, <a
+ href="http://en.wikipedia.org/w/index.php?title=Dmask&amp;action=edit&amp;redlink=1"
+ class="new" title="Dmask (page does not exist)">dmask</a> and for
+files only, fmask.</dd>
+</dl>
+<p>More detailed information about the fstab file can be found in the <a
+ href="http://en.wikipedia.org/wiki/Manual_page_%28Unix%29"
+ title="Manual page (Unix)" class="mw-redirect">man page</a> about <a
+ rel="nofollow" class="external text"
+ href="http://www.die.net/doc/linux/man/man5/fstab.5.html">Linux fstab</a>;
+for other systems see below.</p>
+<h3><span class="mw-headline" id="nfs">nfs</span><span
+ class="mw-editsection"><span class="mw-editsection-bracket"></span><span
+ class="mw-editsection-bracket"></span></span></h3>
+<dl>
+  <dt><code>addr=ip</code></dt>
+  <dd>where '<code>ip</code>' means IP address</dd>
+</dl>
+
+  </body>
+</html>

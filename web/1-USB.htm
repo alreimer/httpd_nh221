@@ -1,0 +1,62 @@
+<!--#include area="16345:AREA-1" -->
+<!--#include file="head.inc?name=USB" 
+file="side.inc?i=7" -->
+
+<!--<table width=100% border="0" bordercolor="#0066CC" cellpadding="0" cellspacing="0"><tr><td><A href="ShowMainHtml.cgi"><img src="images/home.gif" border="0"></a><img src="images/networking-b.gif" border="0"><a href="administration.htm"><img src="images/admin.gif" border="0"></a><a href="access.htm"><img src="images/Share.gif" border="0"></a><a href="ftp-main.htm"><img src="images/FTP.gif" border="0"></a></td></tr></table>-->
+<table id="maintab" height=290 align="center">
+<tbody><tr>
+<td align="center" valign="top"><br>
+<table id="header" align="center"><tr><td width="602">USB devices<br></td></tr></table>
+<br>
+<!--#incl ude cgi="_lsusb_table" -->
+<!-- CGI: _test.cgi
+    write_file "AREA-1:/proc/bus/usb/devices";
+    bind_par "AREA-1";
+    print "<table><tr bgcolor=\"#ff0000\"><td width=140 align=center class=style2>USB 2.0/1.1</td><td width=135 align=center class=style2>Vendor:ProdID</td><td width=135 align=center class=style2>Manufacturer</td><td width=140 align=center class=style2>Device Name</td><td width=140 align=center class=style2>Serial number</td></tr>\n" ;
+    do {
+	set "a = 0";
+	buf_parse_area "/[/*/]\nT:  " {
+	    set "a = 1";
+	}
+	    print "[?/!/*Cls=09(hub  )?]<tr><td>USB {?/*D:  Ver= /[/*/] ?}</td><td>{?/*P:  Vendor=/[/*/] ?}:{?ProdID=/[/*/] ?}</td><td>{?/*S:  Manufacturer=/[/*/]\n?}</td><td>{?/*S:  Product=/[/*/]\n?}</td><td>{?/*S:  SerialNumber=/[/*/]\n?}</td></tr>\n";
+
+    }	if_set "a == 0";	//stop if set!!!
+    print "</table>";
+END_CGI -->
+<!--#include cgi="_test.cgi" -->
+
+<!-- hier must be javascript to form this stream to table -->
+<pre>
+<!--#in clude file="/proc/bus/usb/devices" -->
+</pre>
+<br>
+<table id="options" height="100" align="center">
+
+<tbody>
+<tr>
+	<td id="td_link"><a href="usb-storage.htm">USB Storage managment</a></td>
+</tr>
+<tr>
+	<td id="td_help">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Managment of USB Disks</td>
+</tr>
+<tr>
+	<td id="td_link"><a href="Show_USB_Disk.cgi">Disk Setup</a></td>
+</tr>
+<tr>
+	<td id="td_help">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Device Setting</td>
+</tr>
+<tr>
+	<td id="td_link"><a href="usb-printer.htm">Printer Setup</a></td>
+</tr>
+<tr>
+	<td id="td_help">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Printer Functionality Setting</td>
+</tr>
+<tr>
+	<td id="td_link"><a href="usbque.htm">Clean Printer Job Queue</a></td>
+</tr>
+<tr>
+	<td id="td_help">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Clean All Waiting Jobs On The Printer Queue</td>
+</tr>
+</tbody></table><br>
+
+</td></tr></tbody></table></body></html>

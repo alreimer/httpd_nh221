@@ -1,0 +1,49 @@
+<html>
+  <head>
+    <title>ipkg help</title>
+  </head>
+  <body>
+    <b>/etc/ipkg.conf</b> <br>
+    Defines destination locations, feeds and global and proxy settings.
+    Each line in the file is either a comment, an empty line (ignored),
+    or consists of a configuration parameter. The following parameters
+    are supported:
+    <dl>
+      <dt># <i>comment</i></dt>
+      <dd>Comments
+      </dd>
+      <dt>src <i>feed-name</i> <i>feed-url</i></dt>
+      <dd>Name and location of a feed.
+      </dd>
+      <dt>dest <i>dest-name</i> <i>dest-location</i></dt>
+      <dd>Installation destination name and directory.
+      </dd>
+      <dt>option <i>name</i> <i>value</i></dt>
+      <dd>Configuration options. Option names are:
+        <dl>
+          <dt>http_proxy</dt>
+          <dd>Proxy to use for HTTP connections
+          </dd>
+          <dt>ftp_proxy</dt>
+          <dd>Proxy to use for FTP connections
+          </dd>
+          <dt>proxy_username</dt>
+          <dd>Proxy user name
+          </dd>
+          <dt>proxy_password</dt>
+          <dd>Proxy password
+          </dd>
+          <dt>offline_root</dt>
+          <dd>Root for offline installation, e.g. into some flash
+            memory.
+          </dd>
+        </dl>
+      </dd>
+    </dl>
+    <dl>
+      <dt>/etc/ipkg/<i>feed-name</i>.conf&nbsp;</dt>
+      <dd>Defines feed-specific settings for the feed <i>feed-name</i>.
+      </dd>
+    </dl>
+  </body>
+</html>

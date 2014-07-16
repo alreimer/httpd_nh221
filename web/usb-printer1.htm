@@ -1,0 +1,138 @@
+<!--#include file="head.inc?name=Home%20Page" 
+file="side.inc?i=7" -->
+<table id="maintab" height=290 align="center"><tr>
+<td align="center" valign="top" colspan=2><br>
+<table id="header" align="center"><tr><td><b>USB :: Printer manager</b></td></tr></table>
+<br>
+
+<!--this is from httpd_rc_usb.c (Set_printer(FILE *out))-->
+<FORM name="main" action="Set_printer.cgi" method="get"><TR><TH align=left width=150 bgColor=#dddddd>&nbsp;&nbsp;Print Server</TH>
+<TD width=400>&nbsp;&nbsp;
+	<input type="radio" name="enable_pserver" value="1" onclick="cmdShareLpOn()" checked>Yes &nbsp;&nbsp;
+	<input type="radio" name="enable_pserver" value="0" onclick="cmdShareLpOff()">No</TD></TR>
+<TR bgColor=#333399><TD class=style2 colSpan=2 height=30>&nbsp;&nbsp;Custom Printing</TD></TR>
+<TR><TH align=left width=150 bgColor=#dddddd>&nbsp;&nbsp;Printer Type</TH>
+<TD width=400>&nbsp;&nbsp;
+	<select name="type" size="1" onChange="cmdChangePrinter()">
+	<option value="0" selected>PostScript</option>
+	<option value="1">EPSON LP-9500C</option>
+	<option value="2">EPSON LP-8800C</option>
+	<option value="3">EPSON LP-9400</option>
+	<option value="4">EPSON LP-8900</option>
+	<option value="5">EPSON LP-8700</option>
+	<option value="6">EPSON LP-8100</option>
+	<option value="7">EPSON LP-7700</option>
+	<option value="8">EPSON LP-7500</option>
+	<option value="9">EPSON LP-2400</option>
+	<option value="10">EPSON LP-2200</option>
+	<option value="11">EPSON LP-1900</option>
+	<option value="13">EPSON PM-890C</option>
+	<option value="14">EPSON PM-870C</option>
+	<option value="15">EPSON PM-850PT</option>
+	<option value="16">EPSON PM-840C</option>
+	<option value="17">EPSON PM-830C</option>
+	<option value="18">EPSON PM-740DU</option>
+	<option value="19">EPSON PM-740C</option>
+	<option value="20">EPSON PM-730C</option>
+	</select></TD></TR>
+<TR><TH align=left width=150 bgColor=#dddddd>&nbsp;&nbsp;Paper Size</TH>
+<TD width=400>&nbsp;&nbsp;
+	<select name="size" size="1">
+	<option value="0" selected>A3</option>
+	<option value="1">A4(Standard)</option>
+	<option value="2">A5</option>
+	<option value="3">B4</option>
+	<option value="4">B5</option>
+	<option value="5">Letter</option>
+	<option value="7">Legal</option>
+	<option value="10">Postcard</option>
+	<option value="11">European 4</option>
+	</select></TD></TR>
+<TR><TH align=left width=150 bgColor=#dddddd>&nbsp;&nbsp;Resolution</TH>
+<TD width=400>&nbsp;&nbsp;
+	<select name="rect" size="1">
+	<option value="0" selected>300x300</option>
+	<option value="1">600x600(Standard)</option>
+	<option value="2">1200x1200</option>
+	</select></TD></TR>
+<TR><TH align=left width=150 bgColor=#dddddd>&nbsp;&nbsp;Paper Tray</TH>
+<TD width=400>&nbsp;&nbsp;
+	<select name="tray" size="1">
+	<option value="0" selected>Automatic(Standard)</option>
+	<option value="1">Manual</option>
+	</select></TD></TR>
+<TR><TH align=left width=150 bgColor=#dddddd>&nbsp;&nbsp;Resolution</TH>
+<TD width=400>&nbsp;&nbsp;
+	<select name="feeder" size="1">
+	<option value="0" selected>Automatic(Standard)</option>
+	<option value="1">1</option>
+	<option value="2">2</option>
+	<option value="3">3</option>
+	<option value="4">4</option>
+	<option value="5">5</option>
+	<option value="6">6</option>
+	<option value="7">7</option>
+	<option value="8">8</option>
+	<option value="9">9</option>
+	<option value="10">10</option>
+	<option value="11">11</option>
+	<option value="12">12</option>
+	<option value="13">13</option>
+	<option value="14">14</option>
+	<option value="15">15</option>
+	</select></TD></TR>
+<TR><TH align=left width=150 bgColor=#dddddd>&nbsp;&nbsp;Both Sides</TH>
+<TD width=400>&nbsp;&nbsp;
+	<select name="reverse" size="1">
+	<option value="0" selected>Single Side(Standard)</option>
+	<option value="1">Both Sides</option>
+	</select></TD></TR>
+<TR><TH align=left width=150 bgColor=#dddddd>&nbsp;&nbsp;Orientation</TH>
+<TD width=400>&nbsp;&nbsp;
+	<select name="dectance" size="1">
+	<option value="0" selected>Portrait(Standard)</option>
+	<option value="1">Landscape</option>
+	</select></TD></TR>
+<TR bgColor=#333399><TD class=style2 colSpan=2 height=30>&nbsp;&nbsp;Inkjet Printing</TD></TR>
+<TR><TH align=left width=150 bgColor=#dddddd>&nbsp;&nbsp;Paper Type</TH>
+<TD width=400>&nbsp;&nbsp;
+	<select name="paper" size="1">
+	<option value="0" selected>Normal Paper(Standard)</option>
+	<option value="1">Super Fine Paper</option>
+	<option value="2">Photo Print Paper</option>
+	<option value="3">Exclusive Gloss Film</option>
+	<option value="4">Exclusive OHP Sheet</option>
+	<option value="5">Iron-on Transfer</option>
+	<option value="6">PM Photo Paper</option>
+	<option value="7">PM Mat Paper</option>
+	</select></TD></TR>
+<TR><TH align=left width=150 bgColor=#dddddd>&nbsp;&nbsp;Resolution</TH>
+<TD width=400>&nbsp;&nbsp;
+	<select name="rect2" size="1">
+	<option value="0" selected>120dpi</option>
+	<option value="1">360dpi(Standard)</option>
+	<option value="2">720dpi</option>
+	</select></TD></TR>
+<TR><TH align=left width=150 bgColor=#dddddd>&nbsp;&nbsp;Print Quality</TH>
+<TD width=400>&nbsp;&nbsp;
+	<select name="qui" size="1">
+	<option value="1">Photograph(Standard)</option>
+	<option value="2">Standard</option>
+	<option value="3">Fine</option>
+	<option value="4">Super fine</option>
+	<option value="0" selected>Draft</option>
+	</select></TD></TR>
+<TR><TH align=left width=150 bgColor=#dddddd>&nbsp;&nbsp;Ink</TH>
+<TD width=400>&nbsp;&nbsp;
+	<select name="ink" size="1">
+	<option value="0" selected>Color(Standard)</option>
+	<option value="1">Monochrome</option>
+	</select></TD></TR>
+<input type="hidden" name="printer_scrpage" value="1">
+<TR bgColor=#333399><TD class=style2 height=30>&nbsp;&nbsp;</TD><TD height=30>&nbsp;&nbsp;
+<INPUT type=submit value="Apply" name=id_set onclick="location.replace('Printer_scrpage.cgi');">&nbsp;&nbsp;<INPUT onclick="history.back()" type=button value="Back" name=id_cancel>
+<INPUT type=submit value="Apply" name=id_set>&nbsp;&nbsp;<INPUT onclick="history.back()" type=button value="Back" name=id_cancel>
+</TD></FORM></TR></TBODY></TABLE></TD></TR></TBODY></TABLE>
+<MAP name=Map><AREA shape=RECT coords=10,1,109,23 href="Show_USB_Detail.cgi">
+<AREA shape=RECT coords=110,1,209,23 href="Show_USB_Disk.cgi"><AREA shape=RECT coords=210,1,318,23 href="Set_printer.cgi">
+<AREA shape=RECT coords=321,1,512,23 href="Set_usbque.cgi"></MAP></BODY></HTML>

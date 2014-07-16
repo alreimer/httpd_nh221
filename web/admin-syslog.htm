@@ -1,0 +1,23 @@
+<!--#include file="head.inc?name=Syslog: /var/log/messages" 
+file="side.inc?i=3" -->
+
+<!--<body bgcolor="#ffffff" text="#000000">-->
+<p><font class="style9">&nbsp;&nbsp;Syslog <a href="_Get_syslog.cgi">rotate</a></font></p>
+<br>
+<p><font class="style9">&nbsp;&nbsp;Syslog</font></p>
+<table border="0" cellpadding="0" cellspacing="0" width="550">
+<tbody>
+<tr><td><pre>
+<font color="black">
+<!--#include file="/var/log/messages" -->
+</font></pre></td></tr>
+<tr><td align="center"><input value="Back" onclick="history.back()" type="button"></td></tr>
+</tbody></table>
+</body></html>
+<!-- CGI: _Get_syslog.cgi
+	print "HTTP/1.0 200 OK\nContent-Disposition: attachment; filename=";
+	my_system "echo syslog_`date +%Y%m%d`.txt";	//End is \n
+	print "Server: thttpd/2.25b\nExpires: 0\n\n";
+	get_file "/var/log/messages";
+	system "echo > /var/log/messages";
+END_CGI -->

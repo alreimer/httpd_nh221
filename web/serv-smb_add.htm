@@ -1,0 +1,83 @@
+<!--#include par="20:user_name::" par="20:n_passwd::" -->
+<!--#include file="head.inc?name=Home%20Page" 
+file="side.inc?i=4&helper=1" -->
+
+<script src="/js/tools.js"></script>
+<script language="JavaScript">
+function help_popUp() {
+var g = window.open('http://??_srv_ip??:??_srv_port??/help/serv-smb_add.help', 'name', 'toolbar=0,scrollbars=1,location=0,statusbar=1,menubar=0,resizable=1,width=700,height=700');
+}
+</script>
+<table id="maintab" height=290 align="center"><tr>
+<td align="center" valign="top"><br>
+<table id="header" align="center"><tr><td><b>Services :: Samba (Additional)</b></td></tr></table>
+<br>
+<!--<table border="0" width="70%" height="40" align="center">
+
+<tr><td width=2% valign=top></td>
+<td width=80% align=left><font color="#FFFFFF" size=2 face="Arial, Helvetica, sans-serif"><b>Please provide .</b></font></td></tr></table>-->
+<br>
+<table border="0" width="70%" height="50" align="center">
+<form method="GET" action="add_user_passwd.cgi" name="smb_passwd">
+<tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;User name:</font></b></td>
+    <td><input type="text" name="user_name" maxlength="16" size="20" value="??user_name??"></td><td></td></tr>
+<tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;Password:</font></b></td>
+    <td><input type="text" name="n_passwd" maxlength="16" size="20" value="??n_passwd??"></td><td></td></tr>
+<tr><td></td><td>Example:...</td>
+<td id="varbox-list-val"><input type="submit" name="save_smbpasswd" value="Apply">&nbsp;<input type="reset" value="Cancel"></td><td></td></tr>
+</table></form>
+
+<br>
+<form method="post" name="host_" action="smbpasswd.cgi">
+<table border="0" width="70%" height="50" align="center">
+<tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;SMB Password File:</font></b></td><td></td><td></td></tr>
+<tr><td colspan="4">
+<textarea name="smbpasswd" cols="80" rows="20" onkeydown="insertTab(this, event);">
+<!-- #include file="/usr/etc/smbpasswd" -->
+</textarea></td></tr>
+<tr><td></td><td>Example:...</td>
+<td id="varbox-list-val"><input type="submit" name="save_smbpasswd" value="Apply">&nbsp;<input type="reset" value="Cancel"></td><td></td></tr>
+</table></form>
+
+here must be applet smbpasswd
+<!--<applet code="applet/smbpasswd.class" width="300" height="100">
+</applet>-->
+</td></tr><tr>
+<td align="center"><br><input type="button" value="Back" onclick="history.back()"></td></tr>
+</table>
+
+<!--</td></tr></table>-->
+</body></html>
+<!-- CGI: smbpasswd.cgi
+    remove_chars "\r::_#smbpasswd";
+    save_file "_#smbpasswd:/usr/etc/smbpasswd";
+    write_par "_etc_save:1";
+    boot_page "serv-smb_add.htm";
+END_CGI -->
+<!--	    sprintf(tmp, "smbpasswd -a \"%s\" \"%s\" > /dev/null 2>&1", user_name, n_passwd);-->
+<!-- CGI: add_user_passwd.cgi
+
+    set "a=0";
+    remove_chars ";\"<>`'$|::_#user_name:_#n_passwd";
+    fill_cfg "user_name:n_passwd";
+
+    if_changed "user_name"{
+	if_changed "n_passwd"{
+	    set "a=1";
+	}
+    }
+    if_set "a == 1"{
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=4";
+
+    print "<tr><td>User:</td><td> ??_%user_name??</td></tr>
+    <tr><td>Password:</td><td> ??_%n_passwd??</td></tr><tr><td colspan=\"2\"><pre>";
+    my_shell "echo -e \"??_%n_passwd??\\n??_%n_passwd??\\n\" | smbpasswd -s -a \"??_%user_name??\"";
+    print "</pre></td></tr></table><a href=\"serv-smb_add.htm\">Back</a></table></body></html>";
+
+
+    write_par "_etc_save:1";
+    }
+    if_set "a == 0"{
+    boot_page "serv-smb_add.htm";
+    }
+END_CGI -->

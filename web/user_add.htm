@@ -1,0 +1,136 @@
+<html><head>
+<title>Home Page</title>
+<meta http-equiv="expires" content="0">
+<meta http-equiv="cache-control" content="no-cache">
+<style type="text/css">
+body {font-family: ArIal, Helvetica, sans-serif}
+p {font-family: Arial, Helvetica, sans-serif}
+td {font-family: Arial, Helvetica, sans-serif}
+</style>
+<script language="JavaScript">
+function check_hd(){
+    if(document.form1.hdcapacity.value != 2){
+        document.form1.apply.disabled=true;
+    }
+}
+</script>
+</head>
+<body onload="check_hd();">
+<!--<table width=740 height=400 border="0" align="center" bgcolor="#FFFFFF" cellpadding=0 cellspacing=0>
+<tr><td valign=top><table width="100%" cellSpacing=0 cellPadding=0 bgColor=#FFFFFF border="0" align="center" >
+<tr><td width="28%" align=center><IMG src="images/logo.jpg" border=0>
+</td></tr></table>-->
+<script language="JavaScript" src="title.js"></script>
+<table width="100%" border="0">
+<tr><td width="80%"><div align="right"><b></b></div></td>
+  <td width="13%"><div align="right"><b></b></div></td>
+  <td width="10%"><div align="right"><b></b></font></div></td></tr></table>
+<table width=100% border="0" bordercolor="#0066CC" cellpadding="0" cellspacing="0"><tr><td>
+<A href="ShowMainHtml.cgi"><img src="images/home.gif" border="0"></a>
+<a href="network.htm"><img src="images/networking.gif" border="0"></a>
+<a href="administration.htm"><img src="images/admin.gif" border="0"></a>
+<a href="access.htm"><img src="images/Share-b.gif" border="0"></a>
+<a href="ftp-main.htm"><img src="images/FTP.gif" border="0"></a>
+<a href="p2p-main.htm"><img src="images/p2p.gif" border="0"></a>
+<a href="web-server.htm"><img src="images/web.gif" border="0"></a>
+</td></tr></table>
+<table width="100%" border="0" height=290 align="center">
+<tr>
+	<td align="center" valign="top" bgcolor="#181C5B"><br>
+<table width=85% border="0" align="center">
+<tr>
+	<td bgColor=#EBDA0C width="602"><B><FONT face="Arial, Helvetica, sans-serif" color=#000000 size=3>Share - Add User</FONT></B><br></td></tr></table>
+<br>
+<table border="0" width="80%" height="50" align="center">
+<tr>
+<td width=10% valign=top><font size=2 color="#FFFFFF" face=\"Arial, Helvetica, sans-serif\"><b>Notes:</b></td>
+<td width=100% align=left><font size=2 color="#FFFFFF" face=\"Arial, Helvetica, sans-serif\"><b>If the user can use FTP at the same time, don't use username as your password.<br>
+</table>
+<form name=form1 method="Get" action="Set_adduser.cgi" onsubmit="return check_form()">
+<table border="0" width="80%" align="center">
+<tr>
+<td width="10%" align="center" rowspan=8><img src="images/user.gif" border=0></td>
+
+<td width="5%"></td><td width="25%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;User Name:</font></b></td>
+<td width="50%" bgcolor="#FFFFFF"><input type="text" name="name" size=maxlength=16 OnChange="cmdCopyName()" size=20 maxlength="16"></td>
+</tr><tr><td width="5%"></td>
+
+<td width="30%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;New Password:</font></b></td>
+<td width="50%" bgcolor="#FFFFFF"><input type="password" name="user_newpasswd" maxlength="16" size=20></td>
+</tr><tr><td width="5%"></td>
+
+<td width="30%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;Confirm Password:</font></b></td>
+<td width="50%" bgcolor="#FFFFFF"><input type="password" name="user_compasswd" maxlength="16" size=20></td>
+</tr><tr><td width="5%"></td>
+
+<td width="30%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;User Description:</font></b></td>
+<td width="50%" bgcolor="#FFFFFF"><input type="text" name="user_des" maxlength="50" size=40></td>
+
+</tr><tr><td width="5%"></td>
+
+<td width="30%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;FTP Access:</font></b></td>
+<td width="50%" bgcolor="#FFFFFF"><input type="radio" name="user_ftp"  value="1">Yes
+<input type="radio" name="user_ftp" value="0" checked>No</td>
+<!--<input type="hidden" name="sel_dir" value="">-->
+</tr><!--<tr><td width="5%"></td>
+
+<td width="30%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;Accessed Level:</font></b></td>
+<td width="50%" bgcolor="#FFFFFF"><input type="radio" name="ftp_admin"  value="1" onclick="check_admin()">Supervisor
+<input type="radio" name="ftp_admin" value="0" onclick="check_admin()" checked>General User</td>
+</tr><tr><td width="5%"></td>
+<td width="35%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;FTP Folder:</font></b></td>
+<td width="50%" bgcolor="#FFFFFF">
+<!--#i nclude select_show_dir="sel_dir" -->
+</script></td>
+</tr>-->
+
+</table><table border="0" width="30%" align="center"><tr><td width="33%"><input type=submit name="apply" value="Apply"></td>
+<input type="hidden" name="hdcapacity">
+<td width=33%><input type=reset value="Undo"></td><br>
+<td width="33%"><input type=button value="Back" onClick="location.replace('Get_alluser.cgi')"></td></tr></table></form></body></html>
+
+<script language="JavaScript">
+function cmdCopyName() 
+{
+    if (document.form1.user_des.value == "") 
+    {
+	document.form1.user_des.value = document.form1.name.value;
+    }
+}
+
+function check_form()
+{
+un = document.form1.name.value;
+up = document.form1.user_newpasswd.value;
+ucp = document.form1.user_compasswd.value;
+ud = document.form1.user_des.value;
+
+if (check_un()==0){warming_b("User Name");document.form1.name.focus();return false;}
+else if (check_nm()==0){document.form1.name.focus();return false;}
+else if (check_root()==0){document.form1.name.focus();return false;}
+<!--else if (check_up()==0){warming_b("New Password");document.form1.user_newpasswd.focus();return false;}-->
+else if (check_pw()==0){document.form1.user_newpasswd.focus();return false;}
+<!--else if (check_pw_char()==0){return false;}-->
+<!--else if (check_ucp()==0){warming_b("Password Confirm");document.form1.user_compasswd.focus();return false;}-->
+else if (check_ud()==0){warming_b("User Description");document.form1.user_des.focus();return false;}
+else if (check_comfirm()==0){warming_com();document.form1.user_compasswd.focus();return false;}
+else if (check_des()==0){document.form1.user_des.focus();return false;}
+return true;};
+
+function check_un(){var ok=1;if (un==null||un=="") {ok=0;}return ok;}
+function check_up(){var ok=1;if (up==null||up=="") {ok=0;}return ok;}
+function check_ucp(){var ok=1;if (ucp==null||ucp=="") {ok=0;}return ok;}
+function check_ud(){var ok=1;if (ud==null||ud=="") {ok=0;}return ok;}
+function check_comfirm(){var ok=1;if(up!=ucp){ok=0;}return ok;}	
+function warming_b(){alert(arguments[0]+": Can not be blank!");}
+function warming_com(){alert("Please type correct new password for dobule comfirm!");}	
+function check_nm(){var ok=1;var temp; for(var i=0;i<un.length;i++){temp=un.charCodeAt(i);if(temp==47||(temp>=58&&temp<=63)||(temp>=91&&temp<=93)||(temp>=42&&temp<=44)||temp<32||temp>126){warming_nm();ok=0;break;}} return ok;}
+function check_root(){var ok=1;if (un == 'root'){warming_root();ok=0;} return ok;}
+function check_pw(){var ok=1;var temp; for(var i=0;i<up.length;i++){temp=up.charCodeAt(i);if(temp<32||temp>126){warming_pw();ok=0;break;}} return ok;}
+function check_pw_char(){var ok=1;if(up.length<3){alert("New Password ERROR: Must have at least 3 character!");document.form1.user_newpasswd.focus();ok=0;}return ok;}
+function check_des(){var ok=1;var temp; for(var i=0;i<ud.length;i++){temp=ud.charCodeAt(i);if(temp==58||temp<32||temp>126){warming_des();ok=0;break;}} return ok;}
+function warming_root(){alert("User Name ERROR: \"root\" is not allowed to be a user name!");}
+function warming_nm(){alert("User Name ERROR: Can not be a \":\" character or control characters!");}
+function warming_pw(){alert("New Password ERROR: Can not be a \":\" character, a space character or control characters!");}
+function warming_des(){alert("User Description ERROR: Can not be a \":\" character or a control characters!");}
+</script>

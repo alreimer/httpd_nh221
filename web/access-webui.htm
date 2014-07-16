@@ -1,0 +1,131 @@
+<!--#include par="20:supername:USERNAME:" par="20:superpassword:PASSWORD:" readcfg par="20:comfirmpasswd::" -->
+<!--#include file="head.inc?name=Home%20Page" 
+file="side.inc?i=5" -->
+
+<table id="maintab" height=290 align="center"><tr>
+<td align="center" valign="top"><br>
+<table id="header" align="center"><tr><td><b>Access :: WebUI</b></td></tr></table>
+<br>
+<form method="GET" action="Set_superuser1.cgi" name="superset" onSubmit="return super_validate()">
+<table border="0" width="70%" height="50" align="center">
+    <colgroup>
+    <col id="varbox-list-name">
+    <col id="varbox-list-val">
+    </colgroup>
+    <tr>
+    <td><b><font size="3">&nbsp;Superuser name:</font></b></td>
+    <td><input type="text" name="supername" maxlength="16" size="20" value="??supername??"></td>
+    </tr>
+    <tr>
+    <td><b><font size="3">&nbsp;Old Password:</font></b></td>
+    <td>??superpassword??</td>
+    </tr>
+    <tr>
+    <td><b><font size="3">&nbsp;New Password:</font></b></td>
+    <td><input type="password" name="superpassword" maxlength="16" size="20"></td>
+    </tr>
+    <tr>
+    <td><b><font size="3">&nbsp;Confirm Password:</font></b></td>
+    <td><input type="password" name="comfirmpasswd" maxlength="16" size="20"></td>
+    </tr>
+</table>
+
+<table id="info" align="center"><tr><td><br>Please provide a superuser name and password (between 4-16 characters each). 
+Periodically change the superuser name and password to ensure security.</td></tr></table>
+
+</td></tr><tr>
+<td align="center"><input type="submit" name="save_hostname" value="Apply">&nbsp;<input type="reset" name="save_hostname" value="Cancel">&nbsp;<input type="button" value="Back" onclick="history.back()"></td>
+</form>
+</tr>
+</table>
+<script language="javascript">
+function super_validate(){
+    nm=document.superset.supername.value;
+    pw=document.superset.superpassword.value;
+    compw=document.superset.comfirmpasswd.value;
+    if(check_nm()==0){
+        return false;
+    }
+    if(check_pw()==0){
+        return false;
+    }
+    if(check_same()==0){
+        return false;
+    }
+//    settime();
+    return true;
+}
+function check_nm(){
+    var ok_nm=1;
+    if(nm==null||nm==""){
+        alert("Super Username ERROR: Can not be blank!");
+        document.superset.supername.focus();
+        ok_nm=0;
+    }else if(nm.length<4){
+        alert("Super Username ERROR: Must have at least 4 characters!");
+        document.superset.supername.focus();
+        ok_nm=0;
+    }else{
+        var temp_u;
+        for(var i=0;i<nm.length; i++){
+            temp_u = nm.charCodeAt(i);
+            if (temp_u==39||temp_u < 33 || temp_u > 126 || temp_u == 38 || temp_u ==61){
+                alert("Super Username ERROR: Can not be a ' character, a space character, control character, &, or =");
+                document.superset.supername.focus();
+                ok_nm=0;
+                break;
+            }
+         }
+     }
+     return ok_nm;
+}
+function check_pw(){
+    var ok_pw=1;
+    if(pw==null||pw==""){
+        alert("New Password ERROR: Can not be blank!");
+        document.superset.superpassword.focus();
+        ok_pw=0;
+    }else if(pw.length<4){
+        alert("New Password ERROR: Must have at least 4 characters!");
+        document.superset.superpassword.focus();
+        ok_pw=0;
+    }else{var temp_u;
+        for(var i=0;i<pw.length; i++){
+            temp_u = pw.charCodeAt(i);
+            if(temp_u==39||temp_u < 33 || temp_u > 126 || temp_u == 38 || temp_u ==61){
+                alert("New Password ERROR: Can not be a ' character, a space character, control character, &, or =");
+                document.superset.superpassword.focus();
+                ok_pw=0;
+                break;
+            }
+        }
+    }
+    return ok_pw;
+}
+function check_same(){var ok_same=1; if(pw!=compw){warming_com();document.superset.comfirmpasswd.focus();return false;};}
+//function settime(){setTimeout("reloadurl()",1500);}
+//function reloadurl(){top.location.replace("/");} 
+function warming_com(){alert("Please type correct new password for dobule comfirm!");}	
+</script>
+</body></html>
+<!-- CGI: Set_superuser1.cgi
+    remove_chars ";\"<>`'|::_#superpassword:_#comfirmpasswd";
+    fill_all_cfg;
+    set "a = 0";
+//    if_changed ""{
+	if "_%superpassword:/?_%comfirmpasswd?//"{
+	    set "a = 1";
+	}
+//    }
+	if_set "a == 0"{
+	    print "<script language=\"JavaScript\">\n
+		alert(\"Please input the correct previous password!!\");\n
+		location.replace('http://??_srv_ip??:??_srv_port??/access-webui.htm');\n</script>\n";
+	}
+	if_set "a == 1"{
+	    savecfg;
+	    init;
+	    boot_page "access-webui.htm";
+	}
+
+END_CGI -->

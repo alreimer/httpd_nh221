@@ -1,0 +1,136 @@
+<!--#include par="30:mac10:LEGAL_MAC9:^(|([0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}))$"
+par="30:mac1:LEGAL_MAC0:^(|([0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}))$"
+par="30:mac2:LEGAL_MAC1:^(|([0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}))$"
+par="30:mac3:LEGAL_MAC2:^(|([0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}))$"
+par="30:mac4:LEGAL_MAC3:^(|([0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}))$"
+par="30:mac5:LEGAL_MAC4:^(|([0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}))$"
+par="30:mac6:LEGAL_MAC5:^(|([0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}))$"
+par="30:mac7:LEGAL_MAC6:^(|([0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}))$"
+par="30:mac8:LEGAL_MAC7:^(|([0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}))$"
+par="30:mac9:LEGAL_MAC8:^(|([0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}))$" par="2:mac_security_mode:MAC_SECURITY_MODE:[0-2]"
+readcfg -->
+<!--#include file="head.inc?name=Home%20Page" 
+file="side.inc?i=2" -->
+
+<script language="JavaScript">
+function changeImage(){
+    document.images[2].src = "images/networking.gif";
+    document.images[6].src = "images/logout-b.gif";
+    window.close();
+}
+function main_validate(){
+    var tmp, count;
+    for(var i=0;i<document.main.length;i++){
+        objEle = document.main(i);
+        if((objEle.type == "text") && (objEle.value != "")){
+            tmp = check_mac(objEle.value);
+            if(tmp == 0){
+                count = i + 1;
+                alert("MAC" + i + " is not legal, format must be as 11:22:33:44:55:66");
+                return false;
+            }
+        }
+    }
+    return true;
+}
+function check_mac(mac){
+    var ok = 1;
+    str = mac.split(":");
+    if(str.length!=6){
+        ok=0;
+        return ok;
+    }
+    for(i=0; i<str.length; i++){
+        if(((str[i].charCodeAt(0) >= 48 && str[i].charCodeAt(0) <= 57) || 
+            (str[i].charCodeAt(0) >= 65 && str[i].charCodeAt(0) <= 70) ||
+            (str[i].charCodeAt(0) >= 97 && str[i].charCodeAt(0) <= 102)) &&
+            ((str[i].charCodeAt(1) >= 48 && str[i].charCodeAt(1) <= 57) || 
+            (str[i].charCodeAt(1) >= 65 && str[i].charCodeAt(1) <= 70) ||
+            (str[i].charCodeAt(1) >= 97 && str[i].charCodeAt(1) <= 102)))
+            ok=1;
+        else
+            ok=0;
+    }
+    return ok;
+}
+</script>
+
+<form method="GET" name="main" action="Set_macsecurity.cgi" onSubmit="return main_validate()">
+<table id="maintab" height=290 align="center"><tr>
+<pre><!-- #include file="/proc/net/arp" --></pre>
+<td align="center" valign="top"><br>
+<table id="header" align="center"><tr><td><b>Networking :: MAC Filter</b></td></tr></table>
+<br>
+<table border="0" width="70%" height="50" align="center">
+    <colgroup>
+    <col id="varbox-list-name">
+    <col id="varbox-list-val">
+    </colgroup>
+    <tr> 
+    <td><b><font size="3">&nbsp;MAC Access Check</font></b></td>
+    <td><select name="mac_security_mode"  size="1">
+    <option value="0">Disable</option>
+    <option value="1">Allowed</option>
+    <option value="2">Denied</option>
+    </select></font></b></p>
+    </blockquote></td>
+    </tr>
+    <tr>
+    <td><b><font size="3">&nbsp;MAC Address 1</font></b></td>
+    <td><input type="text" name="mac1" maxlength=17 value="??mac1??"></td>
+    </tr>
+    <tr>
+    <td><b><font size="3">&nbsp;MAC Address 2</font></b></td>
+    <td><input type="text" name="mac2" maxlength=17 value="??mac2??"></td>
+    </tr>
+    <tr>
+    <td><b><font size="3">&nbsp;MAC Address 3</font></b></td>
+    <td><input type="text" name="mac3" maxlength=17 value="??mac3??"></td>
+    </tr>
+    <tr>
+    <td><b><font size="3">&nbsp;MAC Address 4</font></b></td>
+    <td><input type="text" name="mac4" maxlength=17 value="??mac4??"></td>
+    </tr>
+    <tr>
+    <td><b><font size="3">&nbsp;MAC Address 5</font></b></td>
+    <td><input type="text" name="mac5" maxlength=17 value="??mac5??"></td>
+    </tr>
+    <tr>
+    <td><b><font size="3">&nbsp;MAC Address 6</font></b></td>
+    <td><input type="text" name="mac6" maxlength=17 value="??mac6??"></td>
+    </tr>
+    <tr>
+    <td><b><font size="3">&nbsp;MAC Address 7</font></b></td>
+    <td><input type="text" name="mac7" maxlength=17 value="??mac7??"></td>
+    </tr>
+    <tr>
+    <td><b><font size="3">&nbsp;MAC Address 8</font></b></td>
+    <td><input type="text" name="mac8" maxlength=17 value="??mac8??"></td>
+    </tr>
+    <tr>
+    <td><b><font size="3">&nbsp;MAC Address 9</font></b></td>
+    <td><input type="text" name="mac9" maxlength=17 value="??mac9??"></td>
+    </tr>
+    <tr>
+    <td><b><font size="3">&nbsp;MAC Address 10</font></b></td>
+    <td><input type="text" name="mac10" maxlength=17 value="??mac10??"></td>
+    </tr>
+</table>
+
+<table id="info" align="center"><tr><td><br>Check if MAC is allowed or disallowed to access through HTTPD.<br>
+MAC format is xx:xx:xx:xx:xx:xx</td></tr></table>
+
+</td></tr><tr>
+<td align="center"><input type="submit" name="save_hostname" value="Apply">&nbsp;<input type="reset" value="Reset">&nbsp;<input type="button" value="Back" onclick="history.back()"></td>
+</tr>
+</table></form>
+</body></html>
+
+<!-- CGI: Set_macsecurity.cgi
+    fill_all_cfg ;
+    savecfg;
+    init;
+    boot_page "network-secmac.htm";
+END_CGI -->
+
+

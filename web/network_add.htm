@@ -1,0 +1,57 @@
+<!--Used in network.htm-->
+<!--#include file="head.inc?name=Home%20Page&body=onload%3D\"check_smb()\"" 
+file="side.inc?i=2" -->
+<script src="/js/tools.js"></script>
+
+<table id="maintab" height=290 align="center"><tr>
+Your NAME: ??_dns_name?? and IP: ??_ip??<br>
+<td align="center" valign="top"><br>
+<table id="header" align="center"><tr><td><b>Network :: Hosts/Resolver</b></td></tr></table>
+<br>
+<!--<table border="0" width="70%" height="40" align="center">
+
+<tr><td width=2% valign=top></td>
+<td width=80% align=left><font color="#FFFFFF" size=2 face="Arial, Helvetica, sans-serif"><b>Please provide .</b></font></td></tr></table>-->
+<br>
+
+<form method="post" name="host_" action="network_hosts.cgi" onsubmit="return check_form()">
+<table border="0" width="70%" height="50" align="center">
+<tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;Hosts File:</font></b></td><td></td><td></td></tr>
+<tr><td colspan="4">
+<textarea name="hosts" cols="80" rows="20" onkeydown="insertTab(this, event);">
+<!-- #include file="/etc/hosts" -->
+</textarea></td></tr>
+<!--see examples from ftp-conf, ftp-passw, ftp-mod and serv-ftp-->
+<tr><td></td><td>Example:...</td>
+<td id="varbox-list-val"><input type="submit" name="save_smb" value="Apply">&nbsp;<input type="reset" value="Cancel"></td><td></td></tr>
+</table></form>
+
+<form method="post" name="host_" action="network_resolv.cgi" onsubmit="return check_form()">
+<table border="0" width="70%" height="50" align="center">
+<tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;Resolver File:</font></b></td><td></td><td></td></tr>
+<tr><td colspan="4">
+<textarea name="resolv" cols="80" rows="20" onkeydown="insertTab(this, event);">
+<!-- #include file="/etc/resolv.conf" -->
+</textarea></td></tr>
+<!--see examples from ftp-conf, ftp-passw, ftp-mod and serv-ftp-->
+<tr><td></td><td></td>
+<td id="varbox-list-val"><input type="submit" name="save_smb" value="Apply">&nbsp;<input type="reset" value="Cancel"></td><td></td></tr>
+</table></form>
+</td></tr><tr>
+<td align="center"><br><input type="button" value="Back" onclick="history.back()"></td></tr>
+</table>
+
+<!--</td></tr></table>-->
+</body></html>
+<!-- CGI: network_hosts.cgi
+    remove_chars "\r::_#hosts";
+    save_file "_#hosts:/etc/hosts";
+    write_par "_etc_save:1";
+    boot_page "network_add.htm";
+END_CGI -->
+<!-- CGI: network_resolv.cgi
+    remove_chars "\r::_#resolv";
+    save_file "_#resolv:/etc/resolv.conf";
+    write_par "_etc_save:1";
+    boot_page "network_add.htm";
+END_CGI -->

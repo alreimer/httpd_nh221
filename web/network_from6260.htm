@@ -1,0 +1,306 @@
+<html><head><title>Home Page</title>
+
+<style type="text/css">
+body {font-family: ArIal, Helvetica, sans-serif}
+p {font-family: Arial, Helvetica, sans-serif}
+td {font-family: Arial, Helvetica, sans-serif}
+</style>
+
+<script language="JavaScript">
+<!--
+
+function iponly(myfield, e, dec)
+{
+var key;
+var keychar;
+
+if (window.event)
+   key = window.event.keyCode;
+else if (e)
+   key = e.which;
+else
+   return true;
+keychar = String.fromCharCode(key);
+
+// control keys
+if ((key==null) || (key==0) || (key==8) || 
+    (key==9) || (key==13) || (key==27) )
+   return true;
+
+// numbers
+else if ((("0123456789").indexOf(keychar) > -1))
+   return true;
+// decimal point jump
+else if (keychar == ".")
+   {
+   return true;
+   }   
+// decimal point jump
+else if (dec && (keychar == "."))
+   {
+   myfield.form.elements[dec].focus();
+   return false;
+   }
+else
+   return false;
+}
+
+function OnChgType()
+{
+	if  (document.main.dhcp_client[1].checked==true)
+	{
+		document.main.ip.disabled=true;
+		document.main.netmask.disabled=true;
+		document.main.gateway.disabled=true;
+		document.main.dns_server.disabled=true;
+	}
+	else
+	{
+		document.main.ip.disabled=false;
+		document.main.netmask.disabled=false;
+		document.main.gateway.disabled=false;
+		document.main.dns_server.disabled=false;
+	}
+}
+function main_validate(){
+	ip=document.main.ip.value;
+	sm=document.main.netmask.value;
+	gw=document.main.gateway.value;
+	dns=document.main.dns_server.value;
+	if(check_ip()==0)
+	{
+		warmming_ip();
+		document.main.ip.focus();
+		return false;
+	}
+	if(check_sm()==0)
+	{
+		warmming_sm();
+		document.main.netmask.focus();
+		return false;
+	}
+	if(check_gw()==0)
+	{
+		warmming_gw();
+		document.main.gateway.focus();
+		return false;
+	}
+	if(check_domain()==0)
+	{
+		alert("IP and Gateway is not in the same domain!!");
+		document.main.ip.focus();
+		return false;
+	}
+	if(check_gw()==0)
+	{
+		warmming_gw();
+		document.main.gateway.focus();
+		return false;
+	}
+	if(check_dns()==0)
+	{
+		warmming_dns();
+		document.main.dns_server.focus();
+		return false;
+	}
+	return true;
+}
+
+function check_ip(){
+	var ok=1;str = ip.split(".");
+	if (ip == null || ip=="" || ip=="127.0.0.1")	{ok=0;}
+	else if (str.length!=4)				{ok=0;}
+	else if (str[0]==224||str[0]==239||str[0]==1)	{ok=0;}
+	else
+	{
+		for (i=0; i<str.length; i++)
+		{
+			if ( str[i]==null || str[i]=="" || isNaN(str[i]) || parseInt(str[i])<0 || parseInt(str[i])>255)		{ok = 0;break;}
+			if (parseInt(str[i])==0 ){if (i==0 || i==3){ok=0;break;}}if (parseInt(str[i])==255 && i==0)			{ok=0;break;}
+		}
+	}
+	return ok;
+}
+
+function check_dns(){
+	var ok=1;
+	str = dns.split(".");
+	if (dns == null || dns=="")			{return ok;}
+	if(dns=="127.0.0.1")				{ok=0;}
+	else if (str.length!=4)				{ok=0;}
+	else if (str[0]==224||str[0]==239||str[0]==1)	{ok=0;}
+	else
+	{
+		for (i=0; i<str.length; i++)
+		{
+			if ( str[i]==null || str[i]=="" || isNaN(str[i]) || parseInt(str[i])<0 || parseInt(str[i])>255)		{ok = 0;break;}
+			if (parseInt(str[i])==0 ){if (i==0 || i==3){ok=0;break;}}if (parseInt(str[i])==255 && i==0)			{ok=0;break;}
+		}
+	}
+	return ok;
+}
+
+function check_sm(){
+	var ok=1;
+	str = sm.split(".");
+	if (sm == null || sm=="" )			{ok=0;}
+	else if (str.length!=4)				{ok=0;}
+	else
+	{
+		for (i=0; i<str.length; i++)
+		{
+			if ( str[i]==null || str[i]=="" || isNaN(str[i]) || parseInt(str[i])<0 || parseInt(str[i])>255)		{ok = 0;break;}
+			if (parseInt(str[i])!=0 && parseInt(str[i])!=128 && parseInt(str[i])!=192 && parseInt(str[i])!=224 && parseInt(str[i])!= 240 && parseInt(str[i])!=248 && parseInt(str[i])!=252 && parseInt(str[i])!=254 && parseInt(str[i])!=255 )	{ok=0;break;}
+			if (parseInt(str[i])==0)
+			{
+				if (i==0)		{ok=0;break;}
+			}
+		}
+	}
+	return ok;
+}
+
+function check_gw(){
+	var ok=1;
+	str = gw.split(".");
+	if (gw == null || gw=="" )			{ok=0;}
+	else if (str.length!=4)				{ok=0;}
+	else
+	{
+		for (i=0; i<str.length; i++)
+		{
+			if ( str[i]==null || str[i]=="" || isNaN(str[i]) || parseInt(str[i])<0 || parseInt(str[i])>255)		{ok = 0;break;}
+			if (parseInt(str[i])==0 )
+			{
+				if (i==0 || i==3)	{ok=0;break;}
+			}
+			if (parseInt(str[i])==255 && i==0)	{ok=0;break;}
+		}
+	}
+	return ok;
+}
+
+function warmming_ip(){
+	alert("Please check IP!!");
+}
+
+function warmming_sm(){
+	alert("Please check subnetwork mask!!");
+}
+
+function warmming_gw(){
+	alert("Please check gateway!!");
+}
+
+function warmming_dns(){
+	alert("Please check DNS server!!");
+}
+function check_domain(){
+	var ok_domain=1;
+	var s1=ip;
+	var s2=gw;
+	var s3=sm;
+	var ss1,ss2,ss3;
+	for(var i=0;i<4&&ok_domain==1;i++)
+	{
+		var index1=s1.indexOf(".");
+		var index2=s2.indexOf(".");
+		var index3=s3.indexOf(".");
+		if (i!=3)
+		{
+			ss1=s1.substring(0,index1);
+			ss2=s2.substring(0,index2);
+			ss3=s3.substring(0,index3);
+		} else {
+			ss1=s1;
+			ss2=s2;
+			ss3=s3;
+		}
+		s1=s1.substr(index1+1);
+		s2=s2.substr(index2+1);
+		s3=s3.substr(index3+1);
+		var num1=parseInt(ss1);
+		var num2=parseInt(ss2);
+		var num3=parseInt(ss3);
+		if((num1&num3)!=(num2&num3))	{ok_domain=0;break;}
+	}
+	return ok_domain;
+}
+// -->
+</script></head><body>
+<!--<table width=740 height=400 border="0" align="center" bgcolor="#FFFFFF" cellpadding=0 cellspacing=0>
+<tr><td valign=top><table width="100%" cellSpacing=0 cellPadding=0 bgColor=#FFFFFF border="0" align="center" >
+<tr><td width="28%" align=center><IMG src="images/logo.jpg" border=0>
+</td></tr></table>-->
+<!--<script language="JavaScript" src="title.js"></script>-->
+<table border="0" width="100%">
+<tbody><tr><td width="80%"><div align="right"><b></b></div></td>
+  <td width="13%"><div align="right"><b></b></div></td>
+  <td width="10%"><div align="right"><b></b></div></td></tr></tbody></table>
+<!--<table width=100% border="0" bordercolor="#0066CC" cellpadding="0" cellspacing="0"><tr><td><A href="ShowMainHtml.cgi"><img src="images/home.gif" border="0"></a><img src="images/networking-b.gif" border="0"><a href="administration.htm"><img src="images/admin.gif" border="0"></a><a href="access.htm"><img src="images/Share.gif" border="0"></a><a href="ftp-main.htm"><img src="images/FTP.gif" border="0"></a></td></tr></table>-->
+<table align="center" border="0" height="290" width="100%">
+<tbody><tr>
+	<td align="center" bgcolor="#ffffff" valign="top"><br>
+<table align="center" border="0" width="85%">
+<tbody><tr><td bgcolor="#0050a0" width="602"><b><font color="#ffffff" face="Arial, Helvetica, sans-serif" size="3">Networking - IP Address</font></b><br></td></tr></tbody></table>
+<table align="center" border="0" height="50" width="75%">
+<tbody><tr>
+<td width="10%"><font helvetica,="" sans-serif\="" face="\&quot;Arial," size="2"><b>Notes:</b></font></td>
+<td align="left" width="80%"><font face="Arial, Helvetica, sans-serif" size="2"><b>Please provide IP Address, Subnet Mask and Gateway.</b></font></td></tr></tbody></table>
+
+<table align="center" border="0" height="50" width="85%">
+
+<form method="get" name="jumbo" action="Set_Jumboframe.cgi"></form>
+<tbody><tr>
+<td></td>
+<td bgcolor="#d6efff"><b><font size="3">&nbsp;Jumbo Frame:</font></b></td>
+<td bgcolor="#ffffff">
+        <select name="Jumbo_mode" size="1" onchange="Set_Jumboframe.cgi">
+		<option value="0" selected="selected">Disable</option>
+		<option value="1">4000</option>
+		<option value="2">7000</option>
+		</select>
+	<input value="SET" name="jumbo_frame" type="submit">
+</td>
+
+</tr>
+
+<form method="get" name="main" action="Set_ipaddress.cgi" onsubmit="return main_validate()"></form>
+<tr>
+<td width="10%"></td>
+<td bgcolor="#d6efff" width="25%"><b><font size="3">&nbsp;DHCP Client:</font></b></td>
+<td bgcolor="#ffffff" width="47%"><input name="dhcp_client" value="0" checked="checked" onclick="OnChgType()" type="radio">Disable
+<input name="dhcp_client" value="1" onclick="OnChgType()" type="radio">Enable</td>
+<td bgcolor="#ffffff" width="18%"></td>
+</tr>
+<tr>
+<td width="10%"></td>
+<td bgcolor="#d6efff" width="25%"><b><font size="3">&nbsp;IP Address:</font></b></td>
+<td bgcolor="#ffffff" width="47%"><input onkeypress="return iponly(this, event)" name="ip" value="192.168.1.1" maxlength="15" size="20" type="text"></td>
+<td bgcolor="#ffffff" width="18%"></td>
+</tr>
+<tr>
+<td width="10%"></td>
+<td bgcolor="#d6efff" width="25%"><b><font size="3">&nbsp;Subnet Mask:</font></b></td>
+<td bgcolor="#ffffff" width="47%"><input onkeypress="return iponly(this, event)" name="netmask" value="255.255.255.0" maxlength="15" size="20" type="text"></td>
+<td bgcolor="#ffffff" width="18%"></td>
+</tr>
+<tr>
+<td width="10%"></td>
+<td bgcolor="#d6efff" width="25%"><b><font size="3">&nbsp;Gateway:</font></b></td>
+<td bgcolor="#ffffff" width="47%"><input onkeypress="return iponly(this, event)" name="gateway" value="192.168.1.254" maxlength="15" size="20" type="text"></td>
+<td bgcolor="#ffffff" width="18%"></td>
+</tr>
+<tr>
+<td width="10%"></td>
+<td bgcolor="#d6efff" width="25%"><b><font size="3">&nbsp;DNS Server:</font></b></td>
+<td bgcolor="#ffffff" width="47%"><input onkeypress="return iponly(this, event)" name="dns_server" value="168.95.1.1" maxlength="15" size="20" type="text"></td>
+<td bgcolor="#ffffff" width="18%"></td>
+</tr>
+<tr>
+<td colspan="4" align="center"><br><input name="save_hostname" value="Apply" type="submit">&nbsp;<input value="Cancel" type="reset">&nbsp;<input value="Back" onclick="history.back()" type="button"></td>
+</tr>
+
+</tbody></table><br>
+
+</td></tr></tbody></table></body></html>

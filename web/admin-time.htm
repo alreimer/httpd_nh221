@@ -1,0 +1,93 @@
+<!--#include par="10:tz:TZ:" par="25:timezone:TIME_ZONE:" par="2:time_mode:TIME_MODE:[0-2]"
+par="40:time_server:TIME_SERVER:" par="40:ntp_server:NTP_SERVER:"
+par="2:dhcp_client:DHCP_ENABLE:[01]" readcfg
+par="13:time:TIME_VALUE:(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])([01][0-9]|2[0-3])([0-5][0-9])([0-9]){4}" -->
+<!--#include file="head.inc?name=Home%20Page" 
+file="side.inc?i=3" -->
+
+<script language = "Javascript">
+function time_sync(){	//get time info from client and set it into form RAW
+    var today = new Date();
+    var year = today.getFullYear();
+    if((today.getMonth() + 1) < 10)
+        var month = "0" + (today.getMonth() + 1);
+    else
+        var month = (today.getMonth() + 1);
+    if(today.getDate() < 10)
+        var day = "0" + today.getDate();
+    else
+        var day = today.getDate();
+    if(today.getHours() < 10)
+        var hour = "0" + today.getHours();
+    else
+        var hour = today.getHours();
+    if(today.getMinutes() < 10)
+        var minute = "0" + today.getMinutes();
+    else
+        var minute = today.getMinutes();
+//    if(today.getSeconds() < 10)
+//        var second = "0" + today.getSeconds();
+//    else
+//        var second = today.getSeconds();
+
+    document.soho.time.value = month + day + hour + minute + year;
+    return true;
+}
+</script>
+
+<table id="maintab" height=290 align="center"><tr>
+<td align="center" valign="top"><br>
+<table id="header" align="center"><tr><td><b>System :: Time</b></td></tr></table>
+<br>
+<form method="Get" action="Set_sync.cgi" name="soho" onSubmit="return time_sync()">
+<input type="hidden" name="timezone" value="??timezone??">
+<table border="0" width="70%" height="20" align="center">
+    <tr><td bgcolor="#d6efff" align="center" width="30%"><b>Time Zone</b></td>
+	<td width=70%><!--<script language="JavaScript" src="tzone.js"></script>-->
+	<!--#include file="tzone.inc" -->
+	</td>
+    </tr>
+</table><br>
+<table border="0" width="70%" height="20" align="center"><tr><td>
+<input type="radio" value="0" name="time_mode"><b>Use Local Time</b></td></tr></table>
+<table border="0" width="70%" height="20" align="center"><tr>
+    <input type="hidden" name="time">
+    <td bgcolor="#d6efff" align=center width=30%><font color="000000"><b>Current Time</b></font></td>
+    <td bgcolor="#D8D8D8" align=center width=50%><!--#include exec="date" --></td>
+    <td bgcolor="#FFFFFF" align=center width=30%><input type=submit name=sync value="Time Sync"></td></tr>
+<!--    <tr><td colspan=3><font size=2>Clicking Time sync will restart the network daemon such as SAMBA and FTP</font></td></tr>-->
+</table><br>
+<!--<form method="Get" action="Set_time.cgi" name="soho">-->
+<table border="0" width="70%" height="20" align="center">
+
+<tr><td colspan=2><input type="radio" value="1" name="time_mode" ><b>Use NTP Server</b></td></tr>
+<tr><td bgcolor="#d6efff" align="center" width="30%"><b>Server:</b></td>
+    <td width="70%"><input type="text" name="ntp_server" size="40" value="??ntp_server??"></td></tr>
+<tr><td colspan=2><input type="radio" value="2" name="time_mode" ><b>Use Time Server</b></td></tr>
+<tr><td bgcolor="#d6efff" align="center" width="30%"><b>Server:</b></td>
+    <td width="70%"><input type="text" name="time_server" size="40" value="??time_server??"></td></tr>
+
+<tr><td colspan=2><font size=2>If DHCP is enabled, and NTP or Time Server information is transmitted<br>so that information will be used</font></td></tr>
+<!-- if="dhcp_client:0/" -->
+<!-- else -->
+<tr><td colspan=2><font color=#ff0000 size=2>DHCP is enabled</font></td></tr>
+<!-- /if -->
+
+</table><br>
+<table border="0" width="30%" height="20" align="center">
+<tr><input type="submit" name="reset" value="Save">&nbsp;&nbsp;<input type="button" name="reset" value="Back" onclick='history.back();'>
+</tr></table></form>
+</body></html>
+<!-- CGI: Set_sync.cgi
+//    time_mode(radio), ntp_server(text), time_server(text)
+    fill_cfg "time_mode";
+    if "_%time_mode:0/"{
+	fill_cfg "time";
+    }
+    remove_chars ";\"<>`'|::_#ntp_server:_#time_server";
+    fill_cfg "tz:timezone:ntp_server:time_server";
+    savecfg;
+	system "/etc/init.d/S22time restart";
+    boot_page "admin-time.htm";
+
+END_CGI -->

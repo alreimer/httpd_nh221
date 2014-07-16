@@ -1,0 +1,97 @@
+<html>
+  <head>
+    <title>help</title>
+  </head>
+  <body>
+
+<h3>Die Datei /etc/printcap</h3>
+Der Standard-Weg zur Installation eines Druckers unter Linux läuft über die
+Datei <tt>/etc/printcap</tt>. In dieser Datei hat jeder Drucker, der an das
+System angeschlossen ist, aber auch alle Drucker, die über das Netz
+erreichbar sein sollen, einen eigenen Eintrag. Jeder dieser Einträge ist
+eigentlich nur eine Zeile lang, wird aber (durch Verwendung eines Backslash
+vor dem Zeilentrenner) zur leichteren Lesbarkeit auf mehrere Zeilen
+verteilt.
+<p>
+Ein Eintrag für einen Drucker beginnt immer mit dem oder den Namen des
+Druckers. Danach folgen verschiedene Angaben, die jeweils durch Doppelpunkte
+voneinander getrennt sind und meist die Form
+<ul>
+<i>Einstellung=Wert</i>
+</ul>
+besitzen. Typische Beispiele für die möglichen Einstellungen sind:
+<ul>
+<dl>
+<dt><b>af=</b><i>Dateiname</i>
+<dd>Name der Account-Datei, für diesen Drucker
+<dt><b>if=</b><i>Dateiname</i>
+<dd>Name des Input-Filters, den dieser Drucker benutzen soll. Input-Filter
+sind Programme, die die zu druckende Datei in ein dem Drucker verständliches
+Format bringen, siehe weiter unten.
+<dt><b>lf=</b><i>Dateiname</i>
+<dd>Name der Logdatei, in die Fehlermeldungen aufgenommen werden sollen.
+<dt><b>lp=</b><i>Dateiname</i>
+<dd>Name der Gerätedatei des Gerätes, an dem der Drucker angeschlossen ist.
+<dt><b>mx#</b><i>Zahl</i>
+<dd>Maximale Dateigröße in Blöcken. Die Angabe 0 bedeutet, daß es keine
+maximale Dateigröße gibt.
+<dt><b>rm=</b><i>Hostname</i>
+<dd>Name der entfernten Maschine (remote machine), die einen Netzwerkdrucker
+zur Verfügung stellt.
+<dt><b>rp=</b><i>Druckername</i>
+<dd>Name des Druckers auf der entfernten Maschine. 
+<dt><b>sd=</b><i>Verzeichnis</i>
+<dd>Das Verzeichnis, in dem die Aufträge abgespeichert
+werden. (Spool Directory) 
+<dt><b>sh</b>
+<dd>Es wird keine Titelseite gedruckt. (suppress header)
+</dl>
+</ul>
+Ein sehr einfacher Eintrag für einen Drucker könnte also folgendermaßen
+aussehen:
+<pre class=file>
+  lp|hplaser:\
+        :lp=/dev/lp0:\
+        :sd=/var/spool/lp:\
+        :mx#0:\
+        :lf=/var/spool/lp/hp-log:
+
+</pre>
+Der Drucker heißt entweder <tt>lp</tt> oder <tt>hplaser</tt> (der zweite
+Name dient als Beschreibung). Er ist an die
+Schnittstelle <tt>/dev/lp0</tt> angeschlossen und sein Spoolverzeichnis ist
+<tt>/var/spool/lp</tt>. Es existiert keine Größenbeschränkung
+(<tt>mx#0</tt>) und Fehlermeldungen werden in die Datei
+<tt>/var/spool/lp/hp-log</tt> geschrieben.
+<p>
+Die Verwendung von Input-Filtern wird weiter unten beschrieben.
+<p>
+Um auch Netzwerkdrucker an anderen Maschinen ansprechen zu können, benötigen
+wir entsprechend Einträge wie der folgende:
+<pre class=file>
+  lp1|remote printer on marvin:\
+        :sd=/var/spool/lp1:\
+        :rm=marvin.mydomain.net:\
+        :rp=lp:\
+        :sh:mx#0:
+
+</pre>
+Dieser Eintrag beschreibt einen Drucker, der auf unserem System mit dem
+Namen <tt>lp1</tt> angesprochen wird. Er benutzt das lokale Spoolverzeichnis
+<tt>/var/spool/lp1</tt>. Anstatt einem Eintrag <tt>lp=</tt> haben wir jetzt
+den Eintrag <tt>rm=</tt>, der besagt, daß der Drucker auf einer <i>remote
+machine</i> also einem entfernten Rechner angeschlossen ist. Dieser Rechner
+ist in unserem Beispiel der Rechner <tt>marvin.mydomain.net</tt>. Der
+Druckername auf dem entfernten Rechner (<tt>rp</tt> - remote printer) ist
+<tt>lp</tt>. Es wird keine Trennseite ausgegeben und es existiert keine
+Größenbeschränkung.
+
+<p>
+Es ist problemlos möglich, daß ein physikalischer Drucker mehrere
+Printcap-Einträge besitzt. So können z.B. verschiedene Inputfilter für
+den gleichen Drucker verwendet werden, oder ein Drucker kann entweder farbig
+oder in Graustufen angesprochen werden, je nachdem, unter welchem Namen er
+angesprochen wurde. Der Name <tt>lp</tt> ist dabei der voreingestellte
+Drucker.
+ </body>
+</html>

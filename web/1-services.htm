@@ -1,0 +1,67 @@
+<!--#include file="head.inc?name=Home%20Page" 
+file="side.inc?i=4" -->
+
+<table id="maintab" height=290 align="center"><tr>
+<td align="center" valign="top"><br>
+<table id="header" align="center"><tr><td width="602">Services</td></tr></table>
+<br>
+<!--<table border="0" width="70%" height="40" align="center">-->
+
+<table id="options" height="100" align="center">
+<tr>
+	<td id="td_link"><a href="serv-inetd.htm">Inetd</a></td>
+</tr>
+<tr>
+	<td id="td_help">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Configure INETD demon</td>
+</tr>
+<tr>
+	<td id="td_link"><a href="serv-dbear.htm">Dropbear</a></td>
+</tr>
+<tr>
+	<td id="td_help">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Configure SSH demon</td>
+</tr>
+<tr>
+	<td id="td_link"><a href="serv-smb.htm">Samba</a>&nbsp;&nbsp;<a href="serv-smb_add.htm">add</a>&nbsp;&nbsp;<a href="serv-smb_log.htm">logs</a></td>
+</tr>
+<tr>
+	<td id="td_help">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Configure SMB demon</td>
+</tr>
+<tr>
+	<td id="td_link"><a href="serv-ftp.htm">vsFTPd</a>&nbsp;&nbsp;<a href="serv-ftp_log.htm">logs</a></td>
+</tr>
+<tr>
+	<td id="td_help">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Configure FTP demon</td>
+</tr>
+<tr>
+	<td id="td_link"><a href="serv-web.htm">HTTPD</a></td>
+</tr>
+<tr>
+	<td id="td_help">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Configure HTTP demon</td>
+</tr>
+<tr>
+	<td id="td_link"><a href="serv-others.htm">Other demons</a></td>
+</tr>
+<tr>
+	<td id="td_help">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Show other demons</td>
+</tr>
+<tr><td><hr></td></tr>
+<!-- #include shell=""cd services/includes/ 2>/dev/null; for i in $([ $? -eq 0 ] && ls *.hinc 2>/dev/null); do cat "$i"; done "" -->
+<tr><td><hr></td></tr>
+<tr>
+	<td id="td_link"><a href="info.cgi">netstat</a></td>
+</tr>
+<tr>
+	<td id="td_help">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;More information about network</td>
+</tr>
+</table>
+</td></tr></table>
+</body>
+</html>
+<!-- CGI: info.cgi
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=4";
+
+    print "</table><tr>netstat -l :</tr><tr><pre>";
+    my_system "netstat -l";
+    print "</pre></tr></table></body></html>";
+
+END_CGI -->

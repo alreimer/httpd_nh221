@@ -1,0 +1,284 @@
+<!--#include file="head.html" -->
+
+<p class=title>
+<a href=1.107.html>
+<img src=../images/lpi-pengu.png border=0 alt="Zurück">
+</a>
+<h1>1.107.4</h1>
+<h1>Installation und Konfiguration von lokalen und Netzwerkdruckern</h1>
+<p><hr><p>
+<b>Beschreibung:</b>
+Prüfungskandidaten sollten in der Lage sein, einen Printerdämon zu
+installieren und einen Druckerfilter (z.B. apsfilter oder magicfilter) zu
+installieren und zu konfigurieren. Dieses Lernziel beinhaltet das
+Konfigurieren von lokalen und Netzwerkdruckern für ein Linux-System,
+inklusive PostScript-, Non-PostScript- und Samba-Druckern. 
+<p>
+Die wichtigsten Dateien, Bezeichnungen und Anwendungen: 
+<p><ul>
+<li><b>lpd</b>
+<li><tt>/etc/printcap</tt>
+<li><tt>/etc/apsfilter/*</tt>
+<li><tt>/var/lib/apsfilter/*/</tt>
+<li><tt>/etc/magicfilter/*/</tt>
+<li><tt>/var/spool/lpd/*/</tt>
+</ul>
+<p><hr><p>
+<h3>Die Datei /etc/printcap</h3>
+Der Standard-Weg zur Installation eines Druckers unter Linux läuft über die
+Datei <tt>/etc/printcap</tt>. In dieser Datei hat jeder Drucker, der an das
+System angeschlossen ist, aber auch alle Drucker, die über das Netz
+erreichbar sein sollen, einen eigenen Eintrag. Jeder dieser Einträge ist
+eigentlich nur eine Zeile lang, wird aber (durch Verwendung eines Backslash
+vor dem Zeilentrenner) zur leichteren Lesbarkeit auf mehrere Zeilen
+verteilt.
+<p>
+Ein Eintrag für einen Drucker beginnt immer mit dem oder den Namen des
+Druckers. Danach folgen verschiedene Angaben, die jeweils durch Doppelpunkte
+voneinander getrennt sind und meist die Form
+<ul>
+<i>Einstellung=Wert</i>
+</ul>
+besitzen. Typische Beispiele für die möglichen Einstellungen sind:
+<ul>
+<dl>
+<dt><b>af=</b><i>Dateiname</i>
+<dd>Name der Account-Datei, für diesen Drucker
+<dt><b>if=</b><i>Dateiname</i>
+<dd>Name des Input-Filters, den dieser Drucker benutzen soll. Input-Filter
+sind Programme, die die zu druckende Datei in ein dem Drucker verständliches
+Format bringen, siehe weiter unten.
+<dt><b>lf=</b><i>Dateiname</i>
+<dd>Name der Logdatei, in die Fehlermeldungen aufgenommen werden sollen.
+<dt><b>lp=</b><i>Dateiname</i>
+<dd>Name der Gerätedatei des Gerätes, an dem der Drucker angeschlossen ist.
+<dt><b>mx#</b><i>Zahl</i>
+<dd>Maximale Dateigröße in Blöcken. Die Angabe 0 bedeutet, daß es keine
+maximale Dateigröße gibt.
+<dt><b>rm=</b><i>Hostname</i>
+<dd>Name der entfernten Maschine (remote machine), die einen Netzwerkdrucker
+zur Verfügung stellt.
+<dt><b>rp=</b><i>Druckername</i>
+<dd>Name des Druckers auf der entfernten Maschine. 
+<dt><b>sd=</b><i>Verzeichnis</i>
+<dd>Das Verzeichnis, in dem die Aufträge abgespeichert
+werden. (Spool Directory) 
+<dt><b>sh</b>
+<dd>Es wird keine Titelseite gedruckt. (suppress header)
+</dl>
+</ul>
+Ein sehr einfacher Eintrag für einen Drucker könnte also folgendermaßen
+aussehen:
+<pre class=file>
+  lp|hplaser:\
+        :lp=/dev/lp0:\
+        :sd=/var/spool/lp:\
+        :mx#0:\
+        :lf=/var/spool/lp/hp-log:
+
+</pre>
+Der Drucker heißt entweder <tt>lp</tt> oder <tt>hplaser</tt> (der zweite
+Name dient als Beschreibung). Er ist an die
+Schnittstelle <tt>/dev/lp0</tt> angeschlossen und sein Spoolverzeichnis ist
+<tt>/var/spool/lp</tt>. Es existiert keine Größenbeschränkung
+(<tt>mx#0</tt>) und Fehlermeldungen werden in die Datei
+<tt>/var/spool/lp/hp-log</tt> geschrieben.
+<p>
+Die Verwendung von Input-Filtern wird weiter unten beschrieben.
+<p>
+Um auch Netzwerkdrucker an anderen Maschinen ansprechen zu können, benötigen
+wir entsprechend Einträge wie der folgende:
+<pre class=file>
+  lp1|remote printer on marvin:\
+        :sd=/var/spool/lp1:\
+        :rm=marvin.mydomain.net:\
+        :rp=lp:\
+        :sh:mx#0:
+
+</pre>
+Dieser Eintrag beschreibt einen Drucker, der auf unserem System mit dem
+Namen <tt>lp1</tt> angesprochen wird. Er benutzt das lokale Spoolverzeichnis
+<tt>/var/spool/lp1</tt>. Anstatt einem Eintrag <tt>lp=</tt> haben wir jetzt
+den Eintrag <tt>rm=</tt>, der besagt, daß der Drucker auf einer <i>remote
+machine</i> also einem entfernten Rechner angeschlossen ist. Dieser Rechner
+ist in unserem Beispiel der Rechner <tt>marvin.mydomain.net</tt>. Der
+Druckername auf dem entfernten Rechner (<tt>rp</tt> - remote printer) ist
+<tt>lp</tt>. Es wird keine Trennseite ausgegeben und es existiert keine
+Größenbeschränkung.
+
+<p>
+Es ist problemlos möglich, daß ein physikalischer Drucker mehrere
+Printcap-Einträge besitzt. So können z.B. verschiedene Inputfilter für
+den gleichen Drucker verwendet werden, oder ein Drucker kann entweder farbig
+oder in Graustufen angesprochen werden, je nachdem, unter welchem Namen er
+angesprochen wurde. Der Name <tt>lp</tt> ist dabei der voreingestellte
+Drucker.
+
+
+<p>
+<h3>Apsfilter</h3>
+<b>apsfilter</b> erlaubt es, verschiedene Dateitypen direkt zu drucken, ohne
+daß der User die Datei von Hand in eine dem Drucker verständliche Sprache
+konvertieren muß.
+<p>
+<b>apsfilter</b> benutzt verschiedene Programme anderer Hersteller um die
+verschiedenen Dateiformate zunächst in Postscript zu verwandeln. Wenn ein
+echter Postscript-Drucker vorliegt, so werden diese konvertierten Daten dann
+einfach an den Drucker weitergereicht, ansonsten werden sie an Ghostscript
+weitergeleitet, der sie dann in eine für den jeweiligen Drucker
+verständliche Sprache konvertiert.
+<p>
+Die Frage, ob ein Drucker von <b>apsfilter</b> unterstützt wird, ist also
+primär die Frage, ob er entweder ein Postscript-Drucker ist, oder von
+Ghostscript unterstützt wird. 
+<p>
+Welche Filter (siehe <a href=1.107.3.html>letzten Abschnitt</a>) 
+<b>apsfilter</b> benutzt, kann über seine Konfigurationsdatei
+<tt>/etc/apsfilter/apsfilterrc</tt> eingestellt werden. Hier können auch
+alle möglichen anderen Einstellungen vorgenommen werden.
+<p>
+<b>apsfilter</b> bietet ein kleines Programm, mit dem die komplette
+Einrichtung eines Druckers, inklusive der <tt>printcap</tt>-Einträge,
+vorgenommen wird. Dieses Programm heißt <b>apsfilterconfig</b>.
+<p> 
+In <tt>/var/lib/apsfilter</tt> werden alle Aktionen von
+<b>apsfilterconfig</b> zwischengespeichert, so daß sie auch bei erneuter
+Installation wieder zur Verfügung stehen.
+<p>
+Ein typischer Eintrag in <tt>/etc/printcap</tt> für einen Drucker, der mit
+<b>apsfilter</b> angesteuert wird wäre
+<pre class=file>
+lp|PS;r=600x600;q=high;c=gray;p=a4;m=auto:\
+    :lp=/dev/lp0:\
+    :if=/etc/apsfilter/basedir/bin/apsfilter:\
+    :sd=/var/spool/lpd/lp:\
+    :lf=/var/spool/lpd/lp/log:\
+    :af=/var/spool/lpd/lp/acct:\
+    :mx#0:\
+    :sh:
+</pre>
+Wichtig ist hier die Angabe des Input-Filters
+(<tt>if=/etc/apsfilter/basedir/bin/apsfilter</tt>). Jede Datei, die an
+diesen Drucker geschickt wird, wird zuerst durch das angegebene Programm
+(hier <tt>/etc/apsfilter/basedir/bin/apsfilter</tt>) geschickt. Erst dieses
+Programm schickt den Druckauftrag an den eigentlichen Drucker. 
+
+
+<h3>Magicfilter</h3>
+<b>magicfilter</b> ist ein erweiterbarer und einstellbarer automatischer
+Druckerfilter. Der Typ einer zu druckenden Datei wird anhand ihrer 
+Magic-Nummern ermittelt und <b>magicfilter</b> wendet dann einen
+entsprechenden Filter an, der diesen Dateityp in die Ausgabesprache des
+jeweiligen Druckers konvertiert. 
+<p>
+<b>magicfilter</b> ist primär dazu gedacht,
+als Eingabefilter (<tt>if=</tt>) für den LPD-Druckspooler zu arbeiten. Die
+Optionen, die Magicfilter versteht, sind genau die, die <b>lpd</b> an den
+Inputfilter weiterreicht.
+<p>
+Um <b>magicfilter</b> zusammen mit dem LPD-Spooler zu nutzen, muß im
+entsprechenden printcap-Eintrag der input-filter (<tt>if=</tt>) Eintrag auf
+das Programm magicfilter gesetzt sein. Da aber ein printcap-Eintrag keine
+Optionen erlaubt, wird hier einfach ein Script als Eingabefilter gewählt,
+das ausführbar ist und als erste Zeile den Eintrag
+<pre class=file>
+  #!/usr/sbin/magicfilter
+</pre>
+aufweist. 
+<p>
+Dieses Script liegt standardmäßig im Verzeichnis <tt>/etc/magicfilter</tt>
+und trägt den Namen des zu verwendenden Druckers. Im Lieferumfang von
+<b>magicfilter</b> sind bereits etwa 80 verschiedene solcher Scripte für die
+gängigsten Drucker enthalten. Der Inhalt dieser Scripte ist - neben der
+bereits erwähnten ersten Zeile - immer nach folgendem Schema aufgebaut:
+<ul>
+<i>Offset Zeichenkette  Art</i>
+</ul>
+Wobei <i>Offset</i> die Stelle innerhalb der zu druckenden Datei bezeichnet,
+an der eine bestimmte Zeichenkette zu finden ist, <i>Zeichenkette</i> ist
+die Zeichenkette, die an dieser Stelle erwartet wird und <i>Art</i>
+beschreibt die Aktion, die dann mit der Datei ausgeführt wird, um sie zu
+drucken.
+<p>
+Ein typischer Eintrag dieser Datei wäre z.B.
+<pre class=file>
+  # GIF files
+  0       GIF87a          pipe    /usr/bin/giftopnm  2>/dev/null
+  0       GIF89a          pipe    /usr/bin/giftopnm  2>/dev/null
+</pre>
+Wenn also an der Position 0 (Anfang der Datei) entweder die Zeichenkette
+<tt>GIF87a</tt> oder <tt>GIF89a</tt> zu finden ist, dann handelt es sich bei
+der zu druckenden Datei um ein GIF-Bild. Die Aktion, die durchgeführt werden
+soll ist <tt>pipe /usr/bin/giftopnm  2&gt;/dev/null</tt>, der Inhalt der
+GIF-Datei wird also an das Programm <tt>/usr/bin/giftopnm</tt>
+weitergeleitet, das die GIF-Datei in ein PNM-Bild verwandelt. Das kann dann
+entsprechend von einem Postscript-Drucker gedruckt werden.
+<p>
+Damit auch nicht-Postscript Drucker mit <b>magicfilter</b> benutzt werden
+können, gibt das Programm die Ausgaben anschließend an Ghostscript weiter,
+das dann ein für den jeweiligen Drucker verständliches Format erzeugt.
+<p>
+Damit diese Arbeit nicht manuell ausgeführt werden muß, wird
+<b>magicfilter</b> zusammen mit einem Installationsscript ausgeliefert, das
+den Namen <b>magicfilterconfig</b> trägt und die notwendigen Einstellungen
+vornimmt, nachdem der User ein paar Fragen zum angeschlossenen Drucker
+beantwortet hat.
+<p>
+Ein typischer <tt>printcap</tt> Eintrag für <b>magicfilter</b> lautet
+beispielsweise:
+<pre class=file>
+  lp|hplj4l|HP Laserjet 4L:\
+        :lp=/dev/lp1:sd=/var/spool/lpd/hplj4l:\
+        :sh:pw#80:pl#72:px#1440:mx#0:\
+        :if=/etc/magicfilter/ljet4l-filter:\
+        :af=/var/log/lp-acct:lf=/var/log/lp-errs:
+</pre>
+Die Angaben <tt>pw, pl</tt> und <tt>px</tt> beziehen sich auf die
+Seitenbreite in Zeichen, die Seitenlänge in Zeilen und die Seitenbreite in
+Pixeln. Ansonsten enthält der Eintrag nichts neues, der Inputfilter ist
+jetzt <tt>/etc/magicfilter/ljet4l-filter</tt>.
+
+<h3>Einbinden eines Windows-Drucker</h3>
+Über die Technik der Input-Filter ist es auch möglich, einen Drucker
+anzusteuern, der von einem Windows-Rechner freigegeben wurde (SMB-Drucker). 
+Dazu wird <b>samba</b> benötigt, bzw. die Programme <b>smbclient</b> (Ein
+Programm zur Nutzung von SMB-Freigaben auch Druckern) und <b>smbprint</b>
+(ein Shellscript, das <b>smbclient</b> nutzt und als Input-Filter nutzbar
+ist. Ein Eintrag in <tt>/etc/printcap</tt> für einen SMB-Drucker wäre 
+beispielsweise
+<pre class=file>
+  lp2|remote-smbprinter:\
+    :lp=/dev/null:sh:\
+    :sd=/var/spool/lp2:\
+    :if=/usr/local/sbin/smbprint:
+
+</pre>
+Im Script <tt>/usr/local/sbin/smbprint</tt> müssen jetzt noch entsprechend
+die Einträge für
+<ul>
+<li>Hostname des Windows-Rechners
+<li>Freigabename des Druckers auf dem Windows-Rechner
+<li>Username auf dem Windows-Rechner
+<li>Passwort für den Windows-Rechner
+</ul>
+angegeben werden. Wenn mehrere Windows-Drucker angesprochen werden sollen,
+so muß für jeden dieser Drucker ein eigenes <tt>smbprint</tt> Script
+existieren. Die Scripts sind einfache Shellscripts und können entsprechend
+kopiert und verändert werden.
+<p>
+
+<h3>Spoolerdaemon starten</h3>
+Normalerweise wird für jedes System ein Druckerdaemon gestartet. Dieser
+Daemon trägt den Namen <b>lpd</b> und wird automatisch beim Systemstart
+durch ein Init-Script aufgerufen. Er ließt die Einträge in
+<tt>/etc/printcap</tt> und kennt so die vorhandenen Drucker. Sobald der
+Spoolerdaemon geladen ist, arbeitet er die Warteschlange ab und kann
+außerdem Anfragen über das Netz beantworten, und die Druckaufträge von dort
+entgegennehmen.
+<p>
+Zugriffskontrolle, wer den Drucker verwenden darf, kann über die Datei
+<tt>/etc/hosts.lpd</tt> erreicht werden. 
+
+
+
+<!--#include file="foot.html" -->

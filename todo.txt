@@ -1,0 +1,55 @@
+20140605
+-added in copy_CGI.c func. strmycpy(), and write_ppar "to_par:from_par:parsestr";
+-added in copy.c func. restore_str(), changed func. parsestr2() and 'struct parsestr'
+-updated usb-sorage.htm
+-added in copy.c "comments not show!" <!--bla-->
+-changed func. change_tbl_stat(), in html-part: chtbl_stat="nf:MyTab://mnt", in cgi-part: chtbl_stat "nd:MyTab://mnt";
+added f-file exist, d-dir exist, e-dir not exist.
+-made strncpy_() in parse_CGI.c used in write_par "this string shows\t\n\\??AREA-1??";
+-changed admin-firmware.htm (added md5sum inserting in image-file)
+20140331
+-touched 'saved'-flag in SaveConfiguration(), so you can make print "??_&par??"; after savecfg;
+-added in print " ?@-_Table_name@? " insertion, the same as tbl_select in HTML-Part
+-in tbl_select="_Table" -means what make simple list of elements
+-In TABLE entry added: in tableBody: #-> check_nfolders not.existing.folder.names. #-> end
+-swiched off the httpd_rc_usb.c file
+-added function change_tbl_stat(), in html-part: chtbl_stat="n:MyTab://mnt", in cgi-part: chtbl_stat "n:MyTab://mnt";
+20140225
+-Made UpTime under 'info' in index.htm(1-ShowMainHtml.htm)
+-In TABLE entry added: in tableBody: #-> check_folders .folder.names. #-> end
+-changed remove_chars($*?) for shell scripts with "rm ??_#file_name??" in CGIs, and made some help-files.
+-added insertion of TAB in <textarea> via JScript.
+20140125
+-added some changes in web/ folder: style.css, upload.htm, pkgs-*, serv-others.htm and many more,
+    special in httpd_%date%_opennas.tar.gz.
+20131231
+-some changes in cfg_arg_srtcmp(flag), and in access-user.htm
+-added TABLE entry, (copy_tbl.c), ??_@var??, tbl_select="", in tableBody: #->get_folder, #->parse_file
+-added in admin-formathd.htm script to partition and format
+-added "jump"-ineger in copy_CGI.c in funct: get_cgi()
+20131119
+-in paresestr1 added /NxN so file="..?arg=..\".."	and /lxl
+-new linked HTML-files throw *.inc-files (file="*.inc?arg=value", get_file "*.inc?arg=value";)
+-new ARGS struct with malloc and free
+-in get_arg() added== "file.inc?par=??_#par1??"	//if not find - erease par=??_#par1?? complete, 
+						only writeable (!= 0) parameters will be linked!
+- set "a := _#val";	-added
+- bugfix in get_cgi with free(arg) and arg = "", allocated;
+
+20131105
+Addad <-- #includes file="*.inc?par=value" -->, cgi_script: exit_cgi;
+
+suser, spassw, adminport must be variables in programm		-done
+
+NEED a parsing and running of CGI  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11
+
+need the scripts in network.htm 	done
+used by one user,			half done throw 'ip' and 'check_ip'
+time limit
+system/formatHD			done
+
+firmware_update			done
+config up- download		done
+
+
+___ alex_raw ___

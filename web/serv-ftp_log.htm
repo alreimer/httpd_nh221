@@ -1,0 +1,23 @@
+<!--#include file="head.inc?name=vsFTPd%20logs" 
+file="side.inc?i=4" -->
+
+<!--<body bgcolor="#ffffff" text="#000000">-->
+<p><font class="style9">&nbsp;&nbsp;vsFTPd log <a href="_Get_log.cgi">rotate</a></font></p>
+<br>
+<p><font class="style9">&nbsp;&nbsp;vsFTPd log</font></p>
+<table border="0" cellpadding="0" cellspacing="0" width="550">
+<tbody>
+<tr><td><pre>
+<font color="black">
+<!--#include file="/var/log/vsftpd.log" -->
+</font></pre></td></tr>
+<tr><td align="center"><input value="Back" onclick="history.back()" type="button"></td></tr>
+</tbody></table>
+</body></html>
+<!-- CGI: _Get_log.cgi
+	print "HTTP/1.0 200 OK\nContent-Disposition: attachment; filename=";
+	my_system "echo vsFTPd_log_`date +%Y%m%d`.txt";	//End is \n
+	print "Server: thttpd/2.25b\nExpires: 0\n\n";
+	get_file "/var/log/vsftpd.log";
+	system "echo > /var/log/vsftpd.log";
+END_CGI -->

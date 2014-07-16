@@ -1,0 +1,9 @@
+<html>
+  <head>
+    <title>help</title>
+  </head>
+  <body>
+    <b>wget: Name, Password, URL</b> <br>
+    Note: Chars ;"<>`'$| are not allowed.
+  </body>
+</html>

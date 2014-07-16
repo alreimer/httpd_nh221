@@ -1,0 +1,98 @@
+//used in parser.c and httpd.c RAW
+//in httpd.c used for USERNAME AND PASSWORD and security(MAC_SECURITY_MODE&IP_SECURITY_MODE)
+
+struct cfg_parse {
+	const char *name;	//used by config file parsing
+	const char *web_name;	//used by web_parsing
+	char *value;
+	int size;		//max string size
+	int changed;		//by init - is 0
+};
+
+typedef struct {
+    char DHCP_ENABLE[2];
+    char IP[20];
+    char GATEWAY[20];
+    char NETMASK[20];
+    char HOSTNAME[17];
+    char WORKGROUP[17];
+    char HOSTNAME_FULL[51];
+    char USERNAME[20];
+    char PASSWORD[20];
+    char FTP_MAX_UNIT[3];
+	char FTP_PORT_NUMBER[6];
+	char FTP_TIMEOUT[4];
+	char FTP_ANONYMITY[2];
+	char FTP_ENABLE[2];
+	char DBEAR_PORT[6];	//new
+	char DBEAR_ENABLE[2];	//new
+	char LEGAL_IP[10][20];
+	char IP_SECURITY_MODE[2];
+	char LEGAL_MAC[10][30];
+	char MAC_SECURITY_MODE[2];
+	char TIME_MODE[2];
+	char NTP_SERVER[40];
+	char TIME_SERVER[40];
+	char TIME_ZONE[25];
+	char TIME_DIFFER[10];
+	char TIME_VALUE[30];
+	char DNS_SERVER[20];
+	char NFS_ENABLE[2];	//new
+	char NMB_ENABLE[2];	//new
+	char CODE_SET[20];
+	char TCONFIG_FOLDER[17];
+	char TCONFIG_FILENAME[17];
+	char TORRENT_USER[3];
+	char TORRENT_ENABLE[2];
+	char WEB_ENABLE[2];
+	char WEB_PORT[6];
+	char WEB_FOLDER[17];
+	char CRON_ENABLE[2];
+	char CRON_START_DAY[2];
+	char CRON_START_HOUR[3];
+	char CRON_START_MIN[3];
+	char CRON_END_DAY[2];
+	char CRON_END_HOUR[3];
+	char CRON_END_MIN[3];
+	char ADMIN_PORT[6];
+	char USB_SHARE[2];
+	char USB_RECYCLE[2];
+//======allen adds to declare saving USB variable======
+  char PRINTER_ENABLE[2];
+  //char PRINTER2_ENABLE[2];
+//=====================================================
+//======allen adds to declare saving Jumbo variable======
+  char JUMBO[2];
+//=======================================================
+//====== allen adds to save the USB port series ======
+  char USB_PORT01[60];
+  char USB_PORT02[60];
+  char USB_PORT03[60];
+  char USB_PORT04[60];
+  char USB_PORT11[60];
+  char USB_PORT12[60];
+  char USB_PORT13[60];
+  char USB_PORT14[60];
+  char USB_PORT21[60];
+  char USB_PORT22[60];
+  char USB_PORT23[60];
+  char USB_PORT24[60];
+  char USB_PORT31[60];
+  char USB_PORT32[60];
+  char USB_PORT33[60];
+  char USB_PORT34[60];
+  char SWAP_ENABLE[5];
+//===========================================================
+//======allen adds to saving checksmb adjugement parameter======
+  char INITBOOT[2];
+//=======================================================
+//=== allen adds to save URL ===//
+  char URL[256];
+//==============================//
+// === Sleep mode === //
+  char SLEEP_MODE[2];
+// ================== //
+// === usb copy folder === //
+  char USB_COPY_FOLDER[17];
+// ================== //
+} config;

@@ -1,0 +1,6 @@
+#!/bin/sh
+# this is watchdog for httpd
+while : ; do
+    httpd
+    sleep 10
+done

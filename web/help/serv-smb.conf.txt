@@ -1,0 +1,18 @@
+http://mirrors.slackware.com/slackware-iso/slackware-14.0-iso/slackware-14.0-install-dvd.iso
+
+
+
+smb.conf:
+    fprintf(n_fd, "[%s]\n", folder_name);
+    fprintf(n_fd, "   comment = %s\n", folder_des);
+    fprintf(n_fd, "   path = /mnt/%s\n", folder_name);
+    fprintf(n_fd, "   browseable = yes\n");
+    fprintf(n_fd, "   public = no\n");
+    fprintf(n_fd, "   writable = no\n");
+    fprintf(n_fd, "   read only = yes\n");
+    fprintf(n_fd, "   Invalid users = \n");
+    fprintf(n_fd, "   readlist = %s\n", readlist);//key
+    fprintf(n_fd, "   writelist = \n");
+    fprintf(n_fd, "   directory mode = 0777\n");
+    fprintf(n_fd, "   create mask = 0777\n");
+    fprintf(n_fd, "\n");

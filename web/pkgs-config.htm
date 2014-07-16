@@ -1,0 +1,41 @@
+<!--#include file="head.inc?name=Home%20Page"
+file="side.inc?i=8&helper=1" -->
+<script src="/js/tools.js"></script>
+<script language="JavaScript">
+function help_popUp() {
+var g = window.open('http://??_srv_ip??:??_srv_port??/help/pkgs-config.help', 'name', 'toolbar=0,scrollbars=1,location=0,statusbar=1,menubar=0,resizable=1,width=700,height=700');
+}
+</script>
+
+<table id="maintab" height=290 align="center"><tr>
+<td align="center" valign="top"><br>
+<table id="header" align="center"><tr><td><b>Packages :: Config</b></td></tr></table>
+<!--<table border="0" width="70%" height="40" align="center">
+
+<tr><td width=2% valign=top></td>
+<td width=80% align=left><font color="#FFFFFF" size=2 face="Arial, Helvetica, sans-serif"><b>Please provide .</b></font></td></tr></table>-->
+<br>
+<form method="post" name="host_" action="save_ipkg_config.cgi" >
+<table border="0" width="70%" height="50" align="center">
+<tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;Ipkg File:</font></b></td><td></td><td></td></tr>
+<tr><td colspan="4">
+<textarea name="ipkg_area" cols="80" rows="20" onkeydown="insertTab(this, event);">
+<!-- #include file="/etc/ipkg.conf" -->
+</textarea></td></tr>
+<!--see examples from ftp-conf, ftp-passw, ftp-mod and serv-ftp-->
+<tr><td></td><td></td>
+<td id="varbox-list-val"><input type="submit" name="save_ipkg" value="Apply">&nbsp;<input type="reset" value="Cancel"></td><td></td></tr>
+</table></form>
+
+</td></tr><tr>
+<td align="center"><br><input type="button" value="Back" onclick="history.back()"></td></tr>
+</table>
+
+<!--</td></tr></table>-->
+</body></html>
+<!-- CGI: save_ipkg_config.cgi
+    remove_chars "\r::_#ipkg_area";
+    save_file "_#ipkg_area:/etc/ipkg.conf";
+    write_par "_etc_save:1";
+    boot_page "pkgs-config.htm";
+END_CGI -->

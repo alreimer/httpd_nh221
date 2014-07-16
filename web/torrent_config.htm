@@ -1,0 +1,166 @@
+<html><head>
+<title>Home Page</title>
+<meta http-equiv="expires" content="0">
+<meta http-equiv="cache-control" content="no-cache">
+<style type="text/css">
+body {font-family: ArIal, Helvetica, sans-serif}
+p {font-family: Arial, Helvetica, sans-serif}
+td {font-family: Arial, Helvetica, sans-serif}
+</style>
+<script language="JavaScript">
+function check_form(){
+    if(check_port() == 0)
+        return false;
+    if(check_period() == 0)
+        return false;
+    if(check_peer() == 0)
+        return false;
+    if(check_bw() == 0)
+        return false;
+    return true;
+}
+function check_port(){
+    var port = document.host.torrent_port;
+    if(port.value < 0 || port.value > 65535){
+        alert("Listen port must be between 0 and 65535, default is 2106 to 2706!!");
+        port.focus();
+        return 0;
+    }
+    return 1;
+}
+function check_period(){
+    var tmp, no_error = 1;
+    var period = document.host.exit_hours.value;
+    for(var i=0;i<period.length;i++){
+        tmp = period.charCodeAt(i);
+        if(tmp == 46){
+            alert("Please input an integer as period!!");
+            no_error = 0;
+            document.host.exit_hours.focus();
+            break;
+        }
+    }
+    if(period < 0 || period > 72){
+        alert("The value of time to leave must be less than 72 hours, default is 72!!");
+        document.host.exit_hours.focus();
+        no_error = 0;
+    }
+    return no_error;
+}
+function check_peer(){
+    var no_error = 1;
+    var max = parseInt(document.host.max_peer.value,10);
+    var min = parseInt(document.host.min_peer.value,10);
+    if(max < 10 || max > 50){
+        alert("Max peer must be between 10 and 50!!");
+        document.host.max_peer.focus();
+        no_error = 0;
+    }
+    if(min < 10 || min > 50){
+        alert("Min peer must be between 10 and 50!!");
+        document.host.min_peer.focus();
+        no_error = 0;
+    }
+    if(min > max){
+        alert("Max peer must be larger than min peer!!");
+        document.host.max_peer.focus();
+        no_error = 0;
+    }
+    return no_error;
+}   
+function check_bw(){
+    var no_error = 1;
+    var bw_max = parseInt(document.host.max_bw.value,10);
+    var bw_min = parseInt(document.host.min_bw.value,10);
+    if(bw_max < 1 || bw_max > 2097152){
+        alert("Max download bandwidth must be between 1 and 2097152!!");
+        document.host.max_bw.focus();
+        no_error = 0;
+    }
+    if(bw_min < 1 || bw_min > 2097152){
+        alert("Max upload bandwidth must be between 1 and 2097152!!");
+        document.host.min_bw.focus();
+        no_error = 0;
+    }
+    return no_error;
+}
+</script>
+</head>
+<body>
+<script language="JavaScript" src="title.js"></script>
+<table width="100%" border="0">
+<tr><td width="80%"><div align="right"><b></b></div></td>
+<td width="13%"><div align="right"><b></b></div></td>
+<td width="10%"><div align="right"><b></b></font></div></td></tr></table>
+<table width=100% border="0" bordercolor="#0066CC" cellpadding="0" cellspacing="0"><tr><td>
+<A href="ShowMainHtml.cgi"><img src="images/home.gif" border="0"></a>
+<a href="network.htm"><img src="images/networking.gif" border="0"></a>
+<a href="administration.htm"><img src="images/admin.gif" border="0"></a>
+<a href="access.htm"><img src="images/Share.gif" border="0"></a>
+<a href="ftp-main.htm"><img src="images/FTP.gif" border="0"></a>
+<a href="p2p-main.htm"><img src="images/p2p-b.gif" border="0"></a>
+<a href="web-server.htm"><img src="images/web.gif" border="0"></a>
+</td></tr></table>
+<table width="100%" border="0" height=290 align="center">
+<tr>
+<td align="center" valign="top" bgcolor="#181C5B"><br>
+<table width=85% border="0" align="center">
+<tr>
+<td bgColor=#EBDA0C width="602"><B><FONT face="Arial, Helvetica, sans-serif" color=#000000 size=3>Torrent Configuration</FONT></B><br></td></tr></table>
+<br>
+<table border="0" width="75%" height="50" align="center">
+<tr>
+<td width=10% valign=top><font size=2 face=\"Arial, Helvetica, sans-serif\" color=#FFFFFF><b>Notes:</b></td>
+<td width=100% align=left><font size=2 face=\"Arial, Helvetica, sans-serif\" color=#FFFFFF><b>Download options are as follows -
+<br><b>1. The value of time to leave is an integer less than 72 hours.</b>
+<br><b>2. Max and min peers count is between 10 and 50.</b>
+<br><b>3. Max bandwidth for download and upload is between 1 and 2097152 Kbps.</font></td></tr> 
+</table>
+<form method="GET" name="host" action="set_torrent_option.cgi" onsubmit="return check_form()">
+
+<table border="0" width="85%" height="50" align="center">
+<tr>
+<td width="10%"></td>
+<td width="35%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;Listen Port:</font></b></td>
+<td width="42%" bgcolor="#FFFFFF"><input type="text" name="torrent_port" maxlength="5" size="20" value="2106"></td>
+<td width="13%" bgcolor="#181C5B"></td>
+</tr>
+<tr>
+<td width="10%"></td>
+<td width="35%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;Time to Leave:</font></b></td>
+<td width="42%" bgcolor="#FFFFFF"><input type="text" name="exit_hours" maxlength="3" size="20" value="72">Hours</td>
+<td width="13%" bgcolor="#181C5B"></td>
+</tr>
+<tr>
+<td width="10%"></td>
+<td width="35%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;Max Peers Count:</font></b></td>
+<td width="42%" bgcolor="#FFFFFF"><input type="text" name="max_peer" maxlength="2" size="20" value="50"></td>
+<td width="13%" bgcolor="#181C5B"></td>
+</tr>
+<tr>
+<td width="10%"></td>
+<td width="35%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;Min Peers Count:</font></b></td>
+<td width="42%" bgcolor="#FFFFFF"><input type="text" name="min_peer" maxlength="2" size="20" value="10"></td>
+<td width="13%" bgcolor="#181C5B"></td>
+</tr>
+<tr>
+<td width="10%"></td>
+<td width="35%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;Max Download Bandwidth:</font></b></td>
+<td width="42%" bgcolor="#FFFFFF"><input type="text" name="max_bw" maxlength="7" size="20" value="128">Kbps</td>
+<td width="13%" bgcolor="#181C5B"></td>
+</tr>
+<tr>
+<td width="10%"></td>
+<td width="35%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;Max Upload Bandwidth:</font></b></td>
+<td width="42%" bgcolor="#FFFFFF"><input type="text" name="min_bw" maxlength="7" size="20" value="128">Kbps</td>
+<td width="13%" bgcolor="#181C5B"></td>
+</tr>
+<tr>
+<td align=center colspan=4 width="653"><br><input type="submit" name="save_torrent" value="Apply">&nbsp;<input type="reset" value="Cancel">&nbsp;<input type="button" value="Back" onclick="history.back()"></form></td>
+</tr>
+</table><br>
+</body>
+</html>
+
+
+

@@ -1,0 +1,144 @@
+<!--#include par="20:ip10:LEGAL_IP9:^(|((([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\.){3}([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])))$"
+par="20:ip1:LEGAL_IP0:^(|((([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\.){3}([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])))$"
+par="20:ip2:LEGAL_IP1:^(|((([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\.){3}([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])))$" 
+par="20:ip3:LEGAL_IP2:^(|((([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\.){3}([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])))$"
+par="20:ip4:LEGAL_IP3:^(|((([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\.){3}([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])))$"
+par="20:ip5:LEGAL_IP4:^(|((([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\.){3}([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])))$"
+par="20:ip6:LEGAL_IP5:^(|((([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\.){3}([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])))$" 
+par="20:ip7:LEGAL_IP6:^(|((([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\.){3}([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])))$"
+par="20:ip8:LEGAL_IP7:^(|((([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\.){3}([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])))$"
+par="20:ip9:LEGAL_IP8:^(|((([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\.){3}([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])))$"
+par="2:ip_security_mode:IP_SECURITY_MODE:^[0-2]$"
+readcfg -->
+<!--#include file="head.inc?name=Home%20Page" 
+file="side.inc?i=2" -->
+
+<script language="JavaScript">
+function changeImage(){
+    document.images[2].src = "images/networking.gif";
+    document.images[6].src = "images/logout-b.gif";
+    window.close();
+}
+function main_validate(){
+    var tmp, count;
+    for(var i=0;i<document.main.length;i++){
+        objEle = document.main(i);
+        if((objEle.type == "text") && (objEle.value != "")){
+            tmp = check_ip(objEle.value);
+            if(tmp == 0){
+                count = i + 1;
+                alert("IP Address" + i + " is not legal!!");
+                return false;
+            }
+        }
+    }
+    return true;
+}
+function check_ip(ip){
+    var ok = 1;
+    str = ip.split(".");
+    if(ip == "127.0.0.1")
+        ok=0;
+    else if (str.length!=4)
+        ok=0;
+    else if(str[0]==224||str[0]==239||str[0]==1)
+        ok=0;
+    else{
+        for(i=0; i<str.length; i++){
+            if (str[i]==null || str[i]=="" || isNaN(str[i]) || parseInt(str[i])<0 || parseInt(str[i])>255){
+                ok = 0;
+                break;
+            }
+            if(parseInt(str[i])==0){
+                if(i==0 || i==3){
+                    ok=0;
+                    break;
+                }
+            }
+            if(parseInt(str[i])==255 && i==0){
+                ok=0;
+                break;
+            }
+        }
+    }
+    return ok;
+}
+</script>
+
+<form method="GET" name="main" action="Set_ipsecurity.cgi" onSubmit="return main_validate()">
+<table id="maintab" height=290 align="center"><tr>
+Your IP is: ??_ip??<br>
+<td align="center" valign="top"><br>
+<table id="header" align="center"><tr><td><b>Networking :: IP Filter</b></td></tr></table>
+<br>
+
+<table border="0" width="70%" height="50" align="center">
+    <colgroup>
+    <col id="varbox-list-name">
+    <col id="varbox-list-val">
+    </colgroup>
+    <tr>
+    <td><b><font size="3">&nbsp;IP Access Check</font></b></td>
+    <td><select name="ip_security_mode"  size="1">
+    <option value="0">Disable</option>
+    <option value="1">Allowed</option>
+    <option value="2">Denied</option>
+    </select></font></b></p>
+    </blockquote></td>
+    </tr>
+    <tr>
+    <td><b><font size="3">&nbsp;IP Address 1</font></b></td>
+    <td><input type="text" name="ip1" value="??ip1??"></td>
+    </tr>
+    <tr>
+    <td><b><font size="3">&nbsp;IP Address 2</font></b></td>
+    <td><input type="text" name="ip2" value="??ip2??"></td>
+    </tr>
+    <tr>
+    <td><b><font size="3">&nbsp;IP Address 3</font></b></td>
+    <td><input type="text" name="ip3" value="??ip3??"></td>
+    </tr>
+    <tr>
+    <td><b><font size="3">&nbsp;IP Address 4</font></b></td>
+    <td><input type="text" name="ip4" value="??ip4??"></td>
+    </tr>
+    <tr>
+    <td><b><font size="3">&nbsp;IP Address 5</font></b></td>
+    <td><input type="text" name="ip5" value="??ip5??"></td>
+    </tr>
+    <tr>
+    <td><b><font size="3">&nbsp;IP Address 6</font></b></td>
+    <td><input type="text" name="ip6" value="??ip6??"></td>
+    </tr>
+    <tr>
+    <td><b><font size="3">&nbsp;IP Address 7</font></b></td>
+    <td><input type="text" name="ip7" value="??ip7??"></td>
+    </tr>
+    <tr>
+    <td><b><font size="3">&nbsp;IP Address 8</font></b></td>
+    <td><input type="text" name="ip8" value="??ip8??"></td>
+    </tr>
+    <tr>
+    <td><b><font size="3">&nbsp;IP Address 9</font></b></td>
+    <td><input type="text" name="ip9" value="??ip9??"></td>
+    </tr>
+    <tr>
+    <td><b><font size="3">&nbsp;IP Address 10</font></b></td>
+    <td><input type="text" name="ip10" value="??ip10??"></td>
+    </tr>
+</table>
+
+<table id="info" align="center"><tr><td><br>Check IP if allowed or disallowed to acccess through HTTPD.</td></tr></table>
+
+</td></tr><tr>
+<td align="center"><input type="submit" name="save_ip" value="Apply">&nbsp;<input type="reset" value="Reset">&nbsp;<input type="button" value="Back" onclick="history.back()"></td>
+</tr>
+</table></form>
+</body></html>
+<!-- CGI: Set_ipsecurity.cgi
+    fill_all_cfg ;
+    savecfg;
+    init;
+    boot_page "network-secip.htm";
+END_CGI -->
+

@@ -1,0 +1,43 @@
+<!--#include file="head.inc?name=Home%20Page" 
+file="side.inc?i=6" -->
+
+<script language="JavaScript">
+function chk_BT(){
+var agree = confirm("All users of this device are warned against illegal downloading of copyrighted materials. The P2P embedded functionality is provided for downloading authorized "
++ "files only. Downloading or distribution of unauthorized materials may result in severe civil and criminal penalty. Users of this device are subject to the restrictions of the "
++ "copyright laws and should accept all the consequences.");
+if(agree == true)
+return true;
+//else return history.go(0);
+else return history.back();
+}
+chk_BT();
+</script>
+<table id="maintab" height=290 align="center">
+<tr>
+	<td align="center" valign="top"><br>
+<table id="header" align="center"><tr><td width="602">P2P<br></td></tr></table>
+<br>
+<table id="options" align="center">
+<tr>
+	<td id="td_link"><a href="p2p-torrent_add.htm">Upload/Remove</a></td>
+</tr>
+<tr>
+	<td id="td_help">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BitTorrent Upload to Folder</td>
+</tr>
+<tr>
+	<td id="td_link"><a href="p2p-upload.htm">Upload</a></td>
+</tr>
+<tr>
+	<td id="td_help">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Upload files max.: 4MB</td>
+</tr>
+<tr>
+	<td id="td_link"><a href="p2p-wget.htm">wGet</a>&nbsp;&nbsp;<a href="p2p-wget_log.htm">logs</a></td>
+</tr>
+<tr>
+	<td id="td_help">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;File Download Configuration Setting</td>
+</tr>
+
+</table><br>
+</td></tr></table>
+</body></html>

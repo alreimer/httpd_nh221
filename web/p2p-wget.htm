@@ -1,0 +1,65 @@
+<!--#include file="head.inc?name=Home%20Page" 
+file="side.inc?i=6&helper=1" -->
+<script language="JavaScript">
+function help_popUp() {
+var g = window.open('http://??_srv_ip??:??_srv_port??/help/p2p-wget.help', 'name', 'toolbar=0,scrollbars=1,location=0,statusbar=1,menubar=0,resizable=1,width=700,height=700');
+}
+</script>
+<table id="maintab" height=290 align="center"><tr>
+<td align="center" valign="top"><br>
+<table id="header" align="center"><tr><td><b>P2P :: wGet</b></td></tr></table>
+<br>
+<!--<table border="0" width="70%" height="40" align="center">
+
+<tr><td width=2% valign=top></td>
+<td width=80% align=left><font color="#FFFFFF" size=2 face="Arial, Helvetica, sans-serif"><b>Please provide .</b></font></td></tr></table>-->
+<br>
+<table border="0" width="70%" height="50" align="center">
+<form method="GET" action="add_wget.cgi" name="add-wget">
+<tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;URL:</font></b></td><td></td><td></td></tr>
+<tr><td colspan="4"><input type="text" name="url_name" size="60"></td></tr>
+<tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;User name:</font></b></td>
+    <td><input type="text" name="user_name" maxlength="16" size="20"></td><td></td></tr>
+<tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;Password:</font></b></td>
+    <td><input type="text" name="n_passwd" maxlength="16" size="20"></td><td></td></tr>
+<tr><td></td><td>Example:...</td>
+<td id="varbox-list-val"><input type="submit" name="save_passwd" value="Apply">&nbsp;<input type="reset" value="Cancel"></td><td></td></tr>
+</table></form>
+
+</td></tr><tr>
+<td align="center"><br><input type="button" value="Back" onclick="history.back()"></td></tr>
+</table>
+
+<!--</td></tr></table>-->
+</body></html>
+<!-- CGI: add_wget.cgi
+
+    set "a=1";
+    remove_chars ";\"<>`'$|::_#user_name:_#n_passwd:_#url_name";
+
+    if_set "a == 1"{
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=6";
+
+    print "<tr><td>URL:</td><td> ??_#url_name??</td></tr>
+    <tr><td>User:</td><td> ??_#user_name??</td></tr>
+    <tr><td>Password:</td><td> ??_#n_passwd??</td></tr><tr><td colspan=\"2\"><pre>";
+    my_shell "
+    	    i=0
+	    while [ \"$i\" -ne 10 ]; do
+    ps | grep wget_$i.log >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+	wget -P /mnt/wget_files \"??_#url_name??\" 2>&1 | httpd_tty /var/wget_$i.log >/dev/null 2>&1 &
+	#--user=\"??_#user_name??\" --password=\"??_#n_passwd??\" 
+	echo \"Your log is: wget_$i.log\"
+	break;
+    fi
+	    i=$(($i+1))
+	    done
+	    ";
+    print "</pre></td></tr></table><a href=\"p2p-wget.htm\">Back</a>&nbsp;&nbsp;<a href=\"p2p-wget_log.htm\">logs</a></table></body></html>";
+
+    }
+    if_set "a == 0"{
+    boot_page "p2p-wget.htm";
+    }
+END_CGI -->

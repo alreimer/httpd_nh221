@@ -1,0 +1,169 @@
+<!--#include par="2:ftp_enable:FTP_ENABLE:[01]" par="6:ftp_port:FTP_PORT:^[0-5]?([0-9]){1,4}$" -->
+<!--#include par="3:ftp_unit:FTP_MAX:" -->
+<!--#include par ="4:ftp_time:FTP_TIMEOUT:" -->
+<!--#include par ="2:anonymity:FTP_ANONYMITY:" -->
+<!--#include readcfg -->
+<!--#include file="head.inc?name=Home%20Page&body=onload%3D\"check_ftp()\"" 
+file="side.inc?i=4" -->
+<script src="/js/tools.js"></script>
+
+<table id="maintab" height=290 align="center"><tr>
+<td align="center" valign="top"><br>
+<table id="header" align="center"><tr><td><b>Services :: vsFTPd</b></td></tr></table>
+<br>
+<!--<table border="0" width="70%" height="40" align="center">
+
+<tr><td width=2% valign=top></td>
+<td width=80% align=left><font color="#FFFFFF" size=2 face="Arial, Helvetica, sans-serif"><b>Please provide .</b></font></td></tr></table>-->
+<form method="get" name="host" action="Set_FTP.cgi" onsubmit="return check_form()">
+<table border="0" width="70%" height="50" align="center">
+    <colgroup>
+    <col id="varbox-list-name">
+    <col id="varbox-list-val">
+    </colgroup>
+    <tr>
+    <td id="varbox-list-name"><b><font size="3">&nbsp;FTP Enable:</font></b></td>
+    <td>
+	<input type="radio" name="ftp_enable" value="1" onclick="check_ftp()">Yes
+        <input type="radio" name="ftp_enable" value="0" onclick="check_ftp()">No
+    </td></tr>
+    <tr>
+    <td><b><font size="3">&nbsp;Port Number:</font></b></td>
+    <td><input type="text" name="ftp_port" maxlength="15" size="20" value="??ftp_port??" onkeypress="return numbersonly(this, event)"></td>
+    </tr>
+<!--<tr>
+<td><b><font size="3">&nbsp;Maximum Unit Number:</font></b></td>
+<td>< input type="text" name="ftp_unit" maxlength="15" size="20"></td>
+</tr>
+<tr>
+<td><b><font size="3">&nbsp;Timeout:</font></b></td>
+<td>< input type="text" name="ftp_time" maxlength="15" size="20">Minutes</td>
+</tr>
+<tr>
+<td><b><font size="3">&nbsp;Allow Anonymity:</font></b></td>
+<td>< input type="radio" name="anony" value="1">Yes< input type="radio" name="anony" value="0">No</td>
+</tr>-->
+    <tr>
+    <td bgcolor="#ffffff"></td>
+    <td><input type="submit" name="save_ftp" value="Apply">&nbsp;<input type="reset" value="Cancel"></td>
+    </tr>
+</table></form>
+<br>
+<form method="post" name="host_" action="Set_FTP_1.cgi" onsubmit="return check_form()">
+<table border="0" width="70%" height="50" align="center">
+<tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;FTP Config File:</font></b></td><td></td><td></td></tr>
+<tr><td colspan="4">
+<textarea name="ftp_cfg" cols="80" rows="20" onkeydown="insertTab(this, event);">
+<!--#include file="/etc/vsftpd.conf" -->
+</textarea></td></tr>
+<!--see examples from ftp-conf, ftp-passw, ftp-mod and serv-ftp-->
+<tr><td></td><td></td>
+<td id="varbox-list-val"><input type="submit" name="save_ftp" value="Apply">&nbsp;<input type="reset" value="Cancel"></td><td></td></tr>
+</table></form>
+
+<!--<table id="info" align="center"><tr><td><br>
+	Allows remote access over a local network or the Internet to files on the Network
+	Shared Storage system.<BR> Also large FTP downloads can be performed by the Network
+	Shared Storage and allow your laptop, PC, or MAC to continue to be used for other
+	applications.
+</td></tr></table>-->
+
+<table id="info" align="center">
+<tr><td><br>Syslog info <a href="syslog.cgi">here</a></td></tr>
+</table>
+<table><tr>
+<td align="center"><br><input type="button" value="Back" onclick="history.back()"></td></tr>
+</table>
+
+</td></tr></table>
+<script language="javascript">
+function check_ftp(){
+    if(document.host.ftp_enable[1].checked){
+        document.host.ftp_port.disabled = true;
+    }else if(document.host.ftp_enable[0].checked){
+        document.host.ftp_port.disabled = false;
+    }
+}
+function check_form(){
+    port=document.host.ftp_port.value;
+
+    if(port == null || port == "" || port < 1 || port > 65535){		/*chars are passed throw*/
+        alert("Error!!! Port Number must be between 1 and 65535!");
+	document.host.ftp_port.focus();
+        return false;
+    }
+}
+
+function numbersonly(myfield, e, dec)	/*function from httpd_scripts.c, check it better*/
+{
+var key;
+var keychar;
+
+if (window.event)
+   key = window.event.keyCode;
+else if (e)
+   key = e.which;
+else
+   return true;
+keychar = String.fromCharCode(key);
+
+if ((key==null) || (key==0) || (key==8) ||
+    (key==9) || (key==13) || (key==27) )
+   return true;
+
+else if ((("0123456789").indexOf(keychar) > -1))
+   return true;
+
+else if (dec && (keychar == "."))
+   {
+   myfield.form.elements[dec].focus();
+   return false;
+   }
+else
+   return false;
+}
+</script>
+</body></html>
+<!-- CGI: Set_FTP.cgi
+    fill_cfg "ftp_enable:ftp_port";
+
+    set "a = 0";
+    if_changed "ftp_enable"{
+	set "a = 1";
+    }
+    if_changed "ftp_port"{
+	set "a = 2";
+    }
+    if_set "a >= 1"{
+    if "_&ftp_enable:1/" {
+	    change_line "/etc/inetd.conf:/*vsftpd:??_&ftp_port??		stream	tcp	nowait	root	/sbin/vsftpd /sbin/vsftpd\n";
+    }
+    if "_&ftp_enable:0/" {
+	    change_line "/etc/inetd.conf:/*vsftpd:#??_&ftp_port??		stream	tcp	nowait	root	/sbin/vsftpd /sbin/vsftpd\n";
+    }
+    system "killall vsftpd";
+    // system "/etc/cfg_inetd";
+    system "/etc/init.d/S30inetd restart";
+    }
+
+    savecfg;
+    boot_page "serv-ftp.htm";
+END_CGI -->
+
+<!-- CGI: Set_FTP_1.cgi
+    remove_chars "\r::_#ftp_cfg";
+    save_file "_#ftp_cfg:/etc/vsftpd.conf";
+    system "killall vsftpd";
+    system "etc/init.d/S30inetd restart";
+    write_par "_etc_save:1";
+    boot_page "serv-ftp.htm";
+END_CGI -->
+
+<!-- CGI: syslog.cgi
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=4";
+
+    print "<pre>";
+    my_system "tail /var/log/messages";
+    print "</pre></table></table></body></html>";
+
+END_CGI -->

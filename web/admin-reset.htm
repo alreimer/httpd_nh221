@@ -1,0 +1,85 @@
+<!--#include par="20:ip:IP:" par="3:port:ADMIN_PORT:" readcfg -->
+<!--#include file="head.inc?name=Home%20Page" 
+file="side.inc?i=3" -->
+
+<table id="maintab" height=290 align="center"><tr>
+<td align="center" valign="top"><br>
+<table id="header" align="center"><tr><td><b>System :: Restart, Restore, Upgrade</b></td></tr></table>
+<br>
+<table border="0" width="70%" height="40" align="center">
+<form method="Get" action="Restart_System.cgi">
+<tr><td bgcolor="#d6efff"><font color="#000000"><b>Restart the system</b></font></td><td width="30%" bgcolor="#FFFFFF" align="center"><input type="hidden" name="seconds" value="80"><input type="submit" name="reset" value="Yes"></td></tr></form>
+<tr><td align="left" colspan="2"><font size=2>It may take several minutes.<br>Please wait and ensure a safe operating environment.<br><br>Note: When the reboot is completed, it will return to the "Home" page.</font></td></tr>
+
+<form method="Get" action="Poweroff_System.cgi">
+<tr><td bgcolor="#d6efff"><font color="#000000"><b>Poweroff the system</b></font></td><td width="30%" bgcolor="#FFFFFF" align="center"><input type="hidden" name="seconds" value="80"><input type="submit" name="reset" value="Yes"></td></tr></form>
+<tr><td align="left" colspan="2"><font size=2>It may take several minutes.</font></td></tr>
+
+<form method="Get" action="Factory_default.cgi">
+<tr><td bgcolor="#d6efff"><font color="#000000"><b>Reset to factory default</b></font></td><td width="30%" bgcolor="#FFFFFF" align="center"><input type="hidden" name="seconds" value="80"><input type="submit" name="reset" value="Yes"></td></tr></form>
+<tr><td align="left" colspan="2"><font size=2>It may take several minutes. Current configuration will be lost. <br>Please wait and ensure a safe operating environment.<br><br>Note: When the reset is completed, it will return to the "Home" page.<br>/etc folder will be saved automatically.</font></td></tr>
+
+</table><br>
+
+
+</table>
+</body>
+</html>
+<!-- CGI: Restart_System.cgi
+	get_file "./JavaReturn_h.htm";
+        print "<td width=\"100%%\" bgcolor=\"#FFFFFF\">";
+	print "<form name=\"host\"><font size=3>&nbsp;&nbsp;The system will restart automatically and reload in <input type=\"text\" name=\"time\" value=\" ";
+	get_var "_#seconds";
+	print " \" size=\"3\" readonly> seconds.<br>&nbsp;&nbsp;Please wait in order to ensure that the operating environment is safe.</font></FORM></td></tr>";
+	print "<tr height=\"5\"><td></td></tr>
+	</table>";
+
+    	print "<script language=\"javascript\">
+	    sec = document.host.time.value;
+	    settime();
+	    function settime(){
+	    if (sec > 0) {
+	    sec--;
+	    document.host.time.value = sec;
+	    timerId = setTimeout(\"settime()\", 1000);
+	    }else{
+	    top.location.href=('http://??_srv_ip??:??_srv_port??');}}
+	    </script></body></html>";
+
+	system "/sbin/reboot &";
+END_CGI -->
+<!-- CGI: Poweroff_System.cgi
+        print "PowerOff";
+
+	system "/sbin/poweroff &";
+END_CGI -->
+<!-- CGI: Factory_default.cgi
+	get_file "./JavaReturn_h.htm";
+    print "script not really work [/etc is busy]";
+        print "<td width=\"100%%\" bgcolor=\"#FFFFFF\">";
+	print "<form name=\"host\"><font size=3>&nbsp;&nbsp;The system will reset to factory default automatically and reload in <input type=\"text\" name=\"time\" value=\" ";
+	get_var "_#seconds";
+	print " \" size=\"3\" readonly> seconds.<br>&nbsp;&nbsp;Please wait in order to ensure that the operating environment is safe.<br>&nbsp;&nbsp;/etc folder will be saved automatically.</font></FORM></td></tr>";
+	print "<tr height=\"5\"><td></td></tr>
+	</table>";
+
+system "sync;sync;sync; cd /; /bin/umount /etc";
+init;
+    	print "<script language=\"javascript\">
+	    sec = document.host.time.value;
+	    settime();
+	    function settime(){
+	    if (sec > 0) {
+	    sec--;
+	    document.host.time.value = sec;
+	    timerId = setTimeout(\"settime()\", 1000);
+	    }else{
+	    top.location.href=('http://??_srv_ip??:??_srv_port??');}}
+	    </script></body></html>";
+
+	system "/etc/save_config.sh";
+	system "/sbin/reboot &";
+//    my_system "/etc/btn_config.sh rstbtn_long" ; //restore to default (script not really work [/etc is busy])
+//	system "/etc/reset_config.sh";
+END_CGI -->
+

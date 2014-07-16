@@ -1,0 +1,85 @@
+<!--#include file="head.inc?name=Home%20Page" 
+file="side.inc?i=3" -->
+
+<table id="maintab" height=290 align="center"><tr>
+<td align="center" valign="top"><br>
+<table id="header" align="center"><tr><td><b>System :: Make Folders</b></td></tr></table>
+<br>
+<!-- TABLE:Exist_folders
+#-> check_folders
+/mnt/services
+/mnt/services/includes
+/mnt/wget_files
+/mnt/packages
+/mnt/torrents
+/mnt/bin
+/mnt/sbin
+/mnt/home
+/mnt/etc
+/mnt/libexec
+#-> end
+END_TABLE -->
+
+<!-- TABLE:Noxist_folders
+#-> check_Nfolders
+/mnt/services
+/mnt/services/includes
+/mnt/wget_files
+/mnt/packages
+/mnt/torrents
+/mnt/bin
+/mnt/sbin
+/mnt/home
+/mnt/etc
+/mnt/libexec
+#-> end
+END_TABLE -->
+<form method="GET" action="MK_folders.cgi" name="superset">
+<table border="0" width="70%" height="50" align="center">
+    <colgroup>
+    <col id="varbox-list-name">
+    <col id="varbox-list-val">
+    </colgroup>
+    <tr>
+    <td><b><font size="3">&nbsp;Existing folders:</font></b></td>
+    <td></td>
+    <tr><td bgcolor="#ffffff" colspan="2">
+    <pre>
+<!--#include tbl_select="_Exist_folders" -->
+    </pre>
+    </td></tr>
+    <tr>
+    <td><b><font size="3">&nbsp;Make folders:</font></b></td>
+    <td>
+<!--#include tbl_select="Noxist_folders" -->
+    </td></tr>
+</table>
+<!--
+<table id="info" align="center"><tr><td><br>Please provide a superuser name and password (between 4-16 characters each). 
+Periodically change the superuser name and password to ensure security.</td></tr></table>
+-->
+</td></tr><tr>
+<td align="center"><input type="submit" name="Apply" value="Make_ALL">&nbsp;<input type="submit" name="Apply" value="Make_ONE">&nbsp;<input type="button" value="Back" onclick="history.back()"></td>
+</form>
+</tr>
+</table>
+</body></html>
+<!-- CGI: MK_folders.cgi
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=3";
+
+    if "_#Apply:Make_ALL/"{
+	print "<pre>";
+	my_shell "for i in $(echo \"?@-_Noxist_folders@?\") ; do mkdir \"$i\"; [ $? -eq 0 ] && echo \"<tr><td>Dir: $i is made!</td></tr>\"; done ";
+	print "</td></tr></table><a href=\"admin-folders.htm\">Back</a></table></body></html>";
+    }
+    if "_#Apply:Make_ONE/"{
+	nnot "_@Noxist_folders:/\ "{
+	    print "<pre>False folder ID: ??_#Noxist_folders??</pre></td></tr></table><a href=\"admin-formathd.htm\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+
+    my_shell "mkdir ??_@Noxist_folders??; [ $? -eq 0 ] && echo \"<tr><td><pre>Dir: ??_@Noxist_folders?? is made!</pre></td></tr>\"; ";
+    print "</td></tr></table><a href=\"admin-folders.htm\">Back</a></table></body></html>";
+    }
+//    boot_page "admin-folders.htm";
+END_CGI -->

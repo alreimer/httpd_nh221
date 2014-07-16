@@ -1,0 +1,73 @@
+#for i386 mashine
+TYPE_SYSTEM = .longshine
+
+#HTTPD_DOCUMENT_ROOT = /htdocs
+CFLAGS = -I../usr/include
+
+#ifeq ($(TYPE_SYSTEM),.longshine)
+CFLAGS = -DNH221 -DNH240 -DLONGSHINE
+#endif
+
+ifeq ($(TYPE_SYSTEM),.micronet)
+	CFLAGS = -DNH221 -DNH240 -DMICRONET
+endif
+
+ifeq ($(TYPE_SYSTEM),.nh240)
+	CFLAGS = -DNH221 -DNH240
+endif
+ifdef M_LARGEFILE
+	CFLAGS += -DEXT3
+endif
+ifdef M_NH220
+    CFLAGS += -DNH220
+endif
+
+CFLAGS += -static
+
+LDFLAGS += 
+
+OBJS = httpd_torrent.o httpd_scripts.o copy.o copy_CGI.o copy_tbl.o parse_CGI.o parser.o httpd.o
+OBJS1 = parser.o pnmd.o
+OBJS2 = ide_ioctl.o
+OBJS3 = httpd_cfg.o
+OBJS4 = httpd_tty.o
+
+STRIP ?= strip
+
+#CFLAGS := $(CFLAGS) -DHTTPD_DOCUMENT_ROOT=\"$(HTTPD_DOCUMENT_ROOT)\"
+#CFLAGS := $(CFLAGS)
+#CFLAGS := $(CFLAGS) -DHTTPD_MAX_ACCEPT
+
+#all: httpd pnmd config_sync ide_ioctl
+all: httpd httpd_cfg httpd_tty
+
+httpd: $(OBJS)
+	${CC} ${LDFLAGS} -o httpd ${LIBS} ${OBJS} ${LDADD}
+#	${STRIP} -x --strip-unneeded -R .comment -R .pdr -R .note -R .mdebug.abi32 httpd
+#	$(MAKE) CC=$(TARGET_CC) CC_FOR_BUILD="$(HOSTCC)" -C $(HTTPD_DIR)
+	$(STRIP) httpd
+
+
+pnmd: $(OBJS1)
+	${LD} $(LDFLAGS) -o pnmd ${LIBS} ${OBJS1} ${LDADD}
+
+httpd_cfg: $(OBJS3)
+	${CC} $(LDFLAGS) -o httpd_cfg ${LIBS} ${OBJS3} ${LDADD}
+
+httpd_tty: $(OBJS4)
+	${CC} $(LDFLAGS) -o httpd_tty ${LIBS} ${OBJS4} ${LDADD}
+
+ide_ioctl: $(OBJS2)
+	${LD} $(LDFLAGS) -o ide_ioctl ${LIBS} ${OBJS2} ${LDADD}
+
+config_sync: checkupgrade.o
+	$(LD) $(LDFLAGS) -o $@ ${LIBS} checkupgrade.o ${LDADD}
+
+clean:
+	rm -f *.[oa] *.elf *~ core httpd httpd_cfg httpd_tty ide_ioctl config_sync pnmd *.gdb
+
+install: all
+	$(CP) httpd httpd_cfg $(DESTSBIN)
+#	$(CP) httpd pnmd config_sync ide_ioctl $(DESTSBIN)
+
+

@@ -1,0 +1,52 @@
+<html><head>
+<title>Home Page</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="refresh" content="60">
+<style type="text/css">
+body {font-family: ArIal, Helvetica, sans-serif}
+p {font-family: Arial, Helvetica, sans-serif}
+td {font-family: Arial, Helvetica, sans-serif}
+</style>
+<script language="JavaScript">
+function show(id){
+    if(id == "percent")
+        explain.innerHTML = "Note: D/L(%) - Download percentage.";
+    else if(id == "size")
+        explain.innerHTML = "Note: Size(MB) - Total size of download files. Unit is Mega byte.";
+    else if(id == "time")
+        explain.innerHTML = "Note: Start Time - Date and time to start downloading.";
+    else if(id == "rate")
+        explain.innerHTML = "Note: Rate(Down/Up) - Current download and upload rate. Unit is Kbps.";
+    else if(id == "max")
+        explain.innerHTML = "Note: MAX Rate(Down/Up) - Max download and upload rate. Unit is Kbps.";
+    else if(id == "sel")
+        explain.innerHTML = "Note: Check the Sel and then click Inactive button to cancel this download.";
+    else if(id == "sel_q")
+        explain.innerHTML = "Note: Check the Sel and then click Inactive button to cancel this queue.";
+}
+</script>
+</head>
+<body>
+<script language="JavaScript" src="title.js"></script>
+<table width="100%" border="0">
+<tr><td width="80%"><div align="right"><b></b></div></td>
+  <td width="13%"><div align="right"><b></b></div></td>
+  <td width="10%"><div align="right"><b></b></font></div></td></tr></table>
+<table width=100% border="0" bordercolor="#0066CC" cellpadding="0" cellspacing="0"><tr><td>
+<A href="ShowMainHtml.cgi"><img src="images/home.gif" border="0"></a>
+<a href="network.htm"><img src="images/networking.gif" border="0"></a>
+<a href="administration.htm"><img src="images/admin.gif" border="0"></a>
+<a href="access.htm"><img src="images/Share.gif" border="0"></a>
+<a href="ftp-main.htm"><img src="images/FTP.gif" border="0"></a>
+<a href="p2p-main.htm"><img src="images/p2p-b.gif" border="0"></a>
+<a href="web-server.htm"><img src="images/web.gif" border="0"></a>
+</td></tr></table>
+<table width="100%" border="0" height=290 align="center">
+<tr>
+	<td align="center" valign="top" bgcolor="#181C5B"><br>
+<table width=85% border="0" align="center">
+<tr>
+	<td bgColor=#EBDA0C width="602"><B><FONT face="Arial, Helvetica, sans-serif" color=#000000 size=3>P2P</FONT></B><br></td></tr></table>
+<table width="85%" border="0" align="center">
+<tr><td><font color=#FFFFFF><div id="explain">Note: Move the cursor over the items to get the comment.</div></font></td></tr></table>
+<table width=85% border="0" align="center">

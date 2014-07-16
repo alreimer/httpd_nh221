@@ -1,0 +1,227 @@
+<html><head>
+<title>Home Page</title>
+<meta http-equiv="expires" content="0">
+<meta http-equiv="cache-control" content="no-cache">
+<style type="text/css">
+body {font-family: ArIal, Helvetica, sans-serif}
+p {font-family: Arial, Helvetica, sans-serif}
+td {font-family: Arial, Helvetica, sans-serif}
+</style>
+<script language="JavaScript">
+function check_form(){
+    var config = document.form1.tconfig_name;
+    var user = document.form1.max_user;
+    var s_hour = document.form1.start_hour;
+    var s_min = document.form1.start_min;
+    var e_hour = document.form1.end_hour;
+    var e_min = document.form1.end_min;
+    var start = document.form1.start_day;
+    var end = document.form1.end_day;
+    
+    if(document.form1.torrent_enable[0].checked){
+        if(config.value == "" || config.value == null){
+            alert("Please input the configuration file name!!");
+            config.focus();
+            return false;
+        }else if(config.value.lastIndexOf(".") != -1){
+            var str = config.value.substring(config.value.lastIndexOf("."),config.value.length);
+            if(str == ".torrent"){
+                alert("Please don't use .torrent as the extension of configuration file!!");
+                config.focus();
+                return false;
+            }
+        }
+        if(user.value == "" || user.value == null || user.value > 2){
+            alert("The max user number must be given and less than 2!!");
+            user.focus();
+            return false;
+        }
+    }
+    if(document.form1.cron_enable[0].checked){
+        if(s_hour == "" || s_hour == null){
+            alert("Please input the scheduler start hour!!");
+            s_hour.focus();
+            return false;
+        }
+        if(parseInt(s_hour.value,10) > 23 || parseInt(s_hour.value,10) < 0){
+            alert("Start hour should be between 0 and 23!!");
+            s_hour.focus();
+            return false;
+        }
+        if(s_min == "" || s_min == null){
+            alert("Please input the scheduler start minute!!");
+            s_min.focus();
+            return false;
+        }
+        if(parseInt(s_min.value,10) > 59 || parseInt(s_min.value,10) < 0){
+            alert("Start minute should be between 0 and 59!!");
+            s_min.focus();
+            return false;
+        }
+        if(e_hour == "" || e_hour == null){
+            alert("Please input the scheduler end hour!!");
+            e_hour.focus();
+            return false;
+        }
+        if(parseInt(e_hour.value,10) > 23 || parseInt(e_hour.value,10) < 0){
+            alert("End hour should be between 0 and 23!!");
+            e_hour.focus();
+            return false;
+        }
+        if(e_min == "" || e_min == null){
+            alert("Please input the scheduler end minute!!");
+            e_min.focus();
+            return false;
+        }
+        if(parseInt(e_min.value,10) > 59 || parseInt(e_min.value,10) < 0){
+            alert("End minute should be between 0 and 59!!");
+            e_min.focus();
+            return false;
+        }
+        if(start.value == 7 && end.value != 7){
+            alert("Please select time from everyday to everyday!!");
+            end.focus();
+            return false;
+        }
+        if(end.value == 7 && start.value != 7){
+            alert("Please select time from everyday to everyday!!");
+            start.focus();
+            return false;
+        }
+    } 
+}
+function check_start_day(){
+    if(document.form1.start_day.value == "7")
+        document.form1.end_day.value = "7";
+}
+function check_end_day(){
+    if(document.form1.end_day.value == "7")
+        document.form1.start_day.value = "7";
+}
+function warning_message(){
+    var agree = confirm("All users of this device are warned against illegal downloading of copyrighted materials. The P2P embedded functionality is provided for downloading authorized "
+    + "files only. Downloading or distribution of unauthorized materials may result in severe civil and criminal penalty. Users of this device are subject to the restrictions of the "
+    + "copyright laws and should accept all the consequences.");
+    if(agree == false)
+        document.form1.torrent_enable[1].checked = true;
+}       
+</script>
+</head>
+<body>
+<script language="JavaScript" src="title.js"></script>
+<table width="100%" border="0">
+<tr><td width="80%"><div align="right"><b></b></div></td>
+<td width="13%"><div align="right"><b></b></div></td>
+<td width="10%"><div align="right"><b></b></font></div></td></tr></table>
+<table width=100% border="0" bordercolor="#0066CC" cellpadding="0" cellspacing="0"><tr><td>
+<A href="ShowMainHtml.cgi"><img src="images/home.gif" border="0"></a>
+<a href="network.htm"><img src="images/networking.gif" border="0"></a>
+<a href="administration.htm"><img src="images/admin.gif" border="0"></a>
+<a href="access.htm"><img src="images/Share.gif" border="0"></a>
+<a href="ftp-main.htm"><img src="images/FTP.gif" border="0"></a>
+<a href="p2p-main.htm"><img src="images/p2p-b.gif" border="0"></a>
+<a href="web-server.htm"><img src="images/web.gif" border="0"></a>
+</td></tr></table>
+<table width="100%" border="0" height=290 align="center">
+<tr>
+<td align="center" valign="top" bgcolor="#181C5B"><br>
+<table width=85% border="0" align="center">
+<tr>
+<td bgColor=#EBDA0C width="602"><B><FONT face="Arial, Helvetica, sans-serif" color=#000000 size=3>P2P Configuration</FONT></B><br></td></tr></table>
+<br>
+<table border="0" width="75%" height="50" align="center">
+<tr>
+<td width=9% valign=top><font size=2 face=\"Arial, Helvetica, sans-serif\" color=#FFFFFF><b>Notes:</b></td>
+<td width=100% align=left><font size=2 face=\"Arial, Helvetica, sans-serif\" color=#FFFFFF><b>Basic Configuration of BitTorrent -
+<br><b>1. Configure file is used to record the download data when something happens.</b>
+<br><b>2. The max active torrent number is 2.</b></font></td></tr> 
+</table>
+<form method="GET" name="form1" action="Config_torrent.cgi" onsubmit="return check_form()">
+
+<table border="0" width="85%" height="50" align="center">
+<tr>
+<td width="10%"></td>
+<td width="30%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;Enable BitTorrent:</font></b></td>
+<td width="47%" bgcolor="#FFFFFF">
+<input type="radio" name="torrent_enable" value="1" onclick="warning_message()">Yes
+<input type="radio" name="torrent_enable" value="0">No</td>
+<td width="13%" bgcolor="#181C5B"></td>
+</tr>
+<tr>
+<!--<input type="hidden" name="torrent_dir">-->
+<td width="10%"></td>
+<td width="30%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;Download Folder:</font></b></td>
+<td width="47%" bgcolor="#FFFFFF">
+<!--#inc lude select_show_dir="torrent_dir" -->
+</td>
+<td width="13%" bgcolor="#181C5B"></td>
+</tr>
+<tr>
+<td width="10%"></td>
+<td width="35%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;BitTorrent Configuratin File:</font></b></td>
+<td width="47%" bgcolor="#FFFFFF"><input type="text" name="tconfig_name" maxlength="16" size="20"></td>
+<td width="13%" bgcolor="#181C5B"></td>
+</tr>
+<tr>
+<td width="10%"></td>
+<td width="35%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;Max Active Torrent Number:</font></b></td>
+<td width="47%" bgcolor="#FFFFFF"><input type="text" name="max_user" maxlength="16" size="20"></td>
+<td width="13%" bgcolor="#181C5B"></td>
+</tr>
+<tr>
+<td width="10%"></td>
+<td width="30%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;Scheduler:</font></b></td>
+<td width="47%" bgcolor="#FFFFFF">
+<input type="radio" name="cron_enable" value="1">Yes
+<input type="radio" name="cron_enable" value="0">No</td>
+<td width="13%" bgcolor="#181C5B"></td>
+</tr>
+<tr>
+<td width="10%"></td>
+<td width="35%" bgcolor="#D8D8D8"><b>
+<font size="3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Start:</font></b></td>
+<td width="47%" bgcolor="#FFFFFF">
+<select name="start_day" onchange="check_start_day()">
+<option value="7">Everyday
+<option value="1">Monday
+<option value="2">Tuesday
+<option value="3">Wednesday
+<option value="4">Thursday
+<option value="5">Friday
+<option value="6">Saturday
+<option value="0">Sunday
+</select>
+Hour:&nbsp;<input type="text" name="start_hour" maxlength="2" size="5">
+Minute:&nbsp;<input type="text" name="start_min" maxlength="2" size="5"></td>
+<td width="13%" bgcolor="#181C5B"></td>
+</tr>
+<tr>
+<td width="10%"></td>
+<td width="35%" bgcolor="#D8D8D8"><b>
+<font size="3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;End:</font></b></td>
+<td width="47%" bgcolor="#FFFFFF">
+<select name="end_day" onchange="check_end_day()">
+<option value="7">Everyday
+<option value="1">Monday
+<option value="2">Tuesday
+<option value="3">Wednesday
+<option value="4">Thursday
+<option value="5">Friday
+<option value="6">Saturday
+<option value="0">Sunday
+</select>
+Hour:&nbsp;<input type="text" name="end_hour" maxlength="2" size="5">
+Minute:&nbsp;<input type="text" name="end_min" maxlength="2" size="5"></td>
+<td width="13%" bgcolor="#181C5B"></td>
+</tr>
+<tr>
+<td align=center colspan=4 width="653"><br><input type="submit" name="save_torrent" value="Apply">&nbsp;<input type="reset" value="Cancel">&nbsp;<input type="button" value="Back" onclick="history.back()"></form></td>
+</tr>
+</table><br>
+</body>
+</html>
+
+
+

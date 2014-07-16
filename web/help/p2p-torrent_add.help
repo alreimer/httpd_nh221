@@ -1,0 +1,9 @@
+<html>
+  <head>
+    <title>help</title>
+  </head>
+  <body>
+    <b>Remove torrent</b> <br>
+    Note: File name must not contain chars ;:/"<>`'$*?|
+  </body>
+</html>

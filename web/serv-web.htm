@@ -1,0 +1,156 @@
+<!-- #include par="20:ip:IP:" par="6:admin_port:ADMIN_PORT:^[0-5]?([0-9]){1,4}$" readcfg -->
+
+<!--#include InIt -->
+<!--#include file="head.inc?name=Home%20Page" 
+file="side.inc?i=4" -->
+
+<script language="JavaScript">
+function check_form(){
+    var aport = document.form1.admin_port;
+    var wport = document.form1.web_port;
+    var user = document.form1.max_user;
+    
+    if(document.form1.web_enable[0].checked){
+        if(wport.value == "" || wport.value == null){
+            alert("Please input the port of WEB server!!");
+            port.focus();
+            return false;
+        }else if(parseInt(wport.value,10) == parseInt(aport.value,10)){
+            alert("WEB server port is the same as administration port!!");
+            wport.focus();
+            return false;
+        }else if((parseInt(wport.value,10) == 20) || (parseInt(wport.value,10) == 21) || 
+                 (parseInt(wport.value,10) == 22) || (parseInt(wport.value,10) == 23) ||
+                 (parseInt(wport.value,10) == 24) || (parseInt(wport.value,10) == 69) ||
+                 (parseInt(wport.value,10) == 137)|| (parseInt(wport.value,10) == 138)||
+                 (parseInt(wport.value,10) == 139)){
+            alert("Please change the WEB server port, the port number is used!!");
+            wport.focus();
+            return false;
+        }
+    }
+    if(aport.value == "" || aport.value == null){
+        alert("Please input the administration port!!");
+        aport.focus();
+        return false;
+    }else if((parseInt(aport.value,10) == 20) || (parseInt(aport.value,10) == 21) || 
+             (parseInt(aport.value,10) == 22) || (parseInt(aport.value,10) == 23) ||
+             (parseInt(aport.value,10) == 24) || (parseInt(aport.value,10) == 69) ||
+             (parseInt(aport.value,10) == 137)|| (parseInt(aport.value,10) == 138)||
+             (parseInt(aport.value,10) == 139)){
+        alert("Please change the administrator WEB server port, the port number is used!!"); 
+        aport.focus();
+        return false;
+    }
+}
+</script>
+
+<table id="maintab" height=290 align="center">
+<tr>
+<td align="center" valign="top"><br>
+<table id="header" align="center"><tr><td width="602">WEB Server Configuration<br></td></tr></table>
+<br>
+<table border="0" width="75%" height="50" align="center">
+<tr>
+<td width=9% valign=top><font size=2 face=\"Arial, Helvetica, sans-serif\"><b>Notes:</b></td>
+<td width=100% align=left><font size=2 face=\"Arial, Helvetica, sans-serif\"><b>Configuration of WEB Server -
+<br><b>1. Port number must be between 1 and 65535.</b>
+<br><b>2. WEB folder is the location of all your HTML files. WEB server will start from "index.html", if it exists.</b></font></td></tr> 
+</table>
+<form method="GET" name="form1" action="Set_webserver.cgi" onsubmit="return check_form()">
+<table border="0" width="85%" align="center">
+<tr>
+<td width="10%"></td>
+<td colspan=3>
+<font size=2 face=\"Arial, Helvetica, sans-serif\"><b>Administrator WEB Server:</b></font></td></tr>
+<tr>
+<td width="10%"></td>
+<td width="35%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;Administration Port:</font></b></td>
+<td width="47%" bgcolor="#FFFFFF"><input type="text" name="admin_port" maxlength="6" size="20" value="??admin_port??"></td>
+<!--<td width="13%" bgcolor="#181C5B"></td>-->
+<td width="13%"></td>
+</tr>
+</table><br>
+<table border="0" width="85%" height="50" align="center">
+<td width="10%"></td>
+<td colspan=3>
+<font size=2 face=\"Arial, Helvetica, sans-serif\" color=#FFFFFF><b>WEB Server:</b></font></td></tr>
+<tr>
+<td width="10%"></td>
+<td width="30%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;Enable WEB Server:</font></b></td>
+<td width="47%" bgcolor="#FFFFFF">
+<input type="radio" name="web_enable" value="1">Yes
+<input type="radio" name="web_enable" value="0">No</td>
+<!--<td width="13%" bgcolor="#181C5B"></td>-->
+<td width="13%"></td>
+</tr>
+<tr>
+<td width="10%"></td>
+<td width="35%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;WEB Server Port:</font></b></td>
+<td width="47%" bgcolor="#FFFFFF"><input type="text" name="web_port" maxlength="16" size="20"></td>
+<!--<td width="13%" bgcolor="#181C5B"></td>-->
+<td width="13%"></td>
+</tr>
+<tr>
+<input type="hidden" name="web_dir">
+<td width="10%"></td>
+<td width="30%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;WEB Folder:</font></b></td>
+<td width="47%" bgcolor="#FFFFFF">
+<!-- TABLE:web_dir
+#-> get_folder: /mnt
+END_TABLE -->
+
+<!--#include tbl_select="web_dir" -->
+</td>
+<!--<td width="13%" bgcolor="#181C5B"></td>-->
+<td width="13%"></td>
+</tr>
+<tr>
+<td align=center colspan=4 width="653"><br><input type="submit" name="save_web" value="Apply">&nbsp;<input type="reset" value="Cancel">&nbsp;<input type="button" value="Back" onclick="history.back()"></form></td>
+</tr>
+</table><br>
+</body>
+</html>
+<!-- CGI: Set_webserver.cgi
+
+    fill_cfg "admin_port";
+    savecfg;
+	get_file "./JavaReturn_h.htm";
+        print "<td width=\"100%%\" bgcolor=\"#FFFFFF\">";
+	print "<form name=\"host\"><font size=3>&nbsp;&nbsp;The system will restart automatically and reload in <input type=\"text\" name=\"time\" value=\" ";
+	print "15";
+	print " \" size=\"3\" readonly> seconds.<br>&nbsp;&nbsp;Please wait in order to ensure that the operating environment is safe.</font></form></td></tr>";
+	print "<tr height=\"5\"><td></td></tr>
+	</table>";
+
+    	print "<script language=\"javascript\">
+	    sec = document.host.time.value;
+	    settime();
+	    function settime(){
+	    if (sec > 0) {
+	    sec--;
+	    document.host.time.value = sec;
+	    timerId = setTimeout(\"settime()\", 1000);
+	    }else{
+	    top.location.href=('http://";
+	get_var "ip";
+	print ":";
+	get_var "_%admin_port";
+	print "');}}
+	    </script></body></html>";
+
+//    my_system "killall httpd;/httpd_nh221/httpd";
+//    my_system "kill -SIGTERM 1";
+    my_system "killall -SIGTERM httpd";
+//    boot_page "serv-web.htm";
+END_CGI -->
+<!-- CGI: Set_DDNS.cgi
+//not used !!
+    not "_@web_dir:/\ "{
+	print "Unable to find the entry ??_#web_dir??";
+	exit_cgi;
+    }
+    print "??_@web_dir??" ;
+END_CGI -->
+
+

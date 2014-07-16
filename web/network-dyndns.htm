@@ -1,0 +1,144 @@
+<!--#include par="2:DYenable:DYDNS_ENABLE:[01]" par="16:DYservice:DYDNS_SERVICE:^(ezip|pgpow|justlinux|dhs|dyndns|dyndns-static|dyndns-custom|ods|tzo|gnudip|easydns|easydns-partner|dyns|hn|zoneedit|heipv6tb)$"
+par="101:DYhost:DYDNS_HOST:^[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$" par="101:DYuser:DYDNS_USER:^[A-Za-z0-9._%+-]+$" par="101:DYpasswd:DYDNS_PASS:^[A-Za-z0-9._%+-]+$"
+par="2:DYwcard:DYDNS_WILDCARD:[01]" par="101:DYmx:DYDNS_MX:^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$"
+par="20:DYip:DYDNS_IP:^(|((([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\.){3}([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])))$" readcfg -->
+<!--#include file="head.inc?name=Home%20Page&body=onload%3D\"check_ddns()\"" 
+file="side.inc?i=2" -->
+
+
+<form method="GET" name="host" action="Set_DDNS.cgi">
+<table id="maintab" height=290 align="center"><tr>
+<td align="center" valign="top"><br>
+<table id="header" align="center"><tr><td><b>Networking :: Dynamic DNS</b></td></tr></table>
+<br>
+
+<table border="0" width="70%" height="50" align="center">
+    <colgroup>
+    <col id="varbox-list-name">
+    <col id="varbox-list-val">
+    </colgroup>
+    <tr>
+    <td><b><font size="3">&nbsp;Dynamic DNS Enable:</font></b></td>
+    <td>
+    <input type="radio" name="DYenable"  value="1" onclick="check_ddns()">Yes
+    <input type="radio" name="DYenable"  value="0" onclick="check_ddns()">No
+    </td></tr>
+
+    <tr>
+    <td><b><font size="3">&nbsp;Service Provider:</font></b></td><td bgcolor="#FFFFFF"></td></tr>
+    </tr>
+    <td bgcolor="#ffffff" colspan="2" align="right">
+    <select name="DYservice" >
+    <option value="ezip" >EnterZone,Inc (EZ-IP) [enterzone.net]</option>
+    <option value="pgpow" >Justlinux (v1.0) [justlinux.com]</option>
+    <option value="justlinux" >JustLinux (v2.0) [justlinux.com]</option>
+    <option value="dhs" >DHS International [dhs.org]</option>
+    <option value="dyndns" >DynDNS Network Services [dyndns.org]</option>
+    <option value="dyndns-static" >DynDNS Network Services (Static) [dyndns.org]</option>
+    <option value="dyndns-custom" >DynDNS Network Services (Custom) [dyndns.org]</option>
+    <option value="ods" >Open Domain Server [ods.org]</option>
+    <option value="tzo" >Tzolkin Corp [tzo.com]</option>
+    <option value="gnudip" >DIP Dynamic IP [gnudip.cheapnet.net]</option>
+    <option value="easydns" >EasyDNS Technologies [easydns.com]</option>
+    <option value="easydns-partner" >EasyDNS Technologies Partner [api.easydns.com]</option>
+    <option value="dyns" >FREE dynamic DNS service [dyndns.cx]</option>
+    <option value="hn" >Vanity Dynamic DNS [hn.org]</option>
+    <option value="zoneedit" >Zoneedit [zoneedit.com]</option>
+    <option value="heipv6tb" >heipv6tb</option>
+    </select><!-- ez-ipupdate v 3.0.11b7-->
+    </td>
+    <tr>
+    <td><b><font size="3">&nbsp;Host Name:</font></b></td>
+    <td>
+    <input type="text" size=20 maxlength=100 name="DYhost" value="??DYhost??">
+    </td></tr>
+    <tr>
+    <td><b><font size="3">&nbsp;Username:</font></b></td>
+    <td>
+    <input type="text" size=20 maxlength=100 name="DYuser" value="??DYuser??">
+    </td></tr>
+    <tr>
+    <td><b><font size="3">&nbsp;Password:</font></b></td>
+    <td>
+    <input type="password" size=20 maxlength=100 name="DYpasswd" value="??DYpasswd??">
+    </td></tr>
+    <tr>
+    <td><b><font size="3">&nbsp;IP Address:</font></b></td>
+    <td>
+    <input type="text" size=20 maxlength=20 name="DYip" value="??DYip??">
+    </td>
+    </tr>
+    <tr>
+    <td bgcolor="#ffffff">&nbsp;Internet IP:</td>
+    <td>
+    <!-- #include exec="wget -qO- http://checkip.dyndns.org | sed -e 's/.*Current IP Address: //' -e 's/<.*$//'"-->
+    </td>
+    </tr>
+    <tr>
+    <td><b><font size="3">&nbsp;Enable Wildcard (*):</font></b></td>
+    <td>
+    <input type="radio" name="DYwcard"  value="1">Yes
+    <input type="radio" name="DYwcard"  value="0">No
+    
+<!--    <input type="checkbox" name="DYwcard"  value="1" >-->
+    </td></tr>
+    <tr>
+    <td><b><font size="3">&nbsp;Mail Exchanger (*):</font></b></td>
+    <td>
+    <input type="text" size=20 maxlength=100 name="DYmx" value="??DYmx??">
+    </td>
+    </tr>
+</table>
+
+<table id="info" align="center"><tr><td><br>Notes:<br>
+1. Please input dynamic DNS service information.<br>
+2. Please input Internet IP into IP Address for assign.<br>
+If no IP is given - it'll be assign automatically from Internet.<br>
+3. * available in selective Service Provider.</td></tr></table>
+
+<input type="hidden" name="anonymity">
+</td></tr><tr>
+<td align="center"><input type="submit" name="submit" value="Apply">&nbsp;<input type="reset" value="Reset">&nbsp;<input type="button" value="Back" onclick="history.back()"></td>
+</tr></table>
+</form>
+</body>
+<script>
+function check_ddns(){
+    if(document.host.DYenable[1].checked){
+        document.host.DYservice.disabled = true;
+        document.host.DYhost.disabled = true;
+        document.host.DYuser.disabled = true;
+        document.host.DYpasswd.disabled = true;
+	document.host.DYip.disabled = true;
+	document.host.DYwcard.disabled = true;
+	document.host.DYmx.disabled = true;
+    }else if(document.host.DYenable[0].checked){
+        document.host.DYservice.disabled = false;
+        document.host.DYhost.disabled = false;
+        document.host.DYuser.disabled = false;
+        document.host.DYpasswd.disabled = false;
+	document.host.DYip.disabled = false;
+	document.host.DYwcard.disabled = false;
+	document.host.DYmx.disabled = false;
+    }
+}
+</script>
+</html>
+
+<!-- CGI: Set_DDNS.cgi
+    fill_cfg "DYenable";
+    if "_&DYenable:1/"{
+	fill_cfg "DYservice:DYhost:DYuser:DYpasswd:DYip:DYwcard:DYmx";
+
+	savecfg;
+	get_file "./JavaReturn_.inc?name=Home%20Page&i=2";
+	print "<pre>";
+//	my_system "/etc/init.d/S41dyndns start";
+	my_shell "/etc/init.d/S41dyndns start ??_&DYip??";	//fresh dont work after savecfg, !!now works!!
+//need crond refresh!!
+	print "</pre></td></tr></table><a href=\"network-dyndns.htm\">Back</a></table></body></html>";
+	exit_cgi;
+    }
+    savecfg;
+    boot_page "network-dyndns.htm";
+END_CGI -->
