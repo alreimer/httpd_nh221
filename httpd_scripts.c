@@ -8,6 +8,7 @@
  * (at your option) any later version.
  */
 //written by snop to handle CGI function
+//need clean out this file - alex
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -240,81 +241,7 @@ SUPERUSER_VALUE SUPERUSER_set;
 
 CGI_ENTRY cgi_entries[] = {
     {"_show_CGIs.cgi",show_CGIs},		//used from copy_CGI.c
-/*    {"Set_network.cgi",Set_network},
-    {"Get_alluser.cgi",Get_alluser},
-    {"Get_allfolder.cgi",Get_allfolder},
-    {"Get_folderuser.cgi",Get_folderuser},
-    {"Get_userinfo.cgi",Get_userinfo},		//not used in web, used from another cgi
-    {"Ch_username.cgi",Ch_username},
-    {"Ch_username_m.cgi",Ch_username_m},
-    {"Ch_foldername.cgi",Ch_foldername},	//not used in web
-    {"Ch_foldername_m.cgi",Ch_foldername_m},	//not used in web
-    {"find_mntfolder.cgi",find_mntfolder},
-    {"Ch_userinfo.cgi",Ch_userinfo},		//not used in web
-    {"Set_addmntfolder.cgi",Set_addmntfolder},
-//    {"Restart_System.cgi",Restart_System},
-//    {"Factory_default.cgi",Factory_default},
-//    {"Firmware_upgrade.cgi",Firmware_upgrade},
-    {"Ch_ftppasswd.cgi",Ch_ftppasswd},
-    {"Set_hdformat_m.cgi",Set_hdformat_m},
-//    {"Set_FTP.cgi",Set_FTP},
-//    {"Set_codeset.cgi",Set_codeset},
-//************************************************* is in rc_usb.c ****************************
-#ifdef USB
-*/
-//======= CGI Function for USB by snop===============
-//********    {"_lsusb_table",lsusb_table},
-/*    {"Show_USB_Disk.cgi",Show_USB_Disk},
-    {"Set_USB_Disk.cgi",Set_USB_Disk},
-    //{"Set_usbdisk.cgi",Set_usbdisk},
-//============================================
-//======= CGI Function for USB by allen=================
-    {"Show_USB_Printer.cgi",Show_USB_Printer},
-    {"Set_printer.cgi",Set_printer},
-    {"Set_usbque.cgi",Set_usbque},
-    {"Printer_scrpage.cgi",Printer_scrpage},
-//==============================================
-//=============== Set usbadvanced ===============
-    //{"Set_usbadvanced.cgi",Set_usbadvanced},
-    {"Set_usbhdformat.cgi",Set_usbhdformat},
-    {"Set_usbhdformat_m.cgi",Set_usbhdformat_m},
-//===============================================
-//=================CGI function for Clean Print Job===================
-    {"Show_advanced_func1.cgi",Show_advanced_func1},
-//=============== copy button ===============
-    {"Set_usbcopy.cgi",Set_usbcopy},
-//==========================================
-#endif
-//**********************************************************************************************
-
-//    {"Set_codeset1.cgi",Set_codeset1},
-//============== ntx_update & web_update =================
-    {"Set_ntx_web_update.cgi",Set_ntx_web_update},
-//========================================================
-//============Firmware upgrade============
-    {"Upgrade_page1.cgi",Upgrade_page1},
-//========================================
-//================ declare the upload and download cgi ================
-//    {"Set_Conf.cgi",Set_Conf},
-//=====================================================================
-    {"Set_ipsecurity.cgi",IPSecurity},
-    {"Set_macsecurity.cgi",MACSecurity},
-//======= CGI Function for Group =============
-    {"Add_Group.cgi",Add_Group},
-    {"Get_allgroup.cgi",Get_allgroup},
-    {"Set_Group.cgi",Set_Group},
-    {"Ch_group.cgi",Ch_group},
-/****************** moved to rc_maintain ********************************************
-//=============== Syslog ===============
-//    {"Show_syslog.cgi",Show_syslog},
-//==========================================
-//************************************************************************************
-    {"ftp_setup.cgi",ftp_setup},
-//================ Samba ===============
-//    {"samba.cgi",samba},
-//============== Dropbear ===============
-//    {"Set_dropbear.cgi", Set_dropbear},
-*/    {"",NULL}
+    {"",NULL}
 };
 
 void Init_Http_Var(void)
@@ -636,7 +563,7 @@ else{
 	"<DIV align=left>&nbsp;&nbsp;<IMG src=\"images/dsk_fm.gif\" useMap=#Map border=0></DIV></TD></TR>\n"
 	"<TR height=5>\n<TD></TD></TR></TBODY></TABLE>\n");
 	//fprintf(out,"<table border=\"0\"><tr><td bgColor=#333399 width=\"802\">\n");
-	//fprintf(out,"<B><FONT class=\"style2\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;¤L | tH?_[</FONT></B><br></td></tr></table><br>\n");
+	//fprintf(out,"<B><FONT class=\"style2\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ï¿½L | tH?_[</FONT></B><br></td></tr></table><br>\n");
 
 	fprintf(out,"<table border=\"0\" width=\"550\">\n");
 	fprintf(out, "<form name=form1 method=\"GET\" action=/Set_delfolder.cgi onsubmit=\"return double_check()\"> ");
@@ -1405,7 +1332,7 @@ void find_ch_username(char *ptr, char *username, char *n_username, FILE *n_fd){
 		"		   return false;\n"
 		"		 }\n"
 		"newn = document.form1.n_foldername.value;if (check_newn()==0){warming_b(\"New Folder Name\");document.form1.n_foldername.focus();return false;}if (check_nm()==0){document.form1.n_foldername.focus();return false;}return true;};function check_newn(){var ok=1;if (newn==null||newn==\"\") {ok=0;}return ok;}function check_nm(){var ok=1;var temp; for(var i=0;i<newn.length;i++){temp=newn.charCodeAt(i);if( !( (temp==0x21) || (temp>=0x24 && temp<=0x24) || (temp>=0x28 && temp<=0x29) || (temp>=0x2d && temp<=0x2e) || (temp>=0x30 && temp<=0x39) || (temp>=0x40 && temp<=0x5a)|| (temp==0x5e) || (temp>=0x61 && temp<=0x7b) || (temp>=0x7d && temp<=0x7e)) ){warming_char();ok=0;break;}} return ok;}function warming_b(){alert(arguments[0]+\": Can not be blank!\");}function warming_char(){alert(\"Folder Name ERROR. Characters allowed: a~z A~Z 0~9 ! $ ^ ( ) - { } . ~\");}</script>");
-		//fprintf(out,"<script language=\"JavaScript\">function check_form(){newn = document.form1.n_foldername.value;if (check_newn()==0){warming_b(\"VtH?_[¼\");document.form1.n_foldername.focus();return false;}if (check_nm()==0){document.form1.n_foldername.focus();return false;}return true;};function check_newn(){var ok=1;if (newn==null||newn==\"\") {ok=0;}return ok;}function check_nm(){var ok=1;var temp; for(var i=0;i<newn.length;i++){temp=newn.charCodeAt(i);if(temp<33||temp>126){warming_char();ok=0;break;}} return ok;}function warming_b(){alert(arguments[0]+\":ðüÍµÄ­¾³¢B\");}function warming_char(){alert(\"VtH?_[¼És³È¶?ªüÍ³êÄ¢Ü·B\");}</script>");
+		//fprintf(out,"<script language=\"JavaScript\">function check_form(){newn = document.form1.n_foldername.value;if (check_newn()==0){warming_b(\"VtH?_[ï¿½\");document.form1.n_foldername.focus();return false;}if (check_nm()==0){document.form1.n_foldername.focus();return false;}return true;};function check_newn(){var ok=1;if (newn==null||newn==\"\") {ok=0;}return ok;}function check_nm(){var ok=1;var temp; for(var i=0;i<newn.length;i++){temp=newn.charCodeAt(i);if(temp<33||temp>126){warming_char();ok=0;break;}} return ok;}function warming_b(){alert(arguments[0]+\":ï¿½ï¿½ÍµÄ­ï¿½ï¿½ï¿½B\");}function warming_char(){alert(\"VtH?_[ï¿½ï¿½sï¿½È¶?ï¿½ï¿½Í³ï¿½Ä¢Ü·B\");}</script>");
 
 		return ;
 	}
@@ -1441,7 +1368,7 @@ void Ch_foldername_m(FILE *out){
 	if(!result){
 	    sprintf(url, "history.back()");
 #if defined(LOBOS) || defined(NOVAC) || defined(CENTURY)
-		Warmming_page(out, "tH?_[¼", url);
+		Warmming_page(out, "tH?_[ï¿½", url);
 #else
 	Warmming_page(out, "Folder Name", url);
 #endif
@@ -1555,7 +1482,7 @@ void find_mntfolder(FILE *out)	/*is it in share.htm->find.htm? which isn't exist
 		if ( (i+1) % 3 == 0 )  fprintf(out, "</tr><tr>" );
 	}
 	 #if defined(LOBOS) || defined(CENTURY)
-	     fprintf(out,"</table><br><table border=\"0\" width=\"30%%\" align=\"center\"><tr><table><tr><td width=\"23%%\"></td><td width=\"30%%\"><input type=button value=\"ßé\" onClick=\"history.back()\"></td></tr></table><table><tr><td>&nbsp;</td></tr></table></tr></table></form></body></html>\n<script language=\"JavaScript\">var num=0;function box_change(){if (arguments[0] == true){num++;}else if (arguments[0] == false) {num--;}if (num==0) {document.form1.del.disabled=true;}else {document.form1.del.disabled=false;}}</script>");
+	     fprintf(out,"</table><br><table border=\"0\" width=\"30%%\" align=\"center\"><tr><table><tr><td width=\"23%%\"></td><td width=\"30%%\"><input type=button value=\"ï¿½ï¿½\" onClick=\"history.back()\"></td></tr></table><table><tr><td>&nbsp;</td></tr></table></tr></table></form></body></html>\n<script language=\"JavaScript\">var num=0;function box_change(){if (arguments[0] == true){num++;}else if (arguments[0] == false) {num--;}if (num==0) {document.form1.del.disabled=true;}else {document.form1.del.disabled=false;}}</script>");
 	#else
 	     fprintf(out,"</table><br><table border=\"0\" width=\"30%%\" align=\"center\"><tr><table><tr><td width=\"23%%\"></td><td width=\"30%%\"><input type=button value=\"Back\" onClick=\"history.back()\"></td></tr></table><table><tr><td>&nbsp;</td></tr></table></tr></table></form></body></html>\n<script language=\"JavaScript\">var num=0;function box_change(){if (arguments[0] == true){num++;}else if (arguments[0] == false) {num--;}if (num==0) {document.form1.del.disabled=true;}else {document.form1.del.disabled=false;}}</script>");
 	#endif
@@ -1726,7 +1653,7 @@ char LineBuf[READ_SHORT];
     	fprintf(out,"New Password must have at least 6 characters!");
     }
     #if defined(LOBOS) || defined(CENTURY) || defined(CENTURY)
-	    fprintf(out, "</b></font><br><br>Please try again...<br></td></tr><tr><td width=100%% align=\"right\"><input type=button value=\"ßé\" onClick=\"%s\"></td></tr></table>\n", "location.replace('/FTP.htm')" );
+	    fprintf(out, "</b></font><br><br>Please try again...<br></td></tr><tr><td width=100%% align=\"right\"><input type=button value=\"ï¿½ï¿½\" onClick=\"%s\"></td></tr></table>\n", "location.replace('/FTP.htm')" );
     #else
 	    fprintf(out, "</b></font><br><br>Please try again...<br></td></tr><tr><td width=100%% align=\"right\"><input type=button value=\"Go Back\" onClick=\"%s\"></td></tr></table>\n", "location.replace('/FTP.htm')");
     #endif
@@ -2462,18 +2389,18 @@ void upgrade_error( FILE *out ){
 
 	    if(!strcmp( type, "User"))
 #ifdef CENTURY
-		fprintf(out,"<table border=\"0\" width=\"550\" align=\"center\"><tr><td><br><b>ÝèÍÏX³êÜµ½B <br><br>±Ì?[U[ <font color=\"#0000ff\"><b>\"%s\"</b></font>\n", folder_name);
+		fprintf(out,"<table border=\"0\" width=\"550\" align=\"center\"><tr><td><br><b>ï¿½ï¿½ï¿½ï¿½Xï¿½ï¿½Üµï¿½B <br><br>ï¿½ï¿½?[U[ <font color=\"#0000ff\"><b>\"%s\"</b></font>\n", folder_name);
 #else
-			fprintf(out,"<table border=\"0\" width=\"85%%\" align=\"center\"><tr><td><br><b>ÝèÍÏX³êÜµ½B <br><br>±Ì?[U[ <font color=\"#0000ff\"><b>\"%s\"</b></font>\n", folder_name);
+			fprintf(out,"<table border=\"0\" width=\"85%%\" align=\"center\"><tr><td><br><b>ï¿½ï¿½ï¿½ï¿½Xï¿½ï¿½Üµï¿½B <br><br>ï¿½ï¿½?[U[ <font color=\"#0000ff\"><b>\"%s\"</b></font>\n", folder_name);
 #endif
 		else
 #ifdef CENTURY
-	    fprintf(out,"<table border=\"0\" width=\"550\" align=\"center\"><tr><td><br><b>ÝèÍÏX³êÜµ½B <br><br>±Ì?[U[ <font color=\"#0000ff\"><b>\"%s\"</b></font>\n", folder_name);
+	    fprintf(out,"<table border=\"0\" width=\"550\" align=\"center\"><tr><td><br><b>ï¿½ï¿½ï¿½ï¿½Xï¿½ï¿½Üµï¿½B <br><br>ï¿½ï¿½?[U[ <font color=\"#0000ff\"><b>\"%s\"</b></font>\n", folder_name);
 #else
-			fprintf(out,"<table border=\"0\" width=\"70%%\" align=\"center\"><tr><td><br><b>ÝèÍÏX³êÜµ½B <br><br>±Ì?[U[ <font color=\"#0000ff\"><b>\"%s\"</b></font>\n", folder_name);
+			fprintf(out,"<table border=\"0\" width=\"70%%\" align=\"center\"><tr><td><br><b>ï¿½ï¿½ï¿½ï¿½Xï¿½ï¿½Üµï¿½B <br><br>ï¿½ï¿½?[U[ <font color=\"#0000ff\"><b>\"%s\"</b></font>\n", folder_name);
 #endif
 
-			fprintf(out,"ÌANZX§ÀðÏX·éê?ÍAu¤LvÝèÌ<a href=\"%s\">tH?_[</a>ðN?bNµÄ­¾³¢B<br></body></html>\n",url);
+			fprintf(out,"ï¿½ANZXï¿½ï¿½ï¿½ï¿½Xï¿½ï¿½ï¿½?ï¿½Auï¿½Lvï¿½ï¿½ï¿½<a href=\"%s\">tH?_[</a>ï¿½N?bNï¿½Ä­ï¿½ï¿½ï¿½B<br></body></html>\n",url);
 
 		return;
 	}
@@ -2487,14 +2414,14 @@ void upgrade_error( FILE *out ){
         fprintf(out,"<META http-equiv=Content-Type content=\"text/html; charset=Shift_JIS\">\n");
 	fprintf(out,"<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/default.css\">\n");
 	fprintf(out,"</head><BODY text=#000000 bgColor=#ffffff>\n");
-	fprintf(out,"<P><FONT class=style9>VXe?Ýè</FONT></P>\n");
+	fprintf(out,"<P><FONT class=style9>VXe?ï¿½ï¿½</FONT></P>\n");
 	fprintf(out,"<table width=\"550\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\">\n");
 	fprintf(out,"<tr>\n<td width=\"100%\" bgcolor=\"#FFFFFF\" height=\"31\">\n");
 	fprintf(out,"<div align=\"left\"><img src=\"images/sys_usr2.gif\" usemap=\"#Map\" border=\"0\"></div></td></tr>\n");
 	fprintf(out,"<tr height=\"5\"><td></td></tr>\n</table><br>\n");
 	fprintf(out,"<table width=\"550\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\"><tr>\n");
-	fprintf(out,"<td width=\"100%\" bgcolor=\"#FFFFFF\">\n<font size=3>ÝèÍÏX³êÜµ½B</font><br><br>\n");
-	fprintf(out,"		±Ì?[U[ <font color=\"#0000ff\"><b>\"%s\"</b></font> ÌANZX§ÀðÏX·éê?ÍA<a href=\"%s\" target=_self><font color=\"#FF2222\">±±</font></a> ðN?bNµÄ­¾³¢B<br>\n",folder_name,url);
+	fprintf(out,"<td width=\"100%\" bgcolor=\"#FFFFFF\">\n<font size=3>ï¿½ï¿½ï¿½ï¿½Xï¿½ï¿½Üµï¿½B</font><br><br>\n");
+	fprintf(out,"		ï¿½ï¿½?[U[ <font color=\"#0000ff\"><b>\"%s\"</b></font> ï¿½ANZXï¿½ï¿½ï¿½ï¿½Xï¿½ï¿½ï¿½?ï¿½A<a href=\"%s\" target=_self><font color=\"#FF2222\">ï¿½ï¿½</font></a> ï¿½N?bNï¿½Ä­ï¿½ï¿½ï¿½B<br>\n",folder_name,url);
 	fprintf(out,"</td>\n</tr>\n<tr height=\"5\"><td></td></tr></table>\n");
 	fprintf(out,"<map name=\"Map\">\n");
 	fprintf(out,"<AREA shape=RECT coords=010,1,109,23 href=\"network-superadmin.htm\">\n");
