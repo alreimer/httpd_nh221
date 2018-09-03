@@ -3,7 +3,7 @@
  * Copyright (c) 1997-1999 D. Jeff Dionne <jeff@rt-control.com>
  * Copyright (c) 1998	   Kenneth Albanowski <kjahds@kjahds.com>
  * Copyright (c) 1999	   Nick Brok <nick@nbrok.iaehv.nl>
- * Copyright (c) 2009-2012 Alexander Reimer <alex_raw@rambler.ru>
+ * Copyright (c) 2009-2018 Alexander Reimer <alex_raw@rambler.ru>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,6 +73,7 @@ int TIMEOUT=30;
 /* Global variables */
 char referer[128];
 char user_agent[128];
+char boundary[1024];
 char ip[20];		//is it not the same as incoming_ip ?
 char port[10];
 char check_ip[20];		//if == '\0'- so release ip.
@@ -406,23 +407,20 @@ printf("c %s\n", c);
     	}
 
 	printf("UNknown type of file - not supported\n");
-	goto NotFound;
+//	goto NotFound;
 
     }else{				/*file c not exist*/
-	//snop adds to handle CGI function
-	if(!strcmp(r-4,".cgi")){
-#if defined(LOBOS) || defined(NOVAC)
-	    if(*check_ip && strcmp(check_ip,ip))
-		DoHTML(f,"limit-warn.htm");
-	    else
-#endif
-		DoCGI(f, 1, file);
+	//handle CGI function
+//	if(!strcmp(r-4,".cgi")){
+	if(!DoCGI(f, file)){
 #ifdef DEBUG
 		printf("CGI c:%s\n",c);
 #endif
+	    free_par_tmp();//clear all "temp"-parameters
 	    free_arg(0);
 	    return 0;
 	}
+    }
 NotFound:
 //	alarm(TIMEOUT);
 	fprintf(f,  "HTTP/1.0 404 Not Found\n"
@@ -432,7 +430,6 @@ NotFound:
 		    "<h2>404 Not Found</h2>\n"
 		    "<p>The requested URL was not found on this server.</p></body>\n</html>\n");
 //	alarm(0);
-    }
     free_arg(0);
     return 0;
 }
@@ -440,8 +437,7 @@ NotFound:
 int HandleConnect(int fd){
 
     FILE *f;
-    //Extend the buffer size(160->1024) by snop
-    //extend the buffer size (1024->2048) by dean
+    //extend the buffer size (1024->2048)
     //this accomodates Wget.cgi (extra long GET request)
     char buf[2048];
     char buf1[2048];
@@ -483,7 +479,6 @@ fclose(fp);
 
 //    alarm(0);
 /*****************************hier must be switch for methods!! */
-    //snop adds to get the method
     method = 0;
     method1 = POST_NO;
     if(!strncmp(buf,"GET",3))		method = M_GET;
@@ -510,7 +505,7 @@ fclose(fp);
 #endif
 
 
-	    while(fgets(buf1, 2048, f) && (strlen(buf1) > 2)){
+	    while(fgets(buf1, 2048, f)){
 
 //		alarm(TIMEOUT);
 
@@ -518,53 +513,59 @@ fclose(fp);
 		printf(buf1);
 #endif
 
-	//snop adds for authentication
-		if(c = parsestr1(buf1,"Authorization:/ Basic/ /[/*/]/<1\r\n/>")){
-//		    if((end = strchr(auth_hdr, '\r')) != NULL) *end = '\0';
-//		    if((end = strchr(auth_hdr, '\n')) != NULL) *end = '\0';
+	//adds for authentication
+		if((log_time <= 10) && (c = parsestr1(buf1,"Authorization:/ Basic/ /[/*/]/<1\r\n\\0/>"))){
 		    decodebase64(c);
 		    password = strchr(c,':');
 		    *password = '\0';
 		    password++;
 #ifdef DEBUG
 		    printf("auth_hdr = %s, password = %s\n",c ,password);
-//		printf("CONFIG.USERNAME: %s,CONFIG.PASSWORD: %s\n",CONFIG.USERNAME,CONFIG.PASSWORD);
 #endif
 		    if(!strcmp(c, CONFIG.USERNAME) && !strcmp(password, CONFIG.PASSWORD))
 			auth = 1;
-		    else
-			if(log_time <= 10) syslog(LOG_AUTHPRIV|LOG_INFO, "Time: %d, IP: %s, USER: %s, PASSWD: %s", log_time, ip, c, password);
+		    else {
+			auth = 0;
+			syslog(LOG_AUTHPRIV|LOG_INFO, "Time: %d, IP: %s, USER: %s, PASSWD: %s", log_time, ip, c, password);
 			log_time++;
+		    }
 
 		}else if(c = parsestr1(buf1, "Refer/,r,er:/ ")){
-	            strncpy(referer, c, 127);
-		    referer[127] = '\0';
+	            strmycpy(referer, c, 128);
+//		    referer[127] = '\0';
 		}else if(c = parsestr1(buf1, "Content-/<1Ll/>ength:/ ")){
 		    content_length = atol(c);
 		}else if (c = parsestr1(buf1, "Content-/<1Tt/>ype:/ ")){
+//printf(buf1);
 		    if(parsestr1(c, "application//x-www-form-urlencoded")){	//web_encoded
 			method1 = POST_WEB_ENCODED;
-		    }else if(parsestr1(c, "multipart//form-data")){		//boundary (data-upload) is comming		
-			method1 = POST_BOUNDARY;
+		    }else if(c = parsestr1(c, "multipart//form-data;/ ")){		//boundary (data-upload) is comming
+			if(c = parsestr1(c, "boundary=/[/*/]/<1\r\n\\0/>")){
+			    method1 = POST_BOUNDARY;
+			    strmycpy(boundary, c, 1024);
+//			    printf(boundary);
+			}
 		    }
 		}else if(c = parsestr1(buf1, "User-Agent:/ ")){    //To identify the OS
-	            strncpy(user_agent, c, 127);
-		    user_agent[127] = '\0';
+	            strmycpy(user_agent, c, 128);
+//		    user_agent[127] = '\0';
 		    agent = 1;
 /*		    if(strstr(c,"Linux"))	//used in post parsing only!
 	    		strcpy(os,"LINUX");
 		    else
 		        strcpy(os,"WIN");
-*/		}
+*/		} else if ( buf1[0] == '\r' || buf1[0] == '\n' ) break;
+//for test alex_raw
+//else printf("%s\n", buf1);
+//end of test
 	}//end of while
 
-//	    if( buf1[0] == '\r' || buf1[0] == '\n' )	//what for is it? RAW
 /**To accept the data delivered by post**/		/**NEED to make this point to main point for Firmware_upgrade and other functions!!!!! and limit post size!**/
 	if((method == M_POST) && (content_length > 1)){
 	    if(((method1 == POST_BOUNDARY) && (content_length < 4*1024*1024)) || ((method1 == POST_WEB_ENCODED) && (content_length < 200*1024))){
 		postdata = (char *)malloc(content_length+1);
 		if(postdata){
-		    memset( postdata, 0, content_length+1);
+		    memset(postdata, 0, content_length+1);
 		    fread(postdata,content_length,1,f);			//in copy.c 1 and content_ placechanged!
 #ifdef DEBUG
 		    printf("\n%s: Line%d - content_length = %d postdata = %s\n",__func__,__LINE__,content_length,postdata);
@@ -583,22 +584,10 @@ fclose(fp);
 	    return 0;
 	}
 
-    //snop adds for Authentication
 #ifdef DEBUG
 	printf("auth = %d, log_time = %d\n",auth,log_time);
 #endif
 
-/*    if(((auth==0) && (log_time==1))){
-	//if(ban == 0)
-		    fprintf(f,"HTTP/1.0 401 Unauthorized\r\n"
-					  "WWW-Authenticate: Basic realm=\"LB-SS01 TXI\" \r\n\r\n"
-					  "<html>\r\n"
-					  "<head><title>401 Unauthorized</title></head>\r\n"
-					  "<body><h1>401 Unauthorized</h1>\r\n"
-					  "<p>Access to this resource is denied; your client has not supplied"
-					  " the correct authentication.</p></body>\r\n</html>\r\n");
-    }
-*/
 	if(log_time <= 5){
 	    if(auth == 0){
 		if(agent){	//browser identified
@@ -615,8 +604,8 @@ fclose(fp);
 #ifdef DEBUG
 	    printf("come in ParseReq\n");
 #endif
-	    log_time = 0;
-    //printf("auth = %d, log_time = %d\n",auth, log_time);
+	    log_time = 1;
+//	printf("auth = %d, log_time = %d\n",auth, log_time);
 //	if((auth !=0 && log_time !=1) || strcmp(check_ip,ip))
     	    ParseReq(f, buf);
 	    }
@@ -728,7 +717,6 @@ int main(int argc, char *argv[]){
 //end
 
 
-//    Init_Http_Var();
     ReadConfiguration1();
 
 //    chdir(HTTPD_DOCUMENT_ROOT);
@@ -798,8 +786,8 @@ printf("%d == %d\n", ec.sin_addr.s_addr,inet_addr("127.0.0.1"));//important!!!
 	port[9] = '\0';
 
 	tmp = (char *)inet_ntoa(ec.sin_addr);		//unsecure
-	strncpy(ip, tmp, MIN(strlen(tmp)+1,19));
-	ip[19] = '\0';
+	strmycpy(ip, tmp, 20);
+//	ip[19] = '\0';
 
 //printf("main ip: %s  --  check_ip: %s\n", ip, check_ip);
 	
@@ -818,8 +806,8 @@ printf("%d == %d\n", ec.sin_addr.s_addr,inet_addr("127.0.0.1"));//important!!!
 	if(hp){
 	    tmp = hp->h_name;
 	}else tmp = no_dns;
-	strncpy(dns_name, tmp, MIN(strlen(tmp)+1,127));
-	dns_name[127] = '\0';
+	strmycpy(dns_name, tmp, 128);
+//	dns_name[127] = '\0';
 
 	}
 
