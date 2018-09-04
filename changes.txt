@@ -1,3 +1,63 @@
+- parsestr: added /Qvar?/ and /n8n and "bla\04"(bla\0 + number=4)
+- changed authentication rules
+20180818
+- in table-parse parse_file(area) added "mixed" string - for begin matches all if's to begin of while-area
+- in table-parse parse_file(area) added "check:/*find in block" string
+-  in tables changed to: parse_file:/ /etc/??file_name??
+	and get_folder:/ /??path??
+	and get_files:/ /??path??
+this used by function strncpy_()
+- changes in functions rename_() and change_line()
+- if(size > 1 && (tmp = malloc(size))) added to copy_CGI.c
+- some changes in parsestr(): /<-"chars" \n \t/>    is included
+20150608
+--------------------------------------------!!!!begin of terminal!!!----------------------------------------------------
+-in function 'boot_page' added <noscript>-line
+-in serv-smb.htm added (mk, del, show folders) of smb.conf file.
+20150405
+-added /etc/term.sh, changed /etc/devfsd.conf and /etc/init.d/S29httpd
+-in change_tbl_stat() added resolving by strncpy_() function. Like resolve line - "this ??tab_entry?? \t is to show"
+-some htm files are changed.(ID_#tab_name) to (ID_#tab_name_0). changed is usb-storage.htm aswell.
+20141230
+- ****** add TAB#1 in whole copy_tbl.c and in function of parse_CGI.c(fill_tbl "TAB#4:TAB2#1:TAB1#0...";)
+- ****** in get_tbl() now is tab_name#1 in use.
+-in copy_tbl.c:   "parse_file:" can be used with entries "if:" (TAB_LEN-times)
+20141218
+-changed save_bfile "";  , admin-firmware.htm  and other html's upload
+-"temp" value will be cleared (free_par_tmp();//clear all "temp"-parameters) after each CGI
+-some changes in write_ppar. to_par can be as type=temp
+-some changes in copy_ppar. to_par can be as type=temp
+-changed whole "par, area, temp" -> struct cfg_parse1, added ->next, ->type parameters
+-added in cgi: copy_ppar "from_par:to_par:offset"; and  clean_par "par1:par2:...";
+-in html-part added reg_par();
+-changed write_ppar "", now can be used braces {}
+-added save_file_full in cgi-part
+-in include_() par="" and area="" filled with ZEROs value-fields
+-write_system and cat_system have now "var_from:var_to:command". var_from is optional! (":var_to:command")
+-in network.htm added "DNS_SERVER0 DNS_SERVER1" and in udhcp-client-script
+-added boundary-recognition for save_bfile()
+-strncpy() changed to stnmycpy in httpd.c
+20140824
+-in DoCGI() removed mime-error, cleared restriction of *.cgi for DoCGI() in httpd.c;
+-added in parsestr1() /<NCHARS/> - all chars Not matches!
+-in <select> and in <type="checkbox"> added parsing of ->entry name, like tbl_select="tbl_name:parsing"
+-in table added "#-> parse_area: _#AREA-1" recognition
+-in script get_file "" and save_file "" are now parsed via strncpy_() funct.
+-added admin-crond.htm
+-in table added "get_files: /mnt"
+-in parsestr1() now "/E" not written to \0
+-now change_line ""{if file not exist or not found}
+-added fill_tbl "table1:table2:table3 .."; ->change rnd_tbl->flag of table entries
+-added ?@_table_name@? ?@__table_name@? in print() func., tbl_check="" in HTML-part
+-in funct. get_arg(var, ->size<-, flag) added parameter: 'size of value'.
+20140623
+-added ?@-_Table_name@? in function strncpy_()
+-changed my_shell() and shell() functions. now used strncpy_() instead of print().
+-cleared httpd_scripts.c from unuseable functions. (Goto_page, Upgrade_page, Javareturn_page, ...)
+-added write_shell()
+-use in func. print and strncpy_ -> the parsestr2() and restore_str()
+-changed access-user.htm (added change_line "";)
+-changed function change_line, so you can use [?condition?]{?cond/[ition?} binded to /etc/file
 20140605
 -added in copy_CGI.c func. strmycpy(), and write_ppar "to_par:from_par:parsestr";
 -added in copy.c func. restore_str(), changed func. parsestr2() and 'struct parsestr'

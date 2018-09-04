@@ -2,7 +2,7 @@
  *
  * Copyright (C) 1998  Kenneth Albanowski <kjahds@kjahds.com>,
  *		       The Silver Hammer Group, Ltd.
- *		 2009-2014  Alexander Reimer <alex_raw@rambler.ru>
+ *		 2009-2018  Alexander Reimer <alex_raw@rambler.ru>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,8 +35,8 @@ static char copybuf[16384];
 #undef DEBUG
 
 extern int TIMEOUT;
-extern struct cfg_parse1 *cfg_pointer;
-extern struct cfg_parse1 cfg1[];
+extern struct cfg_parse1 *cfg1;
+struct cfg_parse1 **cfg_p = &cfg1;
 
 
 /*is old! use parsestr instead!*/
@@ -70,6 +70,7 @@ extern struct cfg_parse1 cfg1[];
 
 char *point[2];		//0 - place where is ch_zero by /]; 1 - end of string
 char ch_zero = '\0';
+unsigned int number = 0;
 
 char *parsestr1( char *d, char *c)	//try identic strings!, "xxx*NULL" combination
 {
@@ -91,27 +92,40 @@ char *parsestr1( char *d, char *c)	//try identic strings!, "xxx*NULL" combinatio
 					    if(*tmp2 == '/' && *(tmp2+1) == '/') tmp2++; //tmp2+=2
 					    else if(*tmp2 == '/' && *(tmp2+1) == 'B' && i <= 1024) i++; //if(/B)
 					    else if(*tmp2 == '/' && *(tmp2+1) == 'E'){	//if(/E)	-optional
-						if(i == 0){tmp = tmp2; *tmp2 = '\0';break;}
+						if(i == 0){tmp = tmp2; break;}
 						else i--;
-					    }				//don't use /E if c-is constant string!!! (*tmp2 = '\0')
+					    }
 					    tmp2++;
 					}
+				//tmp - end of compare-string
 				//tmp2 - can be used,
-				tmp2 = parsestr1(d, c);
-				while(!tmp2){	//not matched
-				    while(*c){
+				while(1){	//not matched
+				    tmp2 = parsestr1(d, c);
+				    if(tmp2) break;
+				    while(1){
 					if(*c == '/' && *(c+1) == '/') c++; //c+=2
 					else if(*c == '/' && *(c+1) == '\\'){c = c + 2; break;} // if(/\) 
+					else if((tmp && (c == tmp)) || (*c == '\0')) return NULL;	//end of compare-strings - no matches - return NULL
 					c++;
 				    }
-				    if(*c) tmp2 = parsestr1(d, c);
-				    else {if(tmp) *tmp = '/'; return NULL;} //restore and quit.
 				}
-				d = tmp2;
-printf("%s\n", d);
-				if(tmp) {*tmp = '/'; c = tmp + 2; continue;}
-				else return d;
-		    case '\\':return d;
+//printf("str:%s d=%s c=%s\n", tmp2,d,c);
+				if(tmp) {d = tmp2; /*tmp2 is not always the end of string!! check it out*/
+					c = tmp + 2; continue;}
+				else return tmp2;
+
+		    case '\\':
+		    case 'E': point[1] = d;//NEW 20.03.2016
+				return d;
+	    /*  set number to /n10n   */
+		    case 'n': c++; tmp = c;
+				while(*tmp && *tmp != 'n') tmp++;
+				    int digi = 0; i = 0;
+				    while(c[i] >= '0' && c[i] <= '9'){ digi = digi*10 + (c[i] - '0'); i++; if(i > 5) break;}
+				    number = digi;	//set number to digi
+				    c = tmp;
+				    if(*tmp) c++; //if not end - increase c.
+				    continue;
 	    /* skip zero or one character*/
 		    case '0': tmp = d; while(tmp <= d+1){tmp = parsestr1(tmp, c+1); if (tmp) return tmp; tmp++;} return NULL;
 	    /* skip one symbol in d, exept \0 */
@@ -140,7 +154,17 @@ printf("%s\n", d);
 			    case '-': //  /<-CHARS/> matches chars 1 or more times
 			    case '*': //  /<*CHARS/> matches chars zero or more times
 				c++; tmp = c; i=0; while((*c != '/'|| c[1] != '>') && *c){
-				if(*c==*d){ do{d++;}while(*c==*d);
+				if(*c == '\\'){
+				    c++;
+				    switch(*c){
+				    case '\\':	ch = '\\';break;
+				    case 't':	ch = '\t';break;
+				    case 'n':	ch = '\n';break;
+				    case '\"':	ch = '\"';break;
+				    default: c--; ch = *c; break;
+				    }
+				} else ch = *c;
+				if(ch==*d){ do{d++;}while(ch==*d);
 				    c = tmp; i=1; continue;
 				}
 				c++;}
@@ -148,6 +172,7 @@ printf("%s\n", d);
 				if(*c == '/') c=c+2; continue;
 			    case '0': //  /<0CHARS/> matches chars zero or 1 time
 			    case '1': //  /<1CHARS/> matches chars one time
+			    case 'N': //  /<NCHARS/> all chars not matches one time
 				i = 0;tmp = c; c++; while((*c != '/'|| c[1] != '>') && *c){
 				if(*c == '\\'){
 				    c++;
@@ -155,6 +180,7 @@ printf("%s\n", d);
 				    case '\\':	ch = '\\';break;
 				    case 't':	ch = '\t';break;
 				    case 'n':	ch = '\n';break;
+				    case '\"':	ch = '\"';break;
 				    case '0':	ch = '\0';break;//check if *d == '\0'.
 							//In /* is set until zero, inclusive zero!
 				    default: c--; ch = *c; break;
@@ -162,7 +188,8 @@ printf("%s\n", d);
 				} else ch = *c;
 				if(ch == *d) i = 1; c++;}
 				if(*(tmp)=='1' && i==0) return NULL;
-				if(*c == '/') c=c+2; if(*d != '\0' && (*(tmp)=='1' || (*(tmp)=='0' &&  i==1))) d++; continue;
+				if(*(tmp)=='N' && i==1) return NULL;
+				if(*c == '/') c=c+2; if(*d != '\0' && (*(tmp)=='1' || *(tmp)=='N' || (*(tmp)=='0' &&  i==1))) d++; continue;
 			    default:
 			    case '\0': c--; continue; //  rest='<\0'
 			}
@@ -190,28 +217,59 @@ printf("%s\n", d);
 			    tmp = parsestr1(d, c+1);
 			    if(tmp)	return NULL;
 			    else { point[1] = d; return d;}
-		    case '?':		// /?variable?/
-		    c++;
-		    tmp = c;
-		    tmp2 = NULL;
-		    while(*tmp){
-			if(*tmp == '?' && *(tmp+1) == '/'){
-			    *tmp = '\0';
-			    tmp2 = get_var(NULL, c);		//get_var and get_variable
-			    *tmp = '?';
-			    c=tmp+2;
-			    break;
+		    case '?':		// /?variable?/	- nicht eingebetet(simple)
+		    case 'Q':		// /Qvar?/	- eingebetet
+			ch = *c;	//in ch: Q or ?
+			c++;
+			char *m;
+			tmp = c;
+			tmp2 = NULL;
+			while(*tmp){
+			    if(*tmp == '?' && *(tmp+1) == '/'){
+				i = tmp - c;
+				if((i > 1) && (i < 33)){
+				m = malloc(i);
+				if(m){
+				    strmycpy(m, c, i);
+				    tmp2 = get_var(NULL, m);		//get_var and get_variable
+				    free(m);
+				}
+				}
+				c=tmp+2;
+				break;
+			    }
+			    tmp++;
 			}
-			tmp++;
-		    }
-		    
-		    if(tmp2){
-			i = strlen(tmp2);
-			if(i && strncmp(d, tmp2, i)) return NULL;
-			d = d + i;
-		    }
 
-		    continue;		//it's or c++ or c=tmp+2
+			if(tmp2 && *tmp2){
+			    if(ch == '?'){
+				i = strlen(tmp2);
+				if(i && strncmp(d, tmp2, i)) return NULL;
+				d = d + i;
+			    }else{
+				static int time = 0;
+				time++;
+				if(time < 10){
+				    unsigned long long size = strncpy_(NULL, tmp2, 0)+1;	//this is max. size of tmp2-string
+				    if(size > 1 && (m = malloc(size))){
+				    strncpy_(m, tmp2, size);
+				    tmp = parsestr1(d, m);
+				    free(m);
+				    if(!tmp){time--; return NULL;}
+				    d = tmp;
+				    //if(*d != '\0') d++;		//????????
+				    }
+				}else printf("parsestr: max. counter\n");
+				time--;
+			    }
+			}
+			else return NULL;
+
+			continue;		//it's or c++ or c=tmp+2
+
+		    case '-': if(*(c+1) == '-') { d=d-1; c=c+2;} //  /--   -means d-1
+			continue;
+
 		    default: c--;
 		}
 	    } else if(*c == '\\'){
@@ -223,15 +281,19 @@ printf("%s\n", d);
 		    case 'r': if(*d != '\r') return NULL; c++; d++; continue;
 	    /* \" string is to match */
 		    case '\"': if(*d != '\"') return NULL; c++; d++; continue;	//need to change it
-	    /* \0 the same as "bla/" */
-		    case '0': if(*d != '\0') return NULL; return d;
+	    /* \0 the same as "bla/"; if after is "bla\02" -> "bla\0" + number=2 */
+		    case '0': if(*d != '\0') return NULL;
+				    c++; int digi = 0; i = 0;
+				    while(c[i] >= '0' && c[i] <= '9'){ digi = digi*10 + (c[i] - '0'); i++; if(i > 5) break;}
+				    if(i) number = digi;	//set number to digi
+				return d;
 		    case '\\': break;
 		    default: c--;
 		}
 	    }
 
 //	    if (tolower(*c) != tolower(*d))  break;
-	    if (*c != *d)  return NULL;
+	    if (*c != *d) return NULL;
 	    if (!(*d))	  {printf("PARSESTR1<<<<<<</n");break;}	//not happens *d=*c=='\0'
 
 	    c++;
@@ -259,9 +321,11 @@ char *parsestr1_( char *d, char *c){		//push and pop the pointers
 char *parsestr2( struct parsestr *ptr, char *d, char *c){		//use the pointers in struct
     char *tmp;
 
+    number = 0;
     point[0] = NULL;
     if(tmp = parsestr1(d, c) /*&& (ptr != NULL)*/){
 	ptr->ch = ch_zero;
+	ptr->num = number;
 	ptr->zero = point[0];	//if NULL -> restore_str is not made
 	ptr->end = point[1];
     }
@@ -303,14 +367,14 @@ int copy_file(char *file, FILE *out)
   if((fp=fopen(file,"r")) == NULL){
     printf(err_str, file);
     fprintf(out, err_str, file);
-    return -1;
+    return 1;
   }
   else{
     while ((n = fread(copybuf,1,sizeof(copybuf),fp)) != 0) {
 	wrote = fwrite(copybuf,n,1,out);
 	if (wrote < 1){
 	    fclose(fp);
-	    return -1;
+	    return 1;
 	}
     }
     fclose(fp);
@@ -350,7 +414,7 @@ int copy_file_include(char *file, FILE *out)
 		    *ptr = '?';
 		    free_arg(1);
 		}
-		return -1;
+		return 1;
 	    }
 
 	    data = (char *)malloc(stbuf.st_size+1);
@@ -359,7 +423,10 @@ int copy_file_include(char *file, FILE *out)
 		data[stbuf.st_size] = '\0';
 		handle_get(data, out);
 		free(data);
-	    } else fprintf(out, "ERR: Unable allocate memory.\n");
+	    } else {
+		fprintf(out, "ERR: Unable allocate memory.\n");
+		//ret = 1;//error alocate
+	    }
 	    fclose(infile);
         } else ret = copy_file(file, out);		//all others will only copied
   if(i){
@@ -422,6 +489,24 @@ inline void radio_value_insert(char *line, char *var_head, FILE *out)
     else fprintf(out, "%s\"", line);	/* send out the remain of line */
 }
 
+//register new parameter called name, from value, size-lang.
+//return 1=success and 0=false
+int reg_par(char *name, char *value, long long size)
+{
+	struct cfg_parse1 *ptr = cfg1;
+	while(ptr){
+		if(ptr->type == CFG_TMP && !strcmp(name, ptr->web_name)){
+			ptr->size = size;
+			ptr->value = value;
+			ptr->new_value = value;
+			return 1;
+		}
+	ptr = ptr->next;
+	}
+	return 0;
+
+}
+
 inline void include_(char *line, char *var_head, FILE *out)	//SSI made total brutal, no checks of file path, and include must be along in string of file!
 {
     char *var_head2;
@@ -432,7 +517,11 @@ do{
 	/*collect parameters in a array*/
 	char *a, *ptr;
 	int i = 0, str_size, val_size;
-/*need cfg_pointer limitation for array*/
+	struct cfg_parse1 *cfg_pointer;
+	*cfg_p = (struct cfg_parse1 *)malloc(sizeof(struct cfg_parse1));
+
+	cfg_pointer = *cfg_p;
+	if(cfg_pointer == NULL) continue;
 	ptr = var_head2;
 
 	    while(i < 3){
@@ -444,15 +533,24 @@ do{
 				a = ptr;
 				str_size = strlen(a)+1;
 				ptr = (char*)malloc(str_size + 2*val_size);//str = "[part of var_head2][value][new_value]"
+				if(ptr == NULL){
+					i = 5; continue;
+				}
 				strcpy(ptr, a);
+				cfg_pointer->type = CFG_PAR;
 				cfg_pointer->str = ptr;
 				cfg_pointer->size = val_size;
 				cfg_pointer->changed = 0;
 				cfg_pointer->saved = 0;
 				cfg_pointer->value = ptr + str_size;
-				*(cfg_pointer->value) = '\0';
+//				*(cfg_pointer->value) = '\0';
 				cfg_pointer->new_value = ptr + str_size + val_size;
-				*(cfg_pointer->new_value) = '\0';
+//				*(cfg_pointer->new_value) = '\0';
+				memset(cfg_pointer->value, 0, 2*val_size);//fill with zeros
+				cfg_pointer->name = NULL;
+				cfg_pointer->pattern = NULL;
+				cfg_pointer->web_name = NULL;
+				cfg_pointer->next = NULL;
 				break;
 	    	    case 1:	cfg_pointer->web_name = a; break;
 		    case 2:	cfg_pointer->name = a; cfg_pointer->pattern = ptr; break;
@@ -463,9 +561,16 @@ do{
 		}
 	    i++;
 	    }
+	if(i != 5){
 printf("Collected parameter: %s:%s:%lld:%s\n", cfg_pointer->web_name, cfg_pointer->name, cfg_pointer->size, cfg_pointer->pattern);
-	cfg_pointer++;
-	cfg_pointer->str = NULL;	//main criteria to abort moving in array.
+	    cfg_p = &(cfg_pointer->next);
+	}else{
+	    printf("ERROR allocate memory\n");
+	    if(cfg_p && *cfg_p){
+		free(*cfg_p);
+		*cfg_p = NULL;	//main criteria to abort moving in array.
+	    }
+	}
 
     } else if ((var_head2 = parsestr2(&strct, var_head,"readcfg/ "))!=NULL){	//<!--#include readcfg -->
 	/*start to fill parameters from config to collected array*/
@@ -475,7 +580,11 @@ printf("Collected parameter: %s:%s:%lld:%s\n", cfg_pointer->web_name, cfg_pointe
 	char *a, *ptr;
 	int i = 0, str_size;
 	long long val_size;
-/*need cfg_pointer limitation for array*/
+	struct cfg_parse1 *cfg_pointer;
+	*cfg_p = (struct cfg_parse1 *)malloc(sizeof(struct cfg_parse1));
+
+	cfg_pointer = *cfg_p;
+	if(cfg_pointer == NULL) continue;
 	ptr = var_head2;
 
 	    while(i < 2){
@@ -483,22 +592,33 @@ printf("Collected parameter: %s:%s:%lld:%s\n", cfg_pointer->web_name, cfg_pointe
 	        if(a)
 		    switch(i){
 		    case 0:	val_size = atoll(a);
-				if(!val_size || val_size > 32 *1024) return;	//size is in impassable range - so skip it all (whole parameter string will be skipped!)
+				if(val_size > 32 *1024) return;	//size is in impassable range - so skip it all (whole parameter string will be skipped!)
 				a = ptr;
 				str_size = strlen(a)+1;
 				ptr = (char*)malloc(str_size + val_size);//str = "[part of var_head2][value]"
+				if(ptr == NULL){
+					i = 5; continue;
+				}
 				strcpy(ptr, a);
+				cfg_pointer->type = (val_size != 0) ? CFG_AREA : CFG_TMP;
 				cfg_pointer->str = ptr;
 				cfg_pointer->size = val_size;
 				cfg_pointer->changed = 0;
 				cfg_pointer->saved = 0;
+				if(val_size != 0){//AREA="size:name"
 				cfg_pointer->value = ptr + str_size;
 				cfg_pointer->new_value = ptr + str_size;
-				memset(cfg_pointer->value, '\0', val_size);
+				memset(cfg_pointer->value, 0, val_size);//fill memory with 0
+				}else{//AREA="0:temp_name"
+				cfg_pointer->value = NULL;
+				cfg_pointer->new_value = NULL;
+				}
 				cfg_pointer->name = NULL; //ptr + str_size - 1;
 				cfg_pointer->pattern = NULL; //ptr + str_size - 1;
+				cfg_pointer->web_name = NULL;
+				cfg_pointer->next = NULL;
 				break;
-	    	    case 1:	cfg_pointer->web_name = a; break;
+		    case 1:	cfg_pointer->web_name = a; break;
 		    }
 		else {
 		    printf("area=\"\" not full, broken by %d\n", i+1);
@@ -506,9 +626,16 @@ printf("Collected parameter: %s:%s:%lld:%s\n", cfg_pointer->web_name, cfg_pointe
 		}
 	    i++;
 	    }
+	if(i != 5){
 printf("Collected parameter: [%s:%lld]\n", cfg_pointer->web_name, cfg_pointer->size);
-	cfg_pointer++;
-	cfg_pointer->str = NULL;	//main criteria to abort moving in array.
+	    cfg_p = &(cfg_pointer->next);
+	}else{
+	    printf("ERROR allocate memory\n");
+	    if(cfg_p && *cfg_p){
+		free(*cfg_p);
+		*cfg_p = NULL;	//main criteria to abort moving in array.
+	    }
+	}
 
     } else
     
@@ -526,17 +653,22 @@ printf("Collected parameter: [%s:%lld]\n", cfg_pointer->web_name, cfg_pointer->s
         my_shell(out, var_head2);
     } else if ((var_head2 = parsestr2(&strct, var_head,"cgi=\"/[/*/]\"/ "))!=NULL){	//<!--#include cgi="..." -->
 
-	DoCGI(out, 0, var_head2);// what about arg??
+	if(DoCGI(out, var_head2))  fprintf(out, "Not Found: %s\n", var_head2);// what about arg??
+	else  free_par_tmp();//clear all "temp"-parameters
+
     } else if((var_head2 = parsestr2(&strct, var_head, "tbl_select=\"/[/*/]\"/ "))!=NULL){
 
 	show_tbl(var_head2, out);
+    } else if((var_head2 = parsestr2(&strct, var_head, "tbl_check=\"/[/*/]\"/ "))!=NULL){
+
+	show_tbl_chck(var_head2, out);
     } else if((var_head2 = parsestr2(&strct, var_head, "chtbl_stat=\"/[/*/]\"/ "))!=NULL){
 
 	change_tbl_stat(var_head2);
     } else if((var_head2 = parsestr2(&strct, var_head, "InIt/ "))!=NULL){		//<!--#include InIt -->
 
-	Init_Http_Var();
-    } else if((var_head2 = parsestr2(&strct, var_head, "write_par=\"/[/*/]\"/ "))!=NULL){	//<!--#include write_par="par:value" -->
+	ReadConfiguration();
+    } else if((var_head2 = parsestr2(&strct, var_head, "write_par=\"/[/*/N\\N/]\"/ "))!=NULL){	//<!--#include write_par="par:value" -->
 
 		// write_par  par:value		this is used in copy_CGI.c - the same code!
 		char *tmp, *tmp2;
@@ -545,10 +677,10 @@ printf("Collected parameter: [%s:%lld]\n", cfg_pointer->web_name, cfg_pointer->s
 			    if(tmp2 && *tmp2 && *var_head2){
 			    	tmp = get_var(&size, tmp2);
 				if(tmp && size){
-				    strncpy(tmp, var_head2, size);
-				    tmp[size-1] = '\0';
+				    strncpy_(tmp, var_head2, size-1);
+//				    tmp[size-1] = '\0';
 				}
-				if(tmp2 != var_head2) *(var_head2-1) = ':';
+//				if(tmp2 != var_head2) *(var_head2-1) = ':';
 			    }
     }//need some end hier (else)
 
@@ -556,16 +688,34 @@ printf("Collected parameter: [%s:%lld]\n", cfg_pointer->web_name, cfg_pointer->s
 
 }
 
+//free all parameter marked as "temp"
+void free_par_tmp(void){
+	struct cfg_parse1 *ptr = cfg1;
+	while(ptr){
+	if(ptr->type == CFG_TMP){
+		ptr->size = 0;
+#ifdef DEBUG
+		printf("-->clear: %s\n", ptr->web_name);
+#endif
+	}
+	ptr = ptr->next;
+	}
+}
+
+//clear all parameters
+void free_par(struct cfg_parse1 **ptr){
+	if(!ptr || !*ptr) return;
+	free_par(&((*ptr)->next));
+printf("FREEpar %s\n", (*ptr)->str);
+	if((*ptr)->str) free((*ptr)->str);
+	free(*ptr);
+	*ptr = NULL;
+}
+
 void free_page_mem(void){
-    cfg_pointer = cfg1;	//new html set pointer to beginn of config
-    while(cfg_pointer->str){		//release old strings
-printf("Free mem %s\n",cfg_pointer->web_name);
-	free(cfg_pointer->str);
-	cfg_pointer->str=NULL;
-	cfg_pointer++;
-    }
-    cfg_pointer = cfg1;
-    
+    free_par(&cfg1);
+    cfg_p = &cfg1;
+
     free_cgi(cgi_name);
     cgi_name = NULL;
     free_tbl();
@@ -574,10 +724,10 @@ printf("Free mem %s\n",cfg_pointer->web_name);
 extern config CONFIG;	//used by get_var function
 
 
-char *get_var(long long *size_ptr, char *var_index){
+char *get_var(unsigned long long *size_ptr, char *var_index){
 
     char *ptr = NULL;
-    long long size = 0;	//if Zero - not write able
+    unsigned long long size = 0;	//if Zero - not write able
 
     if(*var_index == '_'){	/* global variables */
 	var_index++;
@@ -589,9 +739,10 @@ char *get_var(long long *size_ptr, char *var_index){
 	    var_index++;
 	    if(*var_index == '#'){	//??_##variable?? - show local command variable index.html?variable=5
 		var_index++;
-		ptr = get_arg(var_index, 1);
-	    } else ptr = get_arg(var_index, 0);
-	    if(ptr) size = strlen(ptr) + 1;//for remove_show_chars needed
+		return get_arg(var_index, size_ptr, 1);
+	    }
+	    return get_arg(var_index, size_ptr, 0);
+//	    if(ptr) size = strlen(ptr) + 1;//for remove_show_chars needed
 	}else if(*var_index == '%'){	//??_%variable?? - show new_variable
 	    var_index++;
 	    return get_cfg_value(size_ptr, var_index, 1);
@@ -600,7 +751,7 @@ char *get_var(long long *size_ptr, char *var_index){
 	    return get_cfg_value(size_ptr, var_index, 2);
 	}else if(*var_index == '@'){	//??_@variable?? - show variable from rnd table
 	    var_index++;
-	    return get_tbl(var_index);
+	    ptr = get_tbl(var_index);
 	}else if(*var_index == '?'){	//??_?file|expression?? -> in file this expression
 	    var_index++;
 

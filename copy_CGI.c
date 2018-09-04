@@ -29,8 +29,9 @@ extern config CONFIG;
 struct cgi *cgi_name = NULL;
 struct cgi *cgi_used = NULL;	//connect to cgi that is now in use. Used by print()
 
+//return 0 -exec in braces, 1 - jump
 /*used in get_cgi as print "text to \n be ??_%var?? "*/
-void print(FILE *out, char *tmp){
+int print(FILE *out, char *tmp){
     char *tmp1, *tmp2;//tmp2 can be replaced via tmp1!!
     struct cgi *ptr;
     struct parsestr strct;
@@ -38,7 +39,7 @@ void print(FILE *out, char *tmp){
     static int loop_print = 0;	// used if loops exissted
     if(loop_print > 10){
 	fprintf(out, "max loop counter reached\n");
-	return;
+	return 1;
     }
     loop_print++;
 
@@ -61,12 +62,17 @@ void print(FILE *out, char *tmp){
 			if(*tmp2 == '-')		//?@-_Table@?	- list
 							//?@-Table@?	- <select>
 				show_tbl(tmp2+1, out);
-			else if(*tmp == '0'){		//?@0variable@?	-	fill with \0 the rest of variable
+			else if(*tmp2 == '_')		//?@__Table@?	- <input type=checkbox>	- show all
+							//?@_Table@?	- <input type=checkbox>	- show only showable
+				show_tbl_chck(tmp2+1, out);
+			else if(*tmp2 == '0'){		//?@0variable@?	-	fill with \0 the rest of variable
 				long long size, s;
 				tmp2 = get_var(&size, tmp2+1);
-				if(tmp2 && (s = strlen(tmp2)) < size){
-				    fprintf(out, "%s", tmp2);
-				    while(s < size-1){
+				if(tmp2){
+				    s = strlen(tmp2);
+				    if(s < size)	fprintf(out, "%s", tmp2);
+				    else{		fwrite(tmp2, size-1, 1, out); s = size-1;}//make zero at end
+				    while(s < size){
 					putc('\0', out);
 					s++;
 				    }
@@ -94,7 +100,7 @@ void print(FILE *out, char *tmp){
 				if(!tmp2){
 				    restore_str(&strct);
 				    loop_print--;
-				    return;		//if tmp is not matched with data_ptr - break printing
+				    return 0;		//if tmp is not matched with data_ptr - break printing
 				}
 			}
 			tmp = restore_str(&strct);
@@ -104,14 +110,16 @@ void print(FILE *out, char *tmp){
 	    tmp++;
 	    }
 	loop_print--;
+	return 1;
 }
 
 unsigned long long strncpy_(char *tmp, char *tmp1, long long size){
     //tmp -is out, tmp1 -is in. and return the size of string!
     //if tmp == NULL -> works as counter of string tmp1
-    char ch, *tmp2, *tmp3;
+    //'\0' -sign is not counted!! -> strncpy_() + 1 
+    char ch, *tmp2;
+    struct parsestr strct;
     unsigned long long s = 0;
-    int i;
 
     static int loop_strncpy = 0;	// used if loops exissted
     static char *ptr = NULL;//used for breaking loops like: "area:text to loop ??area??"
@@ -122,8 +130,8 @@ unsigned long long strncpy_(char *tmp, char *tmp1, long long size){
 	printf("max loop counter in strncpy_ reached\n");
 	goto end;
     }
-    
-    if(tmp1 == ptr){
+
+    if(tmp1 == ptr || tmp1 == NULL){
 	goto end;
     }
     loop_strncpy++;
@@ -140,24 +148,28 @@ unsigned long long strncpy_(char *tmp, char *tmp1, long long size){
 		case '?':	ch = '?';break;
 		default :	tmp1--;
 	    }
-	}else if(*tmp1 == '?' && *(tmp1+1) == '?' && *(tmp1+2) != '?'){		//??variable??
-		    i = 0;
-		    tmp1 = tmp1 + 2;
-		    tmp2 = tmp1;
-		    while(*tmp2){
-			if(*tmp2 == '?' && *(tmp2+1) == '?'){
-			    *tmp2 = '\0';
-			    i = 1;
-			    tmp3 = get_var(NULL, tmp1);		//get_var and get_variable
-			    if(tmp3) s += strncpy_(tmp ? (tmp+s) : NULL, tmp3, size-s);
-			    *tmp2 = '?';
-			    tmp1=tmp2+2;
-			    break;
-			}
-			tmp2++;
-		    }
-		    if(i == 0) printf("[ERR]: must be ??variable??\n");
-		    continue;		//it's or tmp1=tmp1+2 or tmp1=tmp2+2
+	} else if(tmp2 = parsestr2(&strct, tmp1, "?@/[/N@N/*/]@?")){		//?@variable@?
+		if(*tmp2 == '-')		//?@-_Table@?	- list
+						//?@-Table@?	- <select>
+			s += show_tbl_str(tmp2+1, tmp ? (tmp+s) : NULL, size-s);
+/*		else if(*tmp2 == '0'){		//?@0variable@?	-	fill with \0 the rest of variable
+				long long size1, s;
+				tmp2 = get_var(&size1, tmp2+1);
+				if(tmp2 && (s = strlen(tmp2)) < size1){
+				    fprintf(out, "%s", tmp2);
+				    while(s < size1-1){
+					putc('\0', out);
+					s++;
+				    }
+				}
+		}
+*/		tmp1 = restore_str(&strct);
+		continue;
+	} else if(tmp2 = parsestr2(&strct, tmp1, "??/[/N?N/*/]??")){		//??variable??
+		tmp2 = get_var(NULL, tmp2);		//get_var and get_variable
+		if(tmp2) s += strncpy_(tmp ? (tmp+s) : NULL, tmp2, size-s);
+		tmp1 = restore_str(&strct);
+		continue;
 	}
 	if(tmp) tmp[s] = ch;
 	s++; tmp1++;
@@ -172,121 +184,169 @@ end:
 
 //copy tmp1 to tmp and break if strlen of tmp1 is smoller as size
 //size is including end of str.
-void strmycpy(char *tmp, char *tmp1, long long size){
+unsigned long long strmycpy(char *tmp, char *tmp1, unsigned long long size){
 	if(size) size--;
+	int s = size;
 	while(size){
 		*tmp = *tmp1;
-		if(!(*tmp1)) return;
+		if(!(*tmp1)) return (s-size);
 		tmp++; tmp1++; size--;
 	}
 	*tmp = '\0';
+	return s;
 }
 
-//line="par:from_par:parsestr"
-void write_ppar(char *line){
+//line="from_par:to_par:parsestr"
+int write_ppar(char *line){
 	char *par[2], *tmp, *tmp1;
-	int i = 1;
+	int i = 0, jump = 0;
 	unsigned long long k, size;
 
-	while(i >= 0){
+	while(i <= 1){
 		tmp = w_strtok(&line, ':');
-		if(!tmp || !(*tmp) || !(*line)) {printf("[ERR]: write_ppar step: %d\n", i); return;}
+		if(!tmp || !(*tmp) || !(*line)) {printf("[ERR]: write_ppar step: %d\n", i); return 0;}
 //printf("%s , %d\n", tmp, i);
-		tmp = get_var((i==1)? &size : NULL, tmp);
-		if(!tmp || !size) {printf("[ERR]: parameter not found\n"); return;}
-		par[i] = tmp;
-	i--;
+		par[i] = get_var((i==1)? &size : NULL, tmp);
+	i++;
 	}
-// par[1]=to_par, par[0]=from_par, line=parsestr
-	k = strlen(par[0])+1;
-	tmp = (char *)malloc(k);
-	if(tmp){
-		strncpy(tmp, par[0], k);
-		if(tmp1 = parsestr1(tmp, line)){
+	if(!par[0]) {printf("[ERR]: parameter not found\n"); return 0;}
+
+// par[1]=to_par, par[0]=from_par, line=parsestr, size=to_par_size
+	if(par[1]){
+	    if(size){
+		k = strlen(par[0])+1;
+		//size == 1
+		tmp = (char *)malloc(k);
+		if(tmp){
+		    strncpy(tmp, par[0], k);
+		    if(tmp1 = parsestr1(tmp, line)){
 			strmycpy(par[1], tmp1, size);
-		}
+			jump = 1;//everything is OK - so jump
+		    }
 		free(tmp);
+		}
+	    }
+	}else{
+	    //tmp[1] == NULL
+	    if(tmp1 = parsestr1(par[0], line)){	//par[0] - can be zeroed!! by /[/*/]
+		jump = reg_par(tmp, tmp1, strlen(tmp1)+1);	//tmp = to_par, on success = 1
+	    }
 	}
+	return jump;
 }
 
-void my_shell(FILE *out, char *tmp){		//tmp- is max. 2048byte  if runned from CGI-script
+void write_system(char *b_in, long long s_in, char *buf, long long size, int mode, char *arg);
+
+void write_shell(char *buf_in, long long size_in, char *buf, long long size_1, int mode, char *cmd){ //tmp- is max. 2048byte  if runned from CGI-script
+	unsigned long long size = strncpy_(NULL, cmd, 0)+1;	//this is max. size of cmd-string
+	char *arg;
+
+	if(arg = malloc(size)){
+	    strncpy_(arg, cmd, size);
+	    write_system(buf_in, size_in, buf, size_1, mode, arg);
+	    free(arg);
+	}
+/*
     FILE *fp;
     char *file_name = "/var/temp1234";
 	if((fp = fopen(file_name,"w+")) != NULL){
-	    print(fp, tmp);
-	    fclose(fp);
-	    chmod(file_name, S_IXUSR);	//make file Exec.by.User
-	    my_system(out, file_name);
-	    remove(file_name);
-	}
-    
-}
-
-void shell(char *tmp){		//tmp- is max. 2048byte  if runned from CGI-script
-    FILE *fp;
-    char *file_name = "/var/temp1234";
-	if((fp = fopen(file_name,"w+")) != NULL){
-	    print(fp, tmp);
+	    print(fp, cmd);
 	    fclose(fp);
 	    chmod(file_name, S_IXUSR);
 	    system(file_name);
+	    write_system(buf, size, mode, file_name);
 	    remove(file_name);
-	}
-    
+	}*/
 }
+
+void my_shell(FILE *out, char *tmp){		//tmp- is max. 2048byte  if runned from CGI-script
+	unsigned long long size = strncpy_(NULL, tmp, 0)+1;	//this is max. size of arg-string
+	char *arg;
+
+	if(arg = malloc(size)){
+	    strncpy_(arg, tmp, size);
+	    my_system(out, arg);
+	    free(arg);
+	}
+}
+
+void shell(char *tmp){		//tmp- is max. 2048byte  if runned from CGI-script
+	unsigned long long size = strncpy_(NULL, tmp, 0)+1;	//this is max. size of arg-string
+	char *arg;
+
+	if(arg = malloc(size)){
+	    strncpy_(arg, tmp, size);
+	    system(arg);
+	    free(arg);
+	}
+
+}
+
 void rename_(char *old_name, char *new_name){
 //    char LineBuf[256];
     FILE *fp, *fop;
-	if((fp = fopen(old_name,"r")) != NULL && (fop = fopen(new_name, "w")) != NULL){
+    char i = 0;
+	if((fp = fopen(old_name,"r")) != NULL){
+	    if((fop = fopen(new_name, "w")) != NULL){
 /*	    while(fgets(LineBuf,255,fp) != NULL){
 	        fputs(LineBuf,fop);
 	    }
-*/	    copy(fp, fop);
-	    fclose(fp);
+*/	    i = 1;
+	    copy(fp, fop);
 	    fclose(fop);
-	    remove(old_name);
+	    }
+	    fclose(fp);
+	    if(i) remove(old_name);
 	}
 }
 
-void change_line(char *line){ //line="/etc/file:/ nameserver: nameserver ??var??" or line="/etc/file:/*/?var?/: nameserver ??_%var??"
-    char *file_name, *cmpstr, LineBuf[256];//, *tmp;
+//return 0 -exec in braces, 1 - jump
+int change_line(char *line){ //line="/etc/file??name??:/ nameserver: nameserver ??var??" or line="/etc/file:/*/?var?/: nameserver ??_%var??"
+    char *file_name, *cmpstr, LineBuf[256], *tmp;
+    unsigned long long size;
     char *file ="/var/temp1234";
-    FILE *fp, *fop;
-    int flag = 0;
-        file_name = w_strtok(&line, ':');
-        if(!file_name || !(*file_name)){ printf("change_line: file name is empty\n");return;}
-        cmpstr = w_strtok(&line, ':');
-        if(!cmpstr || !(*cmpstr)){ printf("change_line: compare_string is empty\n");return;}
-	if(!(*line)){ printf("change_line: change_string is empty\n");return;}
+    char *ptr = cgi_used->data_ptr; //!!!!use only in cgi-scripts!!!!
 
-/*	tmp = cmpstr;
-	if(*tmp == '%'){
-		tmp++;
-		tmp = get_var(NULL, tmp);
-		if(!tmp){ printf("change_line: get_var is empty\n");return;}
-		
-	}
-*/	
-	if((fp = fopen(file_name,"r")) != NULL && (fop = fopen(file, "w")) != NULL){
+    FILE *fp, *fop;
+    int flag = 0;//exec in braces
+        file_name = w_strtok(&line, ':');
+        if(!file_name || !(*file_name)){ printf("change_line: file name is empty\n");return 1;}//jump the braces
+        cmpstr = w_strtok(&line, ':');
+        if(!cmpstr || !(*cmpstr)){ printf("change_line: compare_string is empty\n");return 1;}
+
+    size = strncpy_(NULL, file_name, 0)+1;	//this is max. size of arg-string
+    if(size > 1 && (tmp = malloc(size))){
+	strncpy_(tmp, file_name, size);
+
+	if((fp = fopen(tmp,"r")) != NULL){
+	    if((fop = fopen(file, "w")) != NULL){
 	    while(fgets(LineBuf,255,fp) != NULL){
-	
-	//if(strstr(LineBuf, tmp)){
+
+		cgi_used->data_ptr = LineBuf;
 		if(parsestr1(LineBuf, cmpstr)){
+		    if(print(fop, line)){
 //printf("%s   :: %sline: %s\n", cmpstr, LineBuf, line);
-		    flag = 1;
-		    print(fop, line);
+		    flag = 1;//jump braces
+		    }else{
+			fputs(LineBuf,fop);
+		    }
 		}else{
 		    fputs(LineBuf,fop);
 		}
 	    }
-	    fclose(fp);
-	    if(flag == 0) print(fop, line);
 	    fclose(fop);
-	    rename_(file, file_name);
+		if(flag == 1){
+		    rename_(file, tmp);//found and changed - rename file
+		}else{
+		    remove(file);//not found - remove file
+		}
+	    }
+	fclose(fp);
 	}
-	*(cmpstr-1) = ':';
-	*(line-1) = ':';
-
+	cgi_used->data_ptr = ptr;
+	free(tmp);
+    }
+	return flag;
 }
 
 //chars = ab\"fr\\;<>
@@ -353,25 +413,24 @@ void remove_show_chars(char *parm, int sw){
     }
 }
 
-//name:size_limit:format:file_name
+//name:size_limit:firmware:file_name
 int save_bfile_(FILE *out, char *parm){
-    int i = 0, k = 0, ret_val = 1;
+    int i = 0, ret_val = 0;
     char *tmp[4];
 
     while(i < 4){
 	tmp[i] = w_strtok(&parm, ':');
-	if(tmp[i] == NULL || (i != 2 && *tmp[i] == '\0')) k = 1;
+	if(tmp[i] == NULL){
+	    fprintf(out, "not all args are given\n");
+	    return ret_val;
+	}
 	i++;
     }
-    if(k == 1){
-	fprintf(out, "not all args are given\n");
-	return ret_val;
-    }
-    ret_val = save_bfile(out, tmp[0], atoll(tmp[1]), tmp[2], tmp[3]);
+    ret_val = save_bfile_1(out, tmp[0], atoll(tmp[1]), tmp[2], tmp[3]);
 
-    *(tmp[1]-1) = ':';
-    *(tmp[2]-1) = ':';
-    *(tmp[3]-1) = ':';
+//    *(tmp[1]-1) = ':';
+//    *(tmp[2]-1) = ':';
+//    *(tmp[3]-1) = ':';
     return ret_val;
 }
 
@@ -424,41 +483,45 @@ char *search[] = {"print",		//1
 			"system",
 			"my_system",	//"expl1" befor "expl"
 			"get_file",
+			"save_file_full",
 			"save_file",	//5
 			"savecfg",
 			"init",
 			"fill_all_cfg",
-			"fill_cfg",	//9
-			"get_var",	//10
+			"fill_cfg",	//10
+			"get_var",	//11
 			"boot_page",
-			"save_bfile",	//12
-			"set",		//13
-			"if_set",		//14 - the same as set!!
-			"change_line",		//15
-			"if_changed",		//16
-			"not_changed",		//17
-			"if",		//18
-			"not",		//19
-			"shell",	//20
-			"my_shell",	//21
-			"clean_ip",	//22
-			"buf_if_eof",	//23
-			"buf_parse_area",	//24
-			"write_file",	//25
-			"write_par",	//26
-			"write_system",	//27
-			"cat_system",	//28
-			"bind_par",	//29
-			"remove_chars",	//30
-			"show_chars",	//31
-			"load_file",	//32
-			"exit_cgi",	//33
-			"chroot",	//34
-			"exist_file",	//35
-			"nnot",		//36
-			"1234test",	//37
-			"chtbl_stat",	//38
-			"write_ppar",	//39
+			"save_bfile",	//13
+			"set",		//14
+			"if_set",		//15 - the same as set!!
+			"change_line",		//16
+			"if_changed",		//17
+			"not_changed",		//18
+			"if",		//19
+			"not",		//20
+			"shell",	//21
+			"my_shell",	//22
+			"clean_ip",	//23
+			"buf_if_eof",	//24
+			"buf_parse_area",	//25
+			"write_file",	//26
+			"write_par",	//27
+			"write_system",	//28
+			"cat_system",	//29
+			"bind_par",	//30
+			"remove_chars",	//31
+			"show_chars",	//32
+			"dub_ppar",	//33--not used!
+			"exit_cgi",	//34
+			"chroot",	//35
+			"exist_file",	//36
+			"nnot",		//37
+			"1234test",	//38
+			"chtbl_stat",	//39
+			"write_ppar",	//40
+			"fill_tbl",	//41
+			"copy_ppar",	//42
+			"clean_par",	//43
 			NULL
 			};
 
@@ -571,7 +634,7 @@ printf("script %s\n", (*ptr)->name);
 	    *ptr = NULL;
 	}
 }
-
+/*
 struct cgi *find_cgi(char *filename){
     struct cgi *ptr;
     ptr = cgi_name;
@@ -583,27 +646,10 @@ struct cgi *find_cgi(char *filename){
     }
     return NULL;
 }
-/*
-struct cgi *reverse_cgi(char *str){
-    struct cgi *ptr;
-    int i;
-    ptr = cgi_name;
-    while(ptr){
-	i = 0;
-	while(i < GET_CGI_MAX){
-	    if(ptr->arg[i] == str){
-		return ptr;
-	    }
-	i++;
-	}
-	ptr = ptr->next;
-    }
-    return NULL;
-}
 */
+/*
+inline int load_file(char *parm, FILE *out){
 
-int load_file(char *parm, FILE *out){
-    
     parm = get_var(NULL, parm);
     if(!parm || !(*parm)){
 	fprintf(out, "[ERR] Variable not found\n");
@@ -611,13 +657,13 @@ int load_file(char *parm, FILE *out){
     }
     return (copy_file_include(parm, out));
 }
-
+*/
 extern char *print200ok_mime;
 
 int get_cgi(FILE *out, char *filename){
 
     int i = 0, j = 0, jump = 0, allocated;
-    long long size;
+    unsigned long long size, size1, size2;//size2 - for copy_ppar
     struct cgi *ptr;
     char *tmp, *tmp1, *tmp2, *arg = NULL;
     FILE *f;
@@ -650,79 +696,92 @@ int get_cgi(FILE *out, char *filename){
 		}
 		switch (ptr->cmd[i]){
 		    case 1: //print
-			    print(out, arg);
-			     break;
+			    jump = print(out, arg); //run in braces if print returns 0;
+			    break;
 		    case 2: system_(arg);break;
 		    case 3: my_system(out, arg);break;
 		    case 4: //get_file
-			    if(copy_file_include(arg, out)) { jump = 1;}
+			    size = strncpy_(NULL, arg, 0)+1;	//this is max. size of arg-string
+			    if(size > 1 && (tmp = malloc(size))){
+//			    if(tmp = malloc(size)){
+				strncpy_(tmp, arg, size);
+//printf("get_file:%s %ld\n", tmp, size);
+				if(!copy_file_include(tmp, out)) jump = 1; //exec in braces if file not found 
+									//jump if error memory allocate
+				free(tmp);
+			    }else jump = 1;//error allocate memory
 			    break;
-		    case 5: tmp1 = arg;			//save_file arg:file_name
+		    case 5://save_file_full
+		    case 6: tmp1 = arg;			//save_file arg:file_name
 			    tmp2 = w_strtok(&tmp1, ':');
 			    if(tmp2 && *tmp2 && *tmp1){
-			    	tmp = get_var(NULL, tmp2);//was get_arg
-			    if(tmp)
-			    if((f = fopen(tmp1,"w+")) == NULL)
-				fprintf(out, "Unable to open file: %s", ptr->arg[i]);
-			    else {
-				fprintf(f, "%s", tmp);
-/*				while(*tmp){
-				    if(*tmp != 0x0d) putc(*tmp, f);	// '\r'
-				    tmp++;
+			    	tmp2 = get_var(&size1, tmp2);
+				if(tmp2){
+				    size = strncpy_(NULL, tmp1, 0)+1;
+				    if(size > 1 && (tmp = malloc(size))){
+//				    if(tmp = malloc(size)){
+					strncpy_(tmp, tmp1, size);
+					if((f = fopen(tmp,"w+")) == NULL)
+					    fprintf(out, "Unable to open file: %s", tmp);
+					else {
+					    if(ptr->cmd[i] == 5 && size1) fwrite(tmp2, size1, 1, f);//if size1 == 0->make fprintf
+					    else fprintf(f, "%s", tmp2);
+					    fclose(f);
+					}
+				    free(tmp);
+				    }
 				}
-*/
-				fclose(f);
-			    }
-//			    if(tmp2 != tmp1) *(tmp1-1) = ':';
 			    } break; //save_file
-		    case 6: SaveConfiguration();break;		//savecfg (all changed flags will be zeroed)
-		    case 7: ReadConfiguration1();break;		//init
-		    case 8: fill_all_cfg();break;
-		    case 9: fill_cfg(arg);break;
-		    case 10: tmp = get_var(NULL, arg);
+		    case 7: SaveConfiguration();break;		//savecfg (all changed flags will be zeroed)
+		    case 8: ReadConfiguration1();break;		//init
+		    case 9: fill_all_cfg();break;
+		    case 10: fill_cfg(arg);break;
+		    case 11: tmp = get_var(NULL, arg);
 			    if(tmp) fprintf(out, "%s", tmp);/*maybe here print(out, tmp);*/ break;
-		    case 11:	boot_page(out,arg);break;	//the same as: 
+		    case 12:	boot_page(out,arg);break;	//the same as: 
 		/*	"<script language=\"JavaScript\">\n"
-			"location.replace('http://??_srv_ip??:??_srv_port??/filename.htm');\n</script>*/
-		    case 12: 
-			    //save_bfile	name:size_limit:format:file_name
+			"location.replace('http://??_srv_ip??:??_srv_port??/filename.htm');\n</script>"
+			"\n<noscript><a href=\"http://??_srv_ip??:??_srv_port??/filename.htm\">filename.htm</a></noscript>"
+			*/
+		    case 13: 
+			    //save_bfile	name:size_limit:firmware:file_name
 			    //name, file_name
-			    if(save_bfile_(out, arg)) { jump = 1;}
+			    jump = save_bfile_(out, arg);
 			    break;
-		    case 13: //set(ptr, ptr->arg[i]);		//set
+		    case 14: //set(ptr, ptr->arg[i]);		//set
 			    //break;
-		    case 14:					//if_set
+		    case 15:					//if_set
 			    if(!set(ptr, arg)){ jump = 1;}
 			    break;
-		    case 15:				//change_line
-			    change_line(arg);
+		    case 16:				//change_line
+			    jump = change_line(arg);
 			    break;
-		    case 16:				//if_changed
+		    case 17:				//if_changed
 //printf("if_changed: %s; i=%d; bb=%d\n", ptr->arg[i], i, ptr->bb[i]);
 			    if(!cfg_arg_changed(arg)){ jump = 1;}
 			    break;
-		    case 17:				//not_changed or not found
+		    case 18:				//not_changed or not found
 			    if(cfg_arg_changed(arg)) { jump = 1;}
 			    break;
-		    case 18:				//if
+		    case 19:				//if
 //printf("if: %s; i=%d; bb=%d\n", ptr->arg[i], i, ptr->bb[i]);
 			    if(cfg_arg_strcmp(arg, 0)) { jump = 1;}
 			    break;
-		    case 19:				//not
+		    case 20:				//not
 			    if(cfg_arg_strcmp(arg, 1)) { jump = 1;}
 			    break;
-		    case 20:shell(arg);		//shell
+		    case 21:shell(arg);		//shell
 			    break;
-		    case 21:my_shell(out, arg);		//my_shell
+		    case 22:my_shell(out, arg);		//my_shell
 			    break;
 /* write to global variables */
-		    case 22:     check_ip[0] = '\0';	//clean_ip
+		    case 23:     check_ip[0] = '\0';	//clean_ip
 			    break;
 /* buffer functions */
-		    case 23:	//buf_if_eof - if not found in buffer
+		    case 24:	//buf_if_eof - if not found in buffer
 			if(ptr->data_ptr != NULL) { jump = 1;}
 			    break;
-		    case 24:	//buf_parse_area
+		    case 25:	//buf_parse_area
 			if(ptr->parse == NULL){
 			    printf("buf_parse_area: Pointed to NULL\n");
 			    if(allocated) free(arg);
@@ -744,7 +803,7 @@ int get_cgi(FILE *out, char *filename){
 				return 0;
 			    }
 			}
-		    case 25:	// write_file  par:file_name
+		    case 26:	// write_file  par:file_name
 			    tmp1 = arg;
 			    tmp2 = w_strtok(&tmp1, ':');
 			    if(tmp2 && *tmp2 && *tmp1){
@@ -755,32 +814,37 @@ int get_cgi(FILE *out, char *filename){
 				if(tmp2 != tmp1) *(tmp1-1) = ':';
 			    }
 			    break;
-		    case 26:	// write_par  par:value
+		    case 27:	// write_par  par:value
 			    tmp1 = arg;
 			    tmp2 = w_strtok(&tmp1, ':');
 			    if(tmp2 && *tmp2 && *tmp1){
 			    	tmp = get_var(&size, tmp2);
 				if(tmp && size){
-				    strncpy_(tmp, tmp1, size);
-				    tmp[size-1] = '\0';
+				    strncpy_(tmp, tmp1, size-1);
+//				    tmp[size-1] = '\0';
 				}
-				if(tmp2 != tmp1) *(tmp1-1) = ':';
+//				if(tmp2 != tmp1) *(tmp1-1) = ':';
 			    }
 			    break;
-		    case 27:	// write_system  par:cmd
-		    case 28:	// cat_system  par:cmd
+		    case 28:	// write_system  par:cmd
+		    case 29:	// cat_system  par:cmd
 			    tmp1 = arg;
-			    tmp2 = w_strtok(&tmp1, ':');
-			    if(tmp2 && *tmp2 && *tmp1){
-			    	tmp = get_var(&size, tmp2);
-				if(tmp && size){
-				if(ptr->cmd[i] == 27) write_system(tmp, size, 0, tmp1);
-				else write_system(tmp, size, 1, tmp1);
+			    tmp = w_strtok(&tmp1, ':');
+			    if(tmp){
+				if(*tmp)  tmp = get_var(&size1, tmp);
+				else tmp = NULL;
+				tmp2 = w_strtok(&tmp1, ':');
+				if(tmp2 && *tmp2 && *tmp1){
+				    tmp2 = get_var(&size, tmp2);
+				    if(tmp2 && size){
+				    write_shell(tmp, size1, tmp2, size, (ptr->cmd[i] == 28) ? 0 : 1, tmp1);
+//					else write_shell(tmp, size, 1, tmp1);
+				    }
+//				if(tmp2 != tmp1) *(tmp1-1) = ':';
 				}
-				if(tmp2 != tmp1) *(tmp1-1) = ':';
 			    }
 			    break;
-		    case 29:	// bind_par  par
+		    case 30:	// bind_par  par
 			    tmp = get_var(&size, arg);
 			    if(tmp && size){
 				ptr->data_ptr = tmp;
@@ -790,25 +854,25 @@ int get_cgi(FILE *out, char *filename){
 				ptr->parse = NULL;
 			    }
 			    break;
-		    case 30:		//remove_chars
+		    case 31:		//remove_chars
 			    remove_show_chars(arg, 0);
 			    break;
-		    case 31:		//show_chars
+		    case 32:		//show_chars
 			    remove_show_chars(arg, 1);
 			    break;
-		    case 32: //load_file		danger!!
-			    if(load_file(arg, out)) { jump = 1;}
-			    else break;
-		    case 33: //exit_cgi
+		    case 33: //dub_ppar
+			    break;
+		    case 34: //exit_cgi
 			    if(allocated) free(arg);
+			    cgi_used = NULL;
 			    return 1;
-		    case 34: //chroot
+		    case 35: //chroot
 			    if(*arg == '\0') tmp = CONFIG.WEB_ROOT; //if empty str -> use default value
 			    else tmp = arg;
 
 			    if(chdir(tmp)) { jump = 1;}
 			    break;
-		    case 35: //exist_file
+		    case 36: //exist_file
 			    tmp = get_var(NULL, arg);
 			    if(tmp){
 				if((f = fopen(tmp, "r"))==NULL){
@@ -819,10 +883,10 @@ int get_cgi(FILE *out, char *filename){
 				jump = 1;	//jump
 			    }
 			    break;
-		    case 36:			//nnot		-not exist or not matches
+		    case 37:			//nnot		-not exist or not matches
 			    if(!cfg_arg_strcmp(arg, 0)) { jump = 1;}
 			    break;
-		    case 37:
+		    case 38:
 			    printf("%s\n", arg);		//1234test
 /*			    if((f = fopen("/dev/random", "r"))==NULL){
 				fprintf(out, "Unable open /dev/random\n");
@@ -840,11 +904,49 @@ int get_cgi(FILE *out, char *filename){
 			    size = random();
 			    fprintf(out, "%ld", size);
 */			    break;
-		    case 38:
+		    case 39:
 			    change_tbl_stat(arg);	//arg="flag:name:frase(forParsing)"
 			    break;
-		    case 39://arg="par:from_par:parsestr"
-			    write_ppar(arg);
+		    case 40://arg="from_par:to_par:parsestr"
+			    jump = write_ppar(arg);
+			    break;
+		    case 41://arg="par:par1:par2.."
+			    fill_tbl(arg);
+			    break;
+		    case 42: //copy_ppar
+			    //arg="from_par:to_par:offset"
+			    tmp = arg;//offset
+			    tmp1 = w_strtok(&tmp, ':');//from_par
+			    tmp2 = w_strtok(&tmp, ':');//to_par
+			    if(tmp2 && *tmp2 && tmp1 && *tmp1 && *tmp){
+				size2 = atoll(tmp);
+				tmp1 = get_var(&size, tmp1);//from_par
+				if(tmp1){
+				    if(size == 0) size = strlen(tmp1) + 1;//read only from_par
+				    tmp = get_var(&size1, tmp2);//to_par
+				    if(tmp){
+					if(size1){
+						if(size2 < size){//offset < from_par
+						    size = size-size2;
+						    strncpy(tmp, tmp1+size2, (size < size1) ? size : (size1-1));
+						    if(size >= size1) tmp[size1-1] = '\0';
+						    jump = 1;
+						}
+					}
+				    }else{
+					if(size2 < size) jump = reg_par(tmp2 ,tmp1+size2 , size-size2);//to_par
+				    }
+				}
+			    }
+			    break;
+		    case 43://clean_par arg="par:par1:par2.."
+			    tmp1 = arg;
+			    while(tmp2 = w_strtok(&tmp1, ':')){
+				tmp2 = get_var(&size, tmp2);
+				if(tmp2 && size){
+				    memset(tmp2, '\0', size);
+				}
+			    }
 			    break;
 		}//switch end
 	    if(allocated) free(arg);

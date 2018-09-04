@@ -28,7 +28,7 @@
 
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 
-extern struct cfg_parse1 cfg1[];
+extern struct cfg_parse1 *cfg1;
 extern struct cfg_parse2 cfg2[];
 
 //extern config CONFIG;
@@ -63,11 +63,12 @@ int cfg_arg_changed(char *web_name){	//if not found - returns 0 (as not changed)
 
     struct cfg_parse1 *p = cfg1;
 
-    while (p->str){		/* search the variable value  */
-        if(strcmp(p->web_name, web_name) == 0 ){
+    while (p){		/* search the variable value  */
+        if((p->str != NULL) && (p->size != 0) && (p->size != 1) && 
+		(p->web_name != NULL) && strcmp(p->web_name, web_name) == 0 ){
 	    return p->changed;
 	}
-	p++;
+	p = p->next;
     }
 
     return 0;
@@ -102,8 +103,9 @@ void fill_all_cfg(void){
     size_t nmatch;
     regmatch_t pmatch;
 
-    while(p->str){
-	tmp = get_arg(p->web_name, 0);
+    while(p){
+	if((p->str != NULL) && (p->size != 0) && (p->size != 1)){
+	tmp = get_arg(p->web_name, NULL, 0);//NULL - only get value
 	if(tmp){
 	    if(strcmp(tmp, p->value) != 0){
 printf("fill web:%s = %s\n", p->web_name, tmp);
@@ -129,7 +131,8 @@ printf("Not matched\n");
 		END:;
 	    }
 	}
-	p++;
+	}
+	p = p->next;
     }
 }
 
@@ -145,10 +148,10 @@ void fill_cfg(char *parm){
     while(tmp = w_strtok(&parm, ':')){
 	if(*tmp){
 	    p = cfg1;
-	    while(p->str){
-		if(!strcmp(tmp, p->web_name)){
+	    while(p){
+		if((p->str != NULL) && (p->size != 0) && (p->size != 1) && !strcmp(tmp, p->web_name)){
 	
-		    tmp = get_arg(tmp, 0);
+		    tmp = get_arg(tmp, NULL, 0);//NULL - only get value
 		    if(tmp){
 			if(strcmp(tmp, p->value) != 0){
 printf("fill web:%s = %s\n", p->web_name, tmp);
@@ -174,7 +177,7 @@ printf("Not matched\n");
 		    }
 		    break;
 		}
-		p++;
+		p = p->next;
 	    }
 	if(tmp != parm) *(parm-1) = ':'; //not last parm
 	}
@@ -185,16 +188,17 @@ char *get_cfg_value(long long *size_ptr, char *field_name, int i){
 
     struct cfg_parse1 *p = cfg1;
 
-	while (p->str){		/* search the variable value  */
-	    if(strcmp(p->web_name, field_name) == 0 ){
+	while (p){		/* search the variable value  */
+	    if((p->str != NULL) && (p->size != 0) && (p->size != 1) && (p->web_name != NULL) && strcmp(p->web_name, field_name) == 0 ){
 		if(size_ptr) *size_ptr = p->size;	//if pointer is given, return value
 		if(i == 0) return p->value;
 		else if(i == 1) return p->new_value;
-		else if(i == 2) if(p->changed) return p->new_value;
+		else if(i == 2){ if(p->changed) return p->new_value;
 				else return p->value;
+				}
 		else return NULL;
 	    }
-	    p++;
+	    p = p->next;
 	}
     if(size_ptr) *size_ptr = 0; // if given but not matched, return 0
     return NULL;
@@ -203,7 +207,7 @@ char *get_cfg_value(long long *size_ptr, char *field_name, int i){
 int ReadConfiguration1(void){
 
     FILE *fip;
-    char LineBuf[256];
+    char LineBuf[1024];
     char *ptr, *end, *config = ETC_PATH "/config";
     int i;
     struct cfg_parse2 *p;
@@ -214,8 +218,8 @@ int ReadConfiguration1(void){
 	//return 0;
     }
 
-    while(fgets(LineBuf,255,fip) != NULL){
-	    for(i=0;i<255;i++){
+    while(fgets(LineBuf,1023,fip) != NULL){
+	    for(i=0;i<255;i++){//need to change here 255 to 1023
 		if((LineBuf[i] == ' ') || (LineBuf[i] == '\n') || (LineBuf[i] == '\r')){
 		    LineBuf[i] = '\0';
 		    i=256;
@@ -243,7 +247,7 @@ int ReadConfiguration(void){
 
     struct cfg_parse1 *p;
     FILE *fip;
-    char LineBuf[256];
+    char LineBuf[1024];
     char *ptr, *end, *config = ETC_PATH "/config";
     int i;
 
@@ -253,17 +257,17 @@ int ReadConfiguration(void){
 	return 0;
     }
 
-    while(fgets(LineBuf,255,fip) != NULL){
+    while(fgets(LineBuf,1023,fip) != NULL){
 	p = cfg1;
     
-        while(p->str){
-	    if(p->name && *(p->name) && (ptr = strstrcfg(LineBuf, p->name, &i)) != NULL){
+        while(p){
+	    if((p->str != NULL) && (p->size != 0) && (p->size != 1) && (p->name) && *(p->name) && (ptr = strstrcfg(LineBuf, p->name, &i)) != NULL){
 		strncpy(p->value, ptr, MIN(i, (p->size)-1));	//it seems to be OK, but is always p->value[(p->size)-1] == '\0'
 	    	p->value[(p->size)-1] = '\0';	//make it for shure
 //		strcpy(p->value, ptr);
 		printf("%s=%s %lld  %d\n", p->name, p->value, p->size, p->changed);
 	    }
-	    p++;
+	    p = p->next;
 	}
     }
     fclose(fip);
@@ -275,7 +279,7 @@ int SaveConfiguration(void){	//new function to write to config direct from struc
     FILE *fip, *fop;
     struct cfg_parse1 *p;
     int i;
-    char LineBuf[256];	//maybe buffer is to small
+    char LineBuf[1024];	//maybe buffer is to small
 
     if((fip = fopen(ETC_PATH "/config","r")) == NULL || (fop = fopen(ETC_PATH "/config1","w+")) == NULL){
 #ifdef DEBUG
@@ -288,10 +292,11 @@ int SaveConfiguration(void){	//new function to write to config direct from struc
 	fprintf( stdout, "*****Save: Success open config file *****\n" );
 #endif
 
-    while(fgets(LineBuf,255,fip) != NULL){
+    while(fgets(LineBuf,1023,fip) != NULL){
 	    p = cfg1;		//need be more selective!
-	    while(p->str){
-		if(p->name && *(p->name) && p->changed && (! p->saved) && strstrcfg(LineBuf,p->name, &i)){
+	    while(p){
+		if((p->str != NULL) && (p->size != 0) && (p->size != 1) && 
+				p->name && *(p->name) && p->changed && (! p->saved) && strstrcfg(LineBuf,p->name, &i)){
 		    fprintf(fop,"%s=\'%s\'\n", p->name, p->new_value);
 printf("%s=\'%s\' changed=%d\n", p->name, p->new_value, p->changed);
 		p->saved=1;
@@ -300,15 +305,15 @@ printf("%s=\'%s\' changed=%d\n", p->name, p->new_value, p->changed);
 
 	        goto next;
 		}
-		p++;
+		p = p->next;
 	    }
 	    fputs(LineBuf,fop);
     next:	;
     }
     //save the rest of parameters which are not in file
     p = cfg1;
-    while(p->str){
-	if(p->name && *(p->name) && p->changed && (!p->saved)){
+    while(p){
+	if((p->str != NULL) && (p->size != 0) && (p->size != 1) && p->name && *(p->name) && p->changed && (!p->saved)){
 	    fprintf(fop,"%s=\'%s\'\n", p->name, p->new_value);
 printf("%s=\'%s\' changed=%d\n", p->name, p->new_value, p->changed);
 	    p->saved=1;
@@ -316,7 +321,7 @@ printf("%s=\'%s\' changed=%d\n", p->name, p->new_value, p->changed);
 		etc_save[1] = '\0';
 
 	}
-	p++;
+	p = p->next;
     }
 
 

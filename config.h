@@ -73,15 +73,6 @@ cfg_line(HOSTNAME,	hostname,	17)			//   3. LAN Host Name
     cfg_line(WEB_PORT,web_port,		6)		//  51. WEB server port
     cfg_line(WEB_FOLDER,web_dir,	17)		//  52. Folder WEB server pages
 
-    cfg_line(CRON_ENABLE,cron_enable,	2)		//  53. Enable Cron
-    cfg_line(CRON_START_DAY,start_day,	2)	//  54. Cron Start Day
-    cfg_line(CRON_START_HOUR,start_hour, 3)	//  55. Cron Start Hour
-    cfg_line(CRON_START_MIN,start_min,	3)	//  56. Cron Start Min
-    cfg_line(CRON_END_DAY,	end_day,	 2)		//  57. Cron End day
-    cfg_line(CRON_END_HOUR,	end_hour,	3)	//  58. Cron End Hour
-    cfg_line(CRON_END_MIN,	end_min,	3)		//  59. Cron End Min
-	//DYNDNS_ is absend!!
-
     cfg_line(USB_SHARE,	usb_share,	2)		//  61. USB disk as share folder
     cfg_line(USB_RECYCLE,recycle, 	2)		//  62. USB recycle bin
 //======allen adds to declare saving USB variable======
@@ -92,26 +83,6 @@ cfg_line(HOSTNAME,	hostname,	17)			//   3. LAN Host Name
 //======allen adds to declare saving Jumbo variable======
   cfg_line(JUMBO,	Jumbo_mode, 2)			//  64. Jumbo mode radio option
 //=======================================================
-//====== allen adds to save the USB port series ======
-/*  cfg_line(USB_PORT01,, 60)
-  cfg_line(USB_PORT02,, 60)
-  cfg_line(USB_PORT03,, 60)
-  cfg_line(USB_PORT04,, 60)
-  cfg_line(USB_PORT11,, 60)
-  cfg_line(USB_PORT12,, 60)
-  cfg_line(USB_PORT13,, 60)
-  cfg_line(USB_PORT14,, 60)
-  cfg_line(USB_PORT21,, 60)
-  cfg_line(USB_PORT22,, 60)
-  cfg_line(USB_PORT23,, 60)
-  cfg_line(USB_PORT24,, 60)
-  cfg_line(USB_PORT31,, 60)
-  cfg_line(USB_PORT32,, 60)
-  cfg_line(USB_PORT33,, 60)
-  cfg_line(USB_PORT34,, 60)
-  cfg_line(SWAP_ENABLE,	swap_enable, 5)			//  66. Swap virtual memory setting for hdformat
-*/
-//===========================================================
 //======allen adds to saving checksmb adjugement parameter======
   cfg_line(INITBOOT,, 2)
 //=======================================================

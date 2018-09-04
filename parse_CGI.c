@@ -17,11 +17,12 @@
 //#include <ctype.h>
 #include "include/httpd.h"
 #include "parse_CGI.h"
+#include "copy_tbl.h"		//for find_tbl()
 #include "copy.h"
 
 
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
-#define DEBUG
+//#define DEBUG
 
 extern CGI_ENTRY cgi_entries[];
 extern char *print200ok_mime;
@@ -32,15 +33,22 @@ struct ARGS *args_ptr_local = NULL;
 struct ARGS *args_ptr_global = NULL;
 
 /*this is for CGI*/
-char *get_arg(char *name, int flag){	//if flag = 0 -> global args are parsed, if 1 -> local args_ptr are parsed.
+char *get_arg(char *name, unsigned long long *size, int flag){
+//if flag = 0 -> global args are parsed, if 1 -> local args_ptr are parsed.
     struct ARGS *ptr;
 
+    if(size) *size = 0;		//clear the size (non writeable by default !!)
     if(!name) return NULL;
     if(!flag) ptr = args_ptr_global;
     else ptr = args_ptr_local;	//must be preseted befor execution of this function.
     while(ptr && ptr->name && ptr->value){
-	if(strcmp(name, ptr->name) == 0)
+	if(strcmp(name, ptr->name) == 0){
+	    if(size) *size = ptr->size;
+#ifdef DEBUG
+printf("string: %s :: %s\n", name, ptr->value);
+#endif
 	    return ptr->value;
+	}
 	ptr = ptr->next;
     }
     return NULL;
@@ -69,16 +77,20 @@ int handle_arg(int flag, char *input)
 	    free(*ptr);
 	    *ptr = NULL;
 	    break;
-	}	
-	httpd_decode((*ptr)->value);
+	}
+	tmp = (*ptr)->value;
+	(*ptr)->size = input - tmp; //size is included \0 char!!
+	httpd_decode(tmp);
 //**********
-	tmp = parsestr1_((*ptr)->value, "??/[/*/]??/");	//if (args+i)->value == "file.inc?par=??_#par1??"
+	tmp = parsestr1_(tmp, "??/[/*/]??/");	//if (args+i)->value == "file.inc?par=??_#par1??"
 	if(tmp){						//if not find - erease par=??_#par1?? complete
 	    tmp = get_var(&size, tmp);				//only writeable (!= 0) parameters will be linked!
 	    if(tmp && size) {
+		(*ptr)->size = size;
 		(*ptr)->value = tmp;
 		//(args+i)->flag = 0;
 	    } else {
+//		(*ptr)->size = 0;//not found
 //		free(*ptr);
 		continue;
 	    }
@@ -86,7 +98,7 @@ int handle_arg(int flag, char *input)
 //**********
 #ifdef DEBUG
 //    printf("args[].name: %s args.value(after): %s, length=%d\n",(*ptr)->name,(*ptr)->value,strlen((*ptr)->value)+1);
-    printf("args[].name: %s args.value length=%d\n",(*ptr)->name, strlen((*ptr)->value)+1);
+    printf("args[].name: %s args.value length=%ld\n",(*ptr)->name, (*ptr)->size);
 #endif
 	ptr = &((*ptr)->next);
     }
@@ -109,6 +121,41 @@ void free_arg(int flag){
     free_arg_1(&args_ptr_global);
     }else{
     free_arg_1(&args_ptr_local);
+    }
+}
+
+
+//parm="parm1:parm2:parm3..."
+//tbl1:tbl2:tbl3..
+//if tbl1==name_of_html_argument && val_of_html_argument==rnd_number_of_table_entry
+void fill_tbl(char *parm){
+
+    struct rnd_tbl *ptr, *p;
+    struct ARGS *p_args;
+    char *tmp;
+
+    while(tmp = w_strtok(&parm, ':')){
+	if(*tmp){
+		if(ptr = find_tbl(tmp)){
+		    p = ptr;
+		    while(p){
+			p->flag = 1; //hide all elements!
+			p = p->next;
+		    }
+
+		    while(ptr){
+		    p_args = args_ptr_global;
+			while(p_args && p_args->name && p_args->value){
+			    if((strcmp(tmp, p_args->name) == 0) && (strcmp(ptr->rnd_entry, p_args->value) == 0)){
+				ptr->flag = 0;
+				break;//have found, break
+			    }
+			    p_args = p_args->next;
+			}
+		    ptr = ptr->next;
+		    }
+		}
+	}
     }
 }
 
@@ -226,16 +273,12 @@ void delete_crlf( char *plag )	//find \n or \r and make end of string at this pl
     }
 }
 
-
-//mime - used 1 in httpd and 0 in include
-void DoCGI(FILE *out, int mime, char *filename){
+int DoCGI(FILE *out, char *filename){
 
     CGI_ENTRY *p = cgi_entries;
-//    char *data = arg;
 
 #ifdef DEBUG
     printf("filename: %s\n",filename);
-    printf("query: %s\n",arg);
 #endif
 
     while((p->name[0] != ' ') && (p->name[0] != '\0')){
@@ -243,12 +286,12 @@ void DoCGI(FILE *out, int mime, char *filename){
 printf("%s %p\n",p->name, p->handler);
 	    if(*filename != '_') fprintf(out, print200ok_mime, "text/html");
 	    p->handler(out);
-	    return;
+	    return 0;
 	}
 	p++;
     }
-    if(get_cgi(out, filename)) return; //from copy_cgi.c
-    if(mime){ 
+    if(get_cgi(out, filename)) return 0; //from copy_cgi.c
+/*    if(mime){ 
 	    fprintf(out, "HTTP/1.0 404 Not Found\n"
 		 "Content-type: text/html\n\n"
 		 "<html>\n"
@@ -257,7 +300,9 @@ printf("%s %p\n",p->name, p->handler);
 		 "<p>The resource you have requested is not available."
 		 "</p></body>\n"
 		 "</html>\n");
-	}else fprintf(out, "Not Found: %s\n", filename);
+	}else 
+	if(!mime) fprintf(out, "Not Found: %s\n", filename);*/
+    return 1;//not found
 }
 /*
 <HTML><HEAD><TITLE>404 Not Found</TITLE></HEAD>
