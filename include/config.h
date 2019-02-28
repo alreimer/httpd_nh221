@@ -1,8 +1,7 @@
 #define cfg_line(a,b,c)		{#a, CONFIG.a, c},
 #define cfg_line1(a,b,c,d)	{#a#c, CONFIG.a[c], d},
 
-struct cfg_parse1 cfg1[30];	/*new config via web*/
-struct cfg_parse1 *cfg_pointer;
+struct cfg_parse1 *cfg1 = NULL;	/*new config via web*/
 
 struct cfg_parse2 cfg2[] = {
 

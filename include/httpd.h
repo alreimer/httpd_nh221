@@ -10,8 +10,6 @@
 //#define HTTPD_MAX_ACCEPT
 //#define USB		//enable cgi scripts for USB support
 
-#define RAWD		//enable only one client to use server at the same time
-
 /* Methods */
 #define M_GET		1
 #define M_POST		2
@@ -51,12 +49,17 @@ typedef struct{
 /* Global variabels */
 extern char referer[];
 extern char user_agent[];
+extern char boundary[];
 extern char ip[];
 extern char check_ip[];		//internal use. if="" so ip is released.
 extern char port[];
 extern char dns_name[];
 extern char etc_save[];
 extern char buf[];		//buffer for writting some information
+extern unsigned long long buf_size;
+/*version used in terminal*/
+extern char version[];
+extern char value[];
 
 extern char hdused[];
 extern char uptime[];
