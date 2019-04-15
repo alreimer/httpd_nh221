@@ -72,10 +72,14 @@ function check_form(){
     if_set "a >= 1"{
 
     if "_&dbear_enable:1/" {
-	    change_line "/etc/inetd.conf:/*dropbear:??_&dbear_port??		stream	tcp	nowait	root	/sbin/dropbear dropbear -i\n";
+	    change_line "/etc/inetd.conf:/*dropbear:??_&dbear_port??		stream	tcp	nowait	root	/sbin/dropbear dropbear -i\n"{
+		shell "echo \"??_&dbear_port??		stream	tcp	nowait	root	/sbin/dropbear dropbear -i\" >> /etc/inetd.conf";
+	    }
     }
     if "_&dbear_enable:0/" {
-	    change_line "/etc/inetd.conf:/*dropbear:#??_&dbear_port??		stream	tcp	nowait	root	/sbin/dropbear dropbear -i\n";
+	    change_line "/etc/inetd.conf:/*dropbear:#??_&dbear_port??		stream	tcp	nowait	root	/sbin/dropbear dropbear -i\n"{
+		shell "echo \"#??_&dbear_port??		stream	tcp	nowait	root	/sbin/dropbear dropbear -i\" >> /etc/inetd.conf";
+	    }
     }
 //need some script execution
     // system "etc/cfg_inetd";

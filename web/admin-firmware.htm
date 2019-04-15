@@ -1,7 +1,6 @@
-<!--#include area="300:AREA-1" area="513:HEADER" -->
+<!--#include area="300:AREA-1" area="512:HEADER" area="512:md5sum" area="512:buf" area="0:firmware_new"
+area="0:firmware" area="0:file_name" area="0:nfile" -->
 
-
-<!--Need clearing admin-reset.htm from firmware upload-->
 <!--#include file="head.inc?name=Home%20Page" 
 file="side.inc?i=3" -->
 
@@ -112,7 +111,35 @@ function check_un1(){
     get_file "./JavaReturn_.inc?name=Home%20Page&i=3";
 
     print "<tr><td><pre>";
-	save_bfile "ufile:300000:/[/*.bin/:/mnt/kernel.bin";
+//	save_bfile "ufile:300000:/[/*.bin/:/mnt/kernel.bin";
+	save_bfile "ufile:300000:firmware:file_name"{
+	    print "error</pre></td></tr></table><a href=\"admin-firmware.htm\">Back</a></table></body></html>";
+	    exit_cgi;
+	}
+	copy_ppar "firmware:HEADER:0";
+	write_ppar "HEADER:md5sum:MAGICNUM=/[/*/]\n"{
+	    print "Error: MAGICNUMBER not found
+</pre></td></tr></table><a href=\"admin-firmware.htm\">Back</a></table></body></html>";
+	    exit_cgi;
+	}
+	copy_ppar "firmware:firmware_new:512"{
+	    print "Error: make pointer to firmware
+</pre></td></tr></table><a href=\"admin-firmware.htm\">Back</a></table></body></html>";
+	    exit_cgi;
+	}
+	write_ppar "file_name:nfile:/[/*.bin/"{
+	    print "Error: ??file_name?? not matches to parsestr
+</pre></td></tr></table><a href=\"admin-firmware.htm\">Back</a></table></body></html>";
+	    exit_cgi;
+	}
+	write_system "firmware_new:buf:md5sum /dev/stdin | cut -d' ' -f1";
+	nnot "buf:/?md5sum?//"{
+	    print "Error: ??buf?? not mathes to ??md5sum??
+</pre></td></tr></table><a href=\"admin-firmware.htm\">Back</a></table></body></html>";
+	    exit_cgi;
+	}
+	save_file_full "firmware_new:/mnt/kernel.bin";
+
     print "</pre></td></tr></table><a href=\"admin-firmware.htm\">Back</a></table></body></html>";
 
 END_CGI -->
@@ -132,7 +159,7 @@ LINUX=1259770
 ROOT=915364
 RAMDISK2=1458448
 */
-	write_system "HEADER:echo MAGICNUM=$(md5sum /dev/mtdblock7 | cut -d' ' -f1); echo -e 'PRODUCT_ID=NH231\nCUSTOMER=ALLNET\nVERSION=V2.02(03-06-2009)\n'";
+	write_system ":HEADER:echo MAGICNUM=$(md5sum /dev/mtdblock7 | cut -d' ' -f1); echo -e 'PRODUCT_ID=NH231\nCUSTOMER=ALLNET\nVERSION=V2.02(03-06-2009)\n'";
 	print "?@0HEADER@?";
 	get_file "/dev/mtdblock7";
 END_CGI -->
@@ -140,7 +167,35 @@ END_CGI -->
     get_file "./JavaReturn_.inc?name=Home%20Page&i=3";
 
     print "<tr><td><pre>";
-	save_bfile "ufile:3000000:/[/*.bin/:/mnt/rootfs.bin";
+//	save_bfile "ufile:3000000:/[/*.bin/:/mnt/rootfs.bin";
+	save_bfile "ufile:3900000:firmware:file_name"{
+	    print "error</pre></td></tr></table><a href=\"admin-firmware.htm\">Back</a></table></body></html>";
+	    exit_cgi;
+	}
+	copy_ppar "firmware:HEADER:0";
+	write_ppar "HEADER:md5sum:MAGICNUM=/[/*/]\n"{
+	    print "Error: MAGICNUMBER not found
+</pre></td></tr></table><a href=\"admin-firmware.htm\">Back</a></table></body></html>";
+	    exit_cgi;
+	}
+	copy_ppar "firmware:firmware_new:512"{
+	    print "Error: make pointer to firmware
+</pre></td></tr></table><a href=\"admin-firmware.htm\">Back</a></table></body></html>";
+	    exit_cgi;
+	}
+	write_ppar "file_name:nfile:/[/*.bin/"{
+	    print "Error: ??file_name?? not matches to parsestr
+</pre></td></tr></table><a href=\"admin-firmware.htm\">Back</a></table></body></html>";
+	    exit_cgi;
+	}
+	write_system "firmware_new:buf:md5sum /dev/stdin | cut -d' ' -f1";
+	nnot "buf:/?md5sum?//"{
+	    print "Error: ??buf?? not mathes to ??md5sum??
+</pre></td></tr></table><a href=\"admin-firmware.htm\">Back</a></table></body></html>";
+	    exit_cgi;
+	}
+	save_file_full "firmware_new:/mnt/rootfs.bin";
+
     print "</pre></td></tr></table><a href=\"admin-firmware.htm\">Back</a></table></body></html>";
 
 END_CGI -->
@@ -153,7 +208,7 @@ END_CGI -->
 	print "rootfs_{?/*VERSION='/[/*/]'?}.bin\n";
 	print "Server: thttpd/2.25b\nExpires: 0\n\n";
 
-	write_system "HEADER:echo MAGICNUM=$(md5sum /dev/mtdblock6 | cut -d' ' -f1); echo -e 'PRODUCT_ID=NH231\nCUSTOMER=ALLNET\nVERSION=V2.02(03-06-2009)\n'";
+	write_system ":HEADER:echo MAGICNUM=$(md5sum /dev/mtdblock6 | cut -d' ' -f1); echo -e 'PRODUCT_ID=NH231\nCUSTOMER=ALLNET\nVERSION=V2.02(03-06-2009)\n'";
 	print "?@0HEADER@?";
 
 	get_file "/dev/mtdblock6";

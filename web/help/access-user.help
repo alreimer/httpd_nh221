@@ -4,6 +4,6 @@
   </head>
   <body>
     <b>Crypt Password</b> <br>
-    Note: Chars ;"<>`'$| are not allowed.
+    Note: Chars ;"<>`'$|? are not allowed.
   </body>
 </html>

@@ -2,7 +2,8 @@
 <!--#include par="20:ip:IP:^(([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\.){3}([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])$"
 par="20:netmask:NETMASK:^(([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\.){3}([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])$"
 par="20:gateway:GATEWAY:^(([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\.){3}([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])$" -->
-<!--#include par="20:dns_server:DNS_SERVER:^(([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\.){3}([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])$"
+<!--#include par="20:dns_server0:DNS_SERVER0:^(([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\.){3}([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])$"
+par="20:dns_server1:DNS_SERVER1:^(([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\.){3}([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])$"
 readcfg -->
 <!--#include file="head.inc?name=Home%20Page&body=onload%3D\"check_dhcp()\"" 
 file="side.inc?i=2" -->
@@ -53,7 +54,11 @@ file="side.inc?i=2" -->
     </tr>
     <tr>
     <td><b>&nbsp;DNS Server:</b></td>
-    <td><input type="text" name="dns_server" maxlength="15" size="20" value="??dns_server??"></td>
+    <td><input type="text" name="dns_server0" maxlength="15" size="20" value="??dns_server0??"></td>
+    </tr>
+    <tr>
+    <td></td>
+    <td><input type="text" name="dns_server1" maxlength="15" size="20" value="??dns_server1??"></td>
     </tr>
 </table>
 
@@ -71,13 +76,15 @@ hn=document.main.hostname.value;
 ip=document.main.ip.value;
 sm=document.main.netmask.value;
 gw=document.main.gateway.value;
-dns=document.main.dns_server.value;
+dns=document.main.dns_server0.value;
+dns1=document.main.dns_server1.value;
 if(check_hn()==0){document.main.hostname.focus();return false;}
 if(check_ip()==0){alert("Error!!! Not a legal IP address!");document.main.ip.focus();return false;}
 if(check_sm()==0){alert("Error!!! Not a legal Subnet Mask!");document.main.netmask.focus();return false;}
 if(check_gw()==0){alert("Error!!! Not a legal IP Mask!");document.main.gateway.focus();return false;}
 if(check_domain()==0){alert("IP Setting Error: IP & Gateway isn't in the same domain!");document.main.ip.focus();return false;}
-if(check_dns()==0){alert("Error!!! Not a legal DNS address!");document.main.dns_server.focus();return false;}
+if(check_dns()==0){alert("Error!!! Not a legal DNS address!");document.main.dns_server0.focus();return false;}
+if(check_dns1()==0){alert("Error!!! Not a legal DNS address!");document.main.dns_server1.focus();return false;}
 return true;
 }
 
@@ -128,6 +135,30 @@ function check_dns(){
 var ok=1;
 str = dns.split(".");
 if (dns == null || dns=="" || dns=="127.0.0.1") ok=0;
+    else if (str.length!=4) ok=0;
+	else if (str[0]==224||str[0]==239||str[0]==1) ok=0;
+	    else{
+		for (i=0; i<str.length; i++){
+		    if ( str[i]==null || str[i]=="" || isNaN(str[i]) || parseInt(str[i])<0 || parseInt(str[i])>255){
+			ok = 0;break;
+		    }
+		    if (parseInt(str[i])==0 ){
+			if (i==0 || i==3){
+			    ok=0;break;
+			}
+		    }
+		    if (parseInt(str[i])==255 && i==0){
+			ok=0;break;
+		    }
+		}
+	    }
+	    return ok;
+}
+
+function check_dns1(){
+var ok=1;
+str = dns1.split(".");
+if (dns1 == null || dns1=="" || dns1=="127.0.0.1") ok=0;
     else if (str.length!=4) ok=0;
 	else if (str[0]==224||str[0]==239||str[0]==1) ok=0;
 	    else{
@@ -231,12 +262,14 @@ function check_dhcp(){
         document.main.ip.disabled = true;
         document.main.netmask.disabled = true;
         document.main.gateway.disabled = true;
-        document.main.dns_server.disabled = true;
+        document.main.dns_server0.disabled = true;
+        document.main.dns_server1.disabled = true;
     }else if(document.main.dhcp_client[1].checked){
         document.main.ip.disabled = false;
         document.main.netmask.disabled = false;
         document.main.gateway.disabled = false;
-        document.main.dns_server.disabled = false;
+        document.main.dns_server0.disabled = false;
+        document.main.dns_server1.disabled = false;
     }
 }
 </script>
@@ -258,15 +291,19 @@ function check_dhcp(){
 	}
 	if_changed "hostname"{	//restart only network
 	    set "a=1"; //change_net = 1;
-	    change_line "/etc/hosts:/*/?hostname?/:??ip?? ??_%hostname?? #httpd\n";
+	    change_line "/etc/hosts:/*/?hostname?/:??ip?? ??_%hostname?? #httpd\n"{
+		shell "echo \"??ip?? ??_%hostname?? #httpd\" >> /etc/hosts";
+	    }
 	}
 	
 	if "_&dhcp_client:0/" {
-	    fill_cfg "ip:netmask:gateway:dns_server";
+	    fill_cfg "ip:netmask:gateway:dns_server0:dns_server1";
 	    if_changed "ip" {	//restart all upto network
 //		set "a=1"; //change_net = 1;
 		set "b=1"; //change_all = 1;
-		change_line "/etc/hosts:/ /?ip?/:??_%ip?? ??_&hostname??  #httpd\n";
+		change_line "/etc/hosts:/ /?ip?/:??_%ip?? ??_&hostname??  #httpd\n"{
+		    shell "echo \"??_%ip?? ??_&hostname?? #httpd\" >> /etc/hosts";
+		}
 	    }
 
 	    if_changed "netmask"{
@@ -276,8 +313,18 @@ function check_dhcp(){
 		set "a=1"; //change_net = 1;
 	    }
 
-	    if_changed "dns_server" {	//only write in resolver.
-		change_line "/etc/resolv.conf:/ nameserver:nameserver  ??_%dns_server??\n";
+	    if_changed "dns_server0" {	//only write in resolver.
+		change_line "/etc/resolv.conf:/ nameserver/ /?dns_server0?/:nameserver  ??_%dns_server0??\n"{
+		    shell "echo \"nameserver  ??_%dns_server0??\" >> /etc/resolv.conf";
+		}
+		write_par "_etc_save:1";
+	    }
+
+	    if_changed "dns_server1" {	//only write in resolver.
+		change_line "/etc/resolv.conf:/ nameserver/ /?dns_server1?/:nameserver  ??_%dns_server1??\n"{
+		    shell "echo \"nameserver  ??_%dns_server1??\" >> /etc/resolv.conf";
+		}
+		write_par "_etc_save:1";
 	    }
 	}
 	
@@ -289,7 +336,8 @@ function check_dhcp(){
 		<tr bgcolor=\"#FFFFFF\"><td width=150>&nbsp;&nbsp;IP Address</td><td width=400>&nbsp;&nbsp;<font color=#ff0000>??_&ip??</font></td></tr>\n
 		<tr bgcolor=\"#FFFFFF\"><td>&nbsp;&nbsp;Subnet Mask</td><td>&nbsp;&nbsp;<font color=#ff0000>??_&netmask??</font></td></tr>\n
 		<tr bgcolor=\"#FFFFFF\"><td>&nbsp;&nbsp;Gateway</td><td>&nbsp;&nbsp;<font color=#ff0000>??_&gateway??</font></td></tr>\n
-		<tr bgcolor=\"#FFFFFF\"><td>&nbsp;&nbsp;DNS Server</td><td>&nbsp;&nbsp;<font color=#ff0000>??_&dns_server??</font></td></tr>\n
+		<tr bgcolor=\"#FFFFFF\"><td>&nbsp;&nbsp;DNS Server0</td><td>&nbsp;&nbsp;<font color=#ff0000>??_&dns_server0??</font></td></tr>\n
+		<tr bgcolor=\"#FFFFFF\"><td>&nbsp;&nbsp;DNS Server1</td><td>&nbsp;&nbsp;<font color=#ff0000>??_&dns_server1??</font></td></tr>\n
 		</table></td></tr>\n";
 	if "_&dhcp_client:0/" {
 	    print "<tr><td><font size=2>\n

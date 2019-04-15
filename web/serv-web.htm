@@ -72,6 +72,9 @@ function check_form(){
 </tr>
 </table><br>
 <table border="0" width="85%" height="50" align="center">
+<td width="10%">After changing, please <a href="etc_save.cgi">save</a> /etc folder!!</td>
+</table><br>
+<table border="0" width="85%" height="50" align="center">
 <td width="10%"></td>
 <td colspan=3>
 <font size=2 face=\"Arial, Helvetica, sans-serif\" color=#FFFFFF><b>WEB Server:</b></font></td></tr>
@@ -92,7 +95,7 @@ function check_form(){
 <td width="13%"></td>
 </tr>
 <tr>
-<input type="hidden" name="web_dir">
+<!--<input type="hidden" name="web_dir">-->
 <td width="10%"></td>
 <td width="30%" bgcolor="#D8D8D8"><b><font size="3">&nbsp;WEB Folder:</font></b></td>
 <td width="47%" bgcolor="#FFFFFF">
@@ -136,7 +139,7 @@ END_TABLE -->
 	get_var "ip";
 	print ":";
 	get_var "_%admin_port";
-	print "');}}
+	print "/serv-web.htm');}}
 	    </script></body></html>";
 
 //    my_system "killall httpd;/httpd_nh221/httpd";
@@ -151,6 +154,11 @@ END_CGI -->
 	exit_cgi;
     }
     print "??_@web_dir??" ;
+END_CGI -->
+<!-- CGI: etc_save.cgi
+    write_par "_etc_save:0";
+    my_system "/etc/save_config.sh";
+//	my_system "/etc/btn_config.sh rstbtn_short" ;
 END_CGI -->
 
 

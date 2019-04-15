@@ -29,6 +29,7 @@ for i in `ls /etc/init.d/S??* | sort -r` ;do
     esac
 done
 
+sleep 3
 #0-stop flash
 /sbin/nh23X_ioctl 0 > /dev/null
 sleep 1

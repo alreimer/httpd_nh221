@@ -1,5 +1,4 @@
-<!--#include par="20:user_name::" par="20:4n_passwd::" -->
-<!--#include file="head.inc?name=Home%20Page&body=onload%3D\"check_smb()\"" 
+<!--#include area="513:AREAun" area="1025:AREApw" file="head.inc?name=Home%20Page&body=onload%3D\"check_smb()\"" 
 file="side.inc?i=5&helper=1" -->
 
 <script language="JavaScript">
@@ -18,13 +17,28 @@ var g = window.open('http://??_srv_ip??:??_srv_port??/help/access-user.help', 'n
 <br>
 <table border="0" width="70%" height="50" align="center">
 <form method="GET" action="add_user_passwd.cgi" name="user_passwd">
-<!--<tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;User name:</font></b></td>
+<tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;User name:</font></b></td>
     <td><input type="text" name="user_name" maxlength="16" size="20" value="??user_name??"></td><td></td></tr>
--->
+
 <tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;Crypt Password:</font></b></td>
     <td><input type="text" name="passwd" maxlength="16" size="20"></td><td></td></tr>
 <tr><td></td><td>Example:...</td>
 <td id="varbox-list-val"><input type="submit" name="save_passwd" value="Apply">&nbsp;<input type="reset" value="Cancel"></td><td></td></tr>
+</table></form>
+
+<!-- TABLE:user_
+#-> parse_file: /etc/passwd
+while:/[/*/]\n
+if:/[/*/]:/*:/*:/*:/*:/*:
+END_TABLE -->
+
+<br>
+<table border="0" width="70%" height="50" align="center">
+<form method="GET" action="del_user_passwd.cgi" name="del_user_passwd">
+<tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;User name:</font></b></td>
+    <td><!--#include tbl_select="user_" --></td><td></td></tr>
+<tr><td></td><td></td>
+<td id="varbox-list-val"><input type="submit" name="save_passwd" value="Delete">&nbsp;<input type="reset" value="Cancel"></td><td></td></tr>
 </table></form>
 
 <br>
@@ -88,17 +102,60 @@ END_CGI -->
 END_CGI -->
 <!-- CGI: add_user_passwd.cgi
 
-    remove_chars ";\"<>`'$|::_#passwd";
+    remove_chars ";\"<>`'$|?::_#passwd";
     get_file "./JavaReturn_.inc?name=Home%20Page&i=5";
+    not "_#user_name:/"{
     not "_#passwd:/"{
     if "_#save_passwd:Apply/"{
-    print "<tr><td>Password:</td><td> ??_#passwd??</td></tr>
-    <tr><td>Copy this in /etc/passwd:</td><td></td></tr><tr><td colspan=\"2\"><pre>";
-    my_shell "cryptpw \"??_#passwd??\"";
-    print "</pre></td></tr></table><a href=\"access-user.htm\">Back</a></table></body></html>";
+    write_system ":AREApw:echo -n $(cryptpw \"??_#passwd??\" 2>/dev/null)";
+//    write_system ":AREApw:echo -n halloHALLO";
+    if "AREApw:/"{
+	print "<tr><td>Error: cryptpw not found!</td></tr></table><a href=\"access-user.htm\">Back</a>
+    </table></body></html>";
+	exit_cgi;
+    }
+    write_par "AREAun:??_#user_name??";
+    print "<tr><td>Name:</td><td> ??AREAun??</td></tr>
+    <tr><td>Password:</td><td> ??_#passwd??</td></tr>
+    <tr><td>Copy this in /etc/passwd:</td><td></td></tr><tr><td colspan=\"2\"><pre>
+    ??AREApw??</pre></td></tr></table><a href=\"add_user_passwd_1.cgi\">Copy to passwd</a>&nbsp;&nbsp;<a href=\"access-user.htm\">Back</a>
+    </table></body></html>";
     exit_cgi ;
     }
     }
-    print "<tr><td>Please enter the password for cryption.</td></tr></table><a href=\"access-user.htm\">Back</a></table></body></html>";
+    }
+    print "<tr><td>Please enter user name and the password for cryption.</td></tr></table><a href=\"access-user.htm\">Back</a></table></body></html>";
+
+END_CGI -->
+<!-- CGI: add_user_passwd_1.cgi
+
+//    get_file "./JavaReturn_.inc?name=Home%20Page&i=5";
+    not "AREAun:/"{
+    not "AREApw:/"{
+    change_line "/etc/passwd:/?AREAun?/:[?/?AREAun?/:?]??AREAun??:??AREApw??{?/*:/*/[:?}"{
+	shell "echo \"??AREAun??:??AREApw??:0:0:user:/home/??AREAun??:/bin/sh\" >> /etc/passwd";
+    }
+    write_par "_etc_save:1";
+    boot_page "access-user.htm";
+    exit_cgi ;
+    }
+    }
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=5";
+    print "<tr><td>Error: name or encrypted password is empty. Please enter user name and the password for cryption.</td></tr></table><a href=\"access-user.htm\">Back</a></table></body></html>";
+
+END_CGI -->
+
+<!-- CGI: del_user_passwd.cgi
+
+    nnot "_@user_:/\ "{
+	get_file "./JavaReturn_.inc?name=Home%20Page&i=5";
+
+	print "<pre>False name ID: ??_#user__0??</pre></td></tr></table><a href=\"access-user.htm\">Back</a></table></body></html>";
+	exit_cgi ;
+    }
+
+    change_line "/etc/passwd:/?_@user_?/:";
+    write_par "_etc_save:1";
+    boot_page "access-user.htm";
 
 END_CGI -->

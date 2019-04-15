@@ -1,0 +1,42 @@
+#!/bin/sh
+
+if [ $2 == 1 ]; then
+	j=0;
+	M=`cat /etc/known_usb 2>/dev/null | grep -v "#" | grep $4 | cut -d ":" -f 2`
+
+	if [ -z $M ]; then
+		M=$4
+	fi
+
+	for i in /dev/$1*
+	do
+		mkdir -p /mnt/home/usb/$M/part$j
+		mount $i /mnt/home/usb/$M/part$j
+		if [ $? != 0 ]; then
+			if [ -z "`ls /mnt/home/usb/$M/part$j/`" ]; then
+				rm -rf /mnt/home/usb/$M/part$j
+			fi
+		fi
+		j=$(($j+1))
+	done
+elif [ $2 == 0 ]; then
+	j=0;
+	M=`cat /etc/known_usb 2>/dev/null | grep -v "#" | grep $4 | cut -d ":" -f 2`
+
+	if [ -z $M ]; then
+		M=$4
+	fi
+
+	for i in /mnt/home/usb/$M/*
+	do
+		umount -f $i
+		if [ -z "`ls $i`" ]; then
+			rm -rf $i
+		fi
+	done
+	if [ -z "`ls /mnt/home/usb/$M/`" ]; then
+		rm -rf /mnt/home/usb/$M
+	fi
+fi
+
+exit 0; 

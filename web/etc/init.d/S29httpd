@@ -2,8 +2,10 @@
 DESC="httpd Daemon"
 
 start() {
- 	echo " *** Start $DESC ***>>"
+    if [ ! -e /tmp/term ]; then
+	echo " *** Start $DESC ***>>"
 	httpd_watchdog &
+    fi
 }	
 stop() {
 	echo " *** Stop $DESC ***>>"
@@ -25,7 +27,7 @@ case "$1" in
 	restart
 	;;
   *)
-	echo $"Usage: $0 {start|stop|restart}"
+	echo "Usage: $0 {start|stop|restart}"
 	exit 1
 esac
 

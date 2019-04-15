@@ -16,3 +16,4 @@
 
 /bin/chmod 1777 /var/tmp
 /bin/chmod 1777 /var/spool/cron/crontabs
+#/bin/ln -s /etc/crontab /var/spool/cron/crontabs

@@ -1,5 +1,6 @@
 <!-- added by RAW -->
-<!--#include file="head.inc?name=Home%20Page" 
+<!--#include area="0:firmware" area="0:file_name" area="0:nfile"
+file="head.inc?name=Home%20Page" 
 file="side.inc?i=6&helper=1" -->
 
 <table id="maintab" height=290 align="center"><tr>
@@ -15,7 +16,7 @@ file="side.inc?i=6&helper=1" -->
 <tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;ls -l files:</font></b></td><td></td><td></td></tr>
 <tr><td colspan="4">
 <table border="0" width="100%" height="40" align="center">
-<!-- #include shell=""cd /mnt/wget_files/ 2>/dev/null; for i in $([ $? -eq 0 ] && ls 2>/dev/null); do echo \"<tr><td><pre>$(ls -l $i)</pre></td><td><a href=\\\"file_remove.cgi?file_name=$i\\\">remove</a></td></tr>\"; done "" -->
+<!-- #include shell=""cd /mnt/wget_files/ 2>/dev/null; [ $? -eq 0 ] && for i in * ; do [[ -f \"$i\" ]] && echo \"<tr><td><pre>$(ls -l \"$i\")</pre></td><td><a href=\\\"file_remove.cgi?file_name=$i\\\">remove</a></td></tr>\"; done "" -->
 </table>
 </td></tr>
 <tr><td></td><td></td>
@@ -89,7 +90,19 @@ function warming_b(){
     get_file "./JavaReturn_.inc?name=Home%20Page&i=6";
 
     print "<tr><td><pre>";
-	save_bfile "ufile:0::/mnt/wget_files/*";
+//	save_bfile "ufile:0::/mnt/wget_files/*";
+	save_bfile "ufile:0:firmware:file_name"{
+	    print "error</pre></td></tr></table><a href=\"p2p-upload.htm\">Back</a></table></body></html>";
+	    exit_cgi;
+	}
+	write_ppar "file_name:nfile:/L/L"{
+	    print "Error: ??file_name?? not matches to parsestr
+</pre></td></tr></table><a href=\"p2p-upload.htm\">Back</a></table></body></html>";
+	    exit_cgi;
+	}
+
+	save_file_full "firmware:/mnt/wget_files/??nfile??";
+
     print "</pre></td></tr></table><a href=\"p2p-upload.htm\">Back</a></table></body></html>";
 
 END_CGI -->

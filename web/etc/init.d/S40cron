@@ -1,15 +1,12 @@
 #!/bin/sh
-RUN_DAEMON="yes"
 DESC="cron Daemon"
 
 start() {
-	if [ "$RUN_DAEMON" != "yes" ] ; then
-		echo " *** $DESC disabled ***>>"
-		exit 0
-	fi
-
+	. /etc/config
+	if [ ${CRON_ENABLE:=1} -eq 1 ] ; then
 	echo " *** Start $DESC ***>>"
 	/sbin/crond -c /etc/crontab
+	fi
 }
 stop() {
 	echo " *** Stop $DESC ***>>"
@@ -39,7 +36,7 @@ case "$1" in
 	reload
 	;;
   *)
-	echo $"Usage: $0 {start|stop|restart}"
+	echo "Usage: $0 {start|stop|restart}"
 	exit 1
 esac
 

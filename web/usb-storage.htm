@@ -1,4 +1,4 @@
-<!--#include area="16345:AREA-1" -->
+<!--#include area="16345:AREA-1" par="256:backup_path:BACKUP_PATH:" readcfg -->
 <!--#include file="head.inc?name=Home%20Page" 
 file="side.inc?i=7" -->
 <script src="/js/tools.js"></script>
@@ -49,14 +49,16 @@ END_CGI -->
 </table>
 
 <!-- TABLE:mnt_point
+??backup_path??
 #-> parse_file: /etc/known_usb
 while:/[/*/]\n
-if:/ /N#N/*:/[//mnt///!/B/!/*/]/<1:\0/>/\/*.//
+if:/ /N#N/*:/[//mnt///!/B/!/*/]/<1:\0/>/\/*.///\/*/<1;"/>
 END_TABLE -->
 
 <table border="0" width="70%" height="40" align="center">
 <form method="Get" action="Backup.cgi">
 <tr><td bgcolor="#d6efff"><font color="#000000"><b>BackUp USB disk</b></font></td><td width="30%" bgcolor="#FFFFFF" align="center"><input type="submit" name="reset" value="Yes"></td></tr></form>
+<tr><td align="left" colspan="2">Path: ??backup_path??</td></tr>
 <tr><td align="left" colspan="2"><font size=2>It may take several minutes. USB disk will be copied to HD<br>Please wait and ensure a disk is not removed!</font></td></tr>
 
 <form method="Get" action="MK_folders.cgi" >
@@ -108,7 +110,7 @@ END_CGI -->
     }
     if "_#Apply:Make_ONE/"{
 	nnot "_@mnt_point:/\ "{
-	    print "<pre>False folder ID: ??_#mnt_point??</pre></td></tr></table><a href=\"usb-storage.htm\">Back</a></table></body></html>";
+	    print "<pre>False folder ID: ??_#mnt_point_0??</pre></td></tr></table><a href=\"usb-storage.htm\">Back</a></table></body></html>";
 	    exit_cgi ;
 	}
 
@@ -122,10 +124,12 @@ END_CGI -->
 
     if "_#Apply:OK/"{
 	nnot "_@mnt_point:/\ "{
-	    print "<pre>False folder ID: ??_#mnt_point??</pre></td></tr></table><a href=\"usb-storage.htm\">Back</a></table></body></html>";
+	    print "<pre>False folder ID: ??_#mnt_point_0??</pre></td></tr></table><a href=\"usb-storage.htm\">Back</a></table></body></html>";
 	    exit_cgi ;
 	}
-    print "<pre>";
+    print "<form method=\"Get\" action=\"show_folder.cgi\">
+<table><tr><td>?@-mnt_point@?<input type=\"submit\" name=\"Apply\" value=\"OK\"></td></tr>
+<tr><td>Folder: ??_@mnt_point??</td></tr></table></form><pre>";
     my_shell "ls -l \"??_@mnt_point??\" ";
     print " </pre></td></tr></table><a href=\"usb-storage.htm\">Back</a></table></body></html>";
     }

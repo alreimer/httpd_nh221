@@ -55,11 +55,12 @@ case "$1" in
 
 		echo -n > $RESOLV_CONF
 		[ -n "$domain" ] && echo domain $domain >> $RESOLV_CONF
+		k=0
 		for i in $dns ; do
 			echo adding dns $i
 			echo nameserver $i >> $RESOLV_CONF
-			httpd_cfg DNS_SERVER=$i		#added by alex_raw 21.06.2011
-
+			[ $k -lt 2 ] && httpd_cfg DNS_SERVER$k=$i		#added by alex_raw 21.06.2011 and 12.10.2014
+			k=$(($k+1))
 		done
 		;;
 	nak)

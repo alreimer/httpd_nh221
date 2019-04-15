@@ -54,7 +54,7 @@ case "$1" in
 	restart
 	;;
   *)
-	echo $"Usage: $0 {start|stop|restart} IP"
+	echo "Usage: $0 {start|stop|restart} IP"
 	exit 1
 esac
 exit ${ret_val}

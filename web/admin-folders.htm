@@ -17,6 +17,7 @@ file="side.inc?i=3" -->
 /mnt/home
 /mnt/etc
 /mnt/libexec
+/mnt/var/cron/
 #-> end
 END_TABLE -->
 
@@ -32,6 +33,7 @@ END_TABLE -->
 /mnt/home
 /mnt/etc
 /mnt/libexec
+/mnt/var/cron/
 #-> end
 END_TABLE -->
 <form method="GET" action="MK_folders.cgi" name="superset">
@@ -69,16 +71,16 @@ Periodically change the superuser name and password to ensure security.</td></tr
 
     if "_#Apply:Make_ALL/"{
 	print "<pre>";
-	my_shell "for i in $(echo \"?@-_Noxist_folders@?\") ; do mkdir \"$i\"; [ $? -eq 0 ] && echo \"<tr><td>Dir: $i is made!</td></tr>\"; done ";
+	my_shell "for i in $(echo \"?@-_Noxist_folders@?\") ; do mkdir -p \"$i\"; [ $? -eq 0 ] && echo \"<tr><td>Dir: $i is made!</td></tr>\"; done ";
 	print "</td></tr></table><a href=\"admin-folders.htm\">Back</a></table></body></html>";
     }
     if "_#Apply:Make_ONE/"{
 	nnot "_@Noxist_folders:/\ "{
-	    print "<pre>False folder ID: ??_#Noxist_folders??</pre></td></tr></table><a href=\"admin-formathd.htm\">Back</a></table></body></html>";
+	    print "<pre>False folder ID: ??_#Noxist_folders_0??</pre></td></tr></table><a href=\"admin-formathd.htm\">Back</a></table></body></html>";
 	    exit_cgi ;
 	}
 
-    my_shell "mkdir ??_@Noxist_folders??; [ $? -eq 0 ] && echo \"<tr><td><pre>Dir: ??_@Noxist_folders?? is made!</pre></td></tr>\"; ";
+    my_shell "mkdir -p ??_@Noxist_folders??; [ $? -eq 0 ] && echo \"<tr><td><pre>Dir: ??_@Noxist_folders?? is made!</pre></td></tr>\"; ";
     print "</td></tr></table><a href=\"admin-folders.htm\">Back</a></table></body></html>";
     }
 //    boot_page "admin-folders.htm";

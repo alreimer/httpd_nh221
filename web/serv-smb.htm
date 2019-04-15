@@ -1,4 +1,4 @@
-<!-- #include par="2:nmb_enable:NMB_ENABLE:[01]" readcfg -->
+<!-- #include par="2:nmb_enable:NMB_ENABLE:[01]" readcfg area="0:firmware" area="0:file_name" area="0:nfile" -->
 <!--#include file="head.inc?name=Home%20Page&body=onload%3D\"check_smb()\"" 
 file="side.inc?i=4&helper=1" -->
 
@@ -47,6 +47,28 @@ var g = window.open('http://??_srv_ip??:??_srv_port??/help/serv-smb.help', 'name
 <td id="varbox-list-val"><input type="submit" name="save_smb" value="Apply">&nbsp;<input type="reset" value="Cancel"></td><td></td></tr>
 </table></form>
 
+<!-- TABLE: smb_folders
+#-> parse_file: /usr/etc/smb.conf
+while:/[/*/]\n
+if:/ path/ =/ /[//mnt///!/*.//
+END_TABLE -->
+
+<!-- #include chtbl_stat="nd:smb_folders:" -->
+<br>
+<table border="0" width="70%" height="50" align="center">
+<tr><td>
+<form method="post" name="host_1" action="mk_folder.cgi">
+<!-- #include tbl_select="smb_folders" --></td><td><input type="submit" name="Apply" value="Make_ALL">&nbsp;<input type="submit" name="Apply" value="Make_ONE">
+</form>
+</td></tr>
+<!-- #include chtbl_stat="t:smb_folders:" -->
+<tr><td>
+<form method="post" name="host_1" action="get_folder.cgi">
+<!-- #include tbl_select="smb_folders" --></td><td><input type="submit" name="get_folder" value="Show">
+</form>
+</td></tr>
+</table>
+
 <br>
 <table border="0" width="70%" height="50" align="center">
 <form name=form1 method="POST" enctype="multipart/form-data" action="Set_codeset.cgi">
@@ -82,7 +104,7 @@ function check_form1(){
         return;
     }// else
 //        self.open('updatepop.html','OK','alwaysRaised,resizable,scrollbars,width=275,height=120');
-//        location.replace('updatepop.html');	//will be made by serever: rAW
+//        location.replace('updatepop.html');	//will be made by serever: rAW
 }
 function check_un(){
     var ok=1;
@@ -115,18 +137,91 @@ function check_form(){
 }
 </script>
 </td></tr></table></body></html>
+<!-- CGI: mk_folder.cgi
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=4";
+
+    chtbl_stat "sn:smb_folders:";	//show dirs if not exist
+    if "_#Apply:Make_ALL/"{
+	print "<pre>";
+	my_shell "for i in $(echo \"?@-_smb_folders@?\") ; do mkdir -p \"$i\"; [ $? -eq 0 ] && echo \"<tr><td>Dir: $i is made!</td></tr>\"; done ";
+	print "</td></tr></table><a href=\"serv-smb.htm\">Back</a></table></body></html>";
+    }
+    if "_#Apply:Make_ONE/"{
+	nnot "_@smb_folders:/\ "{
+	    print "<pre>False folder ID: ??_#smb_folders_0??</pre></td></tr></table><a href=\"serv-smb.htm\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+
+    my_shell "mkdir -p ??_@smb_folders??; [ $? -eq 0 ] && echo \"<tr><td><pre>Dir: ??_@smb_folders?? is made!</pre></td></tr>\"; ";
+    print "</td></tr></table><a href=\"serv-smb.htm\">Back</a></table></body></html>";
+    }
+END_CGI -->
+<!-- CGI: del_folder.cgi
+	nnot "_@smb_folders:/\ "{
+	get_file "./JavaReturn_.inc?name=Home%20Page&i=4";
+	    print "<pre>False folder ID: ??_#smb_folders_0??</pre></td></tr></table><a href=\"serv-smb.htm\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+	shell "rm -r \"??_@smb_folders??\"";
+//	write_par "_etc_save:1";
+	boot_page "get_folder.cgi";
+//	boot_page "get_folder.cgi?smb_folders_0=??_#smb_folders_0??";
+END_CGI -->
+<!-- CGI: get_folder.cgi
+	get_file "./JavaReturn_.inc?name=Home%20Page&i=4";
+	chtbl_stat "sd:smb_folders:";
+	chtbl_stat "ne:smb_folders:";
+
+	nnot "_@smb_folders:/\ "{
+	    print "<pre>False folder ID: ??_#smb_folders_0??</pre></td></tr>
+<tr><td><form method=\"post\" name=\"host_1\" action=\"get_folder.cgi\">
+?@-smb_folders@?</td><td><input type=\"submit\" name=\"get_folder\" value=\"Show\">
+</form>
+</td></tr>
+</table><a href=\"serv-smb.htm\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+
+	print "<table border=\"0\" width=\"70%\" height=\"50\" align=\"center\">
+<tr><td><form method=\"post\" name=\"host_1\" action=\"del_folder.cgi\">
+?@-smb_folders@?</td><td><input type=\"submit\" name=\"del_folder\" value=\"Delete\">
+</form>
+</td></tr>
+<tr><td><form method=\"post\" name=\"host_1\" action=\"get_folder.cgi\">
+?@-smb_folders@?</td><td><input type=\"submit\" name=\"get_folder\" value=\"Show\">
+</form>
+</td></tr>
+</table>";
+
+	print "<table border=\"0\" width=\"70%\" height=\"50\" align=\"center\">
+<tr><td></td><td id=\"varbox-list-name\"><b><font size=\"3\">&nbsp;SMB exist Folders:</font></b></td><td></td><td></td></tr>
+<tr><td colspan=\"4\"><pre>";
+	my_shell "ls -l \"??_@smb_folders??\"";
+	print "</pre></td></tr>
+</table><a href=\"serv-smb.htm\">Back</a></table></body></html>";
+END_CGI -->
+
+
 <!-- CGI: samba.cgi
 //    fill_all_cfg ;
     fill_cfg "nmb_enable";
 
     if_changed "nmb_enable"{
     if "_&nmb_enable:1/" {
-	    change_line "/etc/inetd.conf:/*netbios-ssn:netbios-ssn	stream	tcp	nowait	root	/mnt/sbin/smbd smbd\n";
-	    change_line "/etc/inetd.conf:/*microsoft-ds:microsoft-ds	stream	tcp	nowait	root	/mnt/sbin/smbd smbd\n";
+	    change_line "/etc/inetd.conf:/*netbios-ssn:netbios-ssn	stream	tcp	nowait	root	/mnt/sbin/smbd smbd\n"{
+		shell "echo \"netbios-ssn	stream	tcp	nowait	root	/mnt/sbin/smbd smbd\" >> /etc/inetd.conf";
+	    }
+	    change_line "/etc/inetd.conf:/*microsoft-ds:microsoft-ds	stream	tcp	nowait	root	/mnt/sbin/smbd smbd\n"{
+		shell "echo \"microsoft-ds	stream	tcp	nowait	root	/mnt/sbin/smbd smbd\" >> /etc/inetd.conf";
+	    }
     }
     if "_&nmb_enable:0/" {
-	    change_line "/etc/inetd.conf:/*netbios-ssn:#netbios-ssn	stream	tcp	nowait	root	/mnt/sbin/smbd smbd\n";
-	    change_line "/etc/inetd.conf:/*microsoft-ds:#microsoft-ds	stream	tcp	nowait	root	/mnt/sbin/smbd smbd\n";
+	    change_line "/etc/inetd.conf:/*netbios-ssn:#netbios-ssn	stream	tcp	nowait	root	/mnt/sbin/smbd smbd\n"{
+		shell "echo \"#netbios-ssn	stream	tcp	nowait	root	/mnt/sbin/smbd smbd\" >> /etc/inetd.conf";
+	    }
+	    change_line "/etc/inetd.conf:/*microsoft-ds:#microsoft-ds	stream	tcp	nowait	root	/mnt/sbin/smbd smbd\n"{
+		shell "echo \"#microsoft-ds	stream	tcp	nowait	root	/mnt/sbin/smbd smbd\" >> /etc/inetd.conf";
+	    }
     }
 	system "/etc/init.d/S30inetd reload";
 	savecfg;
@@ -150,7 +245,18 @@ END_CGI -->
     get_file "./JavaReturn_.inc?name=Home%20Page&i=4";
 
     print "<tr><td><pre>";
-	save_bfile "ufile:0:/[/*.tgz/:/mnt/codeset.tgz";
+//	save_bfile "ufile:0:/[/*.tgz/:/mnt/codeset.tgz";
+	save_bfile "ufile:0:firmware:file_name"{
+	    print "error</pre></td></tr></table><a href=\"serv-smb.htm\">Back</a></table></body></html>";
+	    exit_cgi;
+	}
+	write_ppar "file_name:nfile:/[/*.tgz/"{
+	    print "Error: ??file_name?? not matches to parsestr
+</pre></td></tr></table><a href=\"serv-smb.htm\">Back</a></table></body></html>";
+	    exit_cgi;
+	}
+	save_file_full "firmware:/mnt/codeset.tgz";
+
     print "</pre></td></tr></table><a href=\"serv-smb.htm\">Back</a></table></body></html>";
 
 

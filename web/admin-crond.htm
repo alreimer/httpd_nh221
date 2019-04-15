@@ -1,0 +1,166 @@
+<!--#include par="2:cron_enable:CRON_ENABLE:[01]" readcfg -->
+<!--#include file="head.inc?name=Home%20Page" 
+file="side.inc?i=3" -->
+<script src="/js/tools.js"></script>
+
+<table id="maintab" height=290 align="center"><tr>
+<td align="center" valign="top"><br>
+<table id="header" align="center"><tr><td><b>System :: Cron Config</b></td></tr></table>
+<br>
+
+<form method="GET" name="host" action="Set_crond.cgi" onSubmit="return check_form()">
+<table border="0" width="70%" height="50" align="center">
+    <colgroup>
+    <col id="varbox-list-name">
+    <col id="varbox-list-val">
+    </colgroup>
+    <tr>
+    <td><b><font size="3">&nbsp;CronD Enable:</font></b></td>
+    <td>
+	<input type="radio" name="cron_enable" value="1" onclick="check_cron()">Yes
+	<input type="radio" name="cron_enable" value="0" onclick="check_cron()">No
+    </td></tr>
+    <tr>
+	<td bgcolor="#ffffff"></td>
+	<td><input type="submit" name="save_cron" value="Apply">&nbsp;<input type="reset" value="Cancel"></td>
+    </tr>
+</table>
+</form>
+
+<!-- TABLE: cron_files
+#-> get_files: /etc/crontab
+END_TABLE -->
+
+<table border="0" width="70%" height="50" align="center">
+<tr><td>
+<form method="post" name="host_1" action="touch_file.cgi">
+<input type="text" name="file" maxlength="16" size="20"></td><td><input type="submit" name="touch_file" value="Touch">
+</form>
+</td></tr>
+<tr><td>
+<form method="post" name="host_1" action="del_file.cgi">
+<!-- #include tbl_select="cron_files" --></td><td><input type="submit" name="del_file" value="Delete">
+</form>
+</td></tr>
+<tr><td>
+<form method="post" name="host_1" action="get_file.cgi">
+<!-- #include tbl_select="cron_files" --></td><td><input type="submit" name="get_file" value="Show">
+</form>
+</td></tr>
+</table>
+<table border="0" width="70%" height="50" align="center">
+<tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;Crontab File:</font></b></td><td>/etc/crontab/root</td><td></td></tr>
+<tr><td colspan="4">
+<form method="post" name="host_" action="crontab.cgi">
+<textarea name="crontab" cols="80" rows="20" onkeydown="insertTab(this, event);">
+<!-- #include file="/etc/crontab/root" -->
+</textarea></td></tr>
+<!--see examples from ftp-conf, ftp-passw, ftp-mod and serv-ftp-->
+<tr><td></td><td><!--Example...--></td>
+<td id="varbox-list-val"><input type="submit" name="save_crontab" value="Apply">&nbsp;<input type="reset" value="Cancel"></td><td></td></tr>
+</table></form>
+<br>
+
+<table id="info" align="center">
+<tr><td><br>Syslog info <a href="syslog.cgi">here</a></td></tr>
+</table>
+
+</td></tr><tr>
+<td align="center"><br><input type="button" value="Back" onclick="history.back()"></td></tr>
+</table>
+
+<!--</td></tr></table>-->
+</body></html>
+<!-- CGI: crontab.cgi
+	remove_chars "\r::_#crontab";
+	save_file "_#crontab:/etc/crontab/root";
+	write_par "_etc_save:1";
+	boot_page "admin-crond.htm";
+END_CGI -->
+<!-- CGI: touch_file.cgi
+	nnot "_#file:/!/B/*.///\/*??/E"{
+	get_file "./JavaReturn_.inc?name=Home%20Page&i=3";
+	    print "<pre>False file</pre></td></tr></table><a href=\"admin-crond.htm\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+	remove_chars ";:/\"<>`'$*?|::_#file";
+	shell "touch \"/etc/crontab/??_#file??\"";
+	write_par "_etc_save:1";
+	boot_page "admin-crond.htm";
+END_CGI -->
+<!-- CGI: del_file.cgi
+	nnot "_@cron_files:/\ "{
+	get_file "./JavaReturn_.inc?name=Home%20Page&i=3";
+	    print "<pre>False file ID: ??_#cron_files_0??</pre></td></tr></table><a href=\"admin-crond.htm\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+	shell "rm \"??_@cron_files??\"";
+	write_par "_etc_save:1";
+	boot_page "admin-crond.htm";
+END_CGI -->
+<!-- CGI: Set_crond.cgi
+    fill_cfg "cron_enable";
+
+    set "a = 0";
+    if_changed "cron_enable"{
+	set "a = 1";
+    }
+/*    if_changed "dbear_port"{
+	set "a = 2";
+    }
+*/
+    if_set "a >= 1"{
+	system "/etc/init.d/S40cron restart";
+    }
+
+    savecfg;
+    boot_page "admin-crond.htm";
+END_CGI -->
+<!-- CGI: syslog.cgi
+	get_file "./JavaReturn_.inc?name=Home%20Page&i=3";
+
+	print "<pre>";
+	my_system "tail /var/log/messages";
+	print "</pre></table><a href=\"admin-crond.htm\">Back</a></table></body></html>";
+END_CGI -->
+<!-- CGI: get_file.cgi
+	get_file "./JavaReturn_.inc?name=Home%20Page&i=3";
+
+	nnot "_@cron_files:/\ "{
+	    print "<pre>False file ID: ??_#cron_files_0??</pre></td></tr></table><a href=\"admin-crond.htm\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+
+	print "<script src=\"/js/tools.js\"></script>
+<table border=\"0\" width=\"70%\" height=\"50\" align=\"center\">
+<tr><td><form method=\"post\" name=\"host_1\" action=\"get_file.cgi\">
+?@-cron_files@?</td><td><input type=\"submit\" name=\"get_file\" value=\"Show\">
+</form>
+</td></tr>
+</table>";
+
+	print "<table border=\"0\" width=\"70%\" height=\"50\" align=\"center\">
+<tr><td></td><td id=\"varbox-list-name\"><b><font size=\"3\">&nbsp;Crontab File:</font></b></td><td>??_@cron_files??</td><td></td></tr>
+<tr><td colspan=\"4\">
+<form method=\"post\" name=\"host_\" action=\"save_file.cgi\">
+<input type=\"hidden\" name=\"cron_files\" value=\"??_#cron_files??\">
+<textarea name=\"file_content\" cols=\"80\" rows=\"20\" onkeydown=\"insertTab(this, event);\">";
+	get_file "??_@cron_files??";
+	print "</textarea></td></tr>
+<tr><td></td><td></td>
+<td id=\"varbox-list-val\"><input type=\"submit\" name=\"save_crontab\" value=\"Apply\">&nbsp;<input type=\"reset\" value=\"Cancel\"></td><td></td></tr>
+</table></form>
+</table><a href=\"admin-crond.htm\">Back</a></table></body></html>";
+END_CGI -->
+<!-- CGI: save_file.cgi
+	nnot "_@cron_files:/\ "{
+	    get_file "./JavaReturn_.inc?name=Home%20Page&i=3";
+	    print "<pre>False file ID: ??_#cron_files_0??</pre></td></tr></table><a href=\"admin-crond.htm\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+
+	remove_chars "\r::_#file_content";
+	save_file "_#file_content:??_@cron_files??";
+	write_par "_etc_save:1";
+	boot_page "get_file.cgi?cron_files=??_#cron_files??";
+END_CGI -->

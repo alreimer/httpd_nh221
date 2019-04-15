@@ -1,7 +1,13 @@
 #!/bin/sh
+. /etc/config
+
 FROM=/mnt/home/Share
 
-TO=/mnt/home/usb_backup
+if [ -n "$BACKUP_PATH" ]; then
+    TO=$BACKUP_PATH
+else
+    TO=/mnt/home/usb_backup
+fi
 
 NAME="."
 

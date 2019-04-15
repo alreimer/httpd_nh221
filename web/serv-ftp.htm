@@ -136,10 +136,14 @@ else
     }
     if_set "a >= 1"{
     if "_&ftp_enable:1/" {
-	    change_line "/etc/inetd.conf:/*vsftpd:??_&ftp_port??		stream	tcp	nowait	root	/sbin/vsftpd /sbin/vsftpd\n";
+	    change_line "/etc/inetd.conf:/*vsftpd:??_&ftp_port??		stream	tcp	nowait	root	/sbin/vsftpd /sbin/vsftpd\n"{
+		shell "echo \"??_&ftp_port??		stream	tcp	nowait	root	/sbin/vsftpd /sbin/vsftpd\" >> /etc/inetd.conf";
+	    }
     }
     if "_&ftp_enable:0/" {
-	    change_line "/etc/inetd.conf:/*vsftpd:#??_&ftp_port??		stream	tcp	nowait	root	/sbin/vsftpd /sbin/vsftpd\n";
+	    change_line "/etc/inetd.conf:/*vsftpd:#??_&ftp_port??		stream	tcp	nowait	root	/sbin/vsftpd /sbin/vsftpd\n"{
+		shell "echo \"#??_&ftp_port??		stream	tcp	nowait	root	/sbin/vsftpd /sbin/vsftpd\" >> /etc/inetd.conf";
+	    }
     }
     system "killall vsftpd";
     // system "/etc/cfg_inetd";
