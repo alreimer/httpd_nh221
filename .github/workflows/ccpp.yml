@@ -9,7 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: make
-      run: |
+       - name: List files
+       run: ls
+       - name: make
+       run: |
         cat /Makefile
         make all
