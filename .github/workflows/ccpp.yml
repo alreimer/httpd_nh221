@@ -3,10 +3,11 @@ name: C/C++ CI
 on: [push]
 
 jobs:
-  build:
+   build-linux:
+    name: Linux build
 
     runs-on: ubuntu-latest
     
     steps:
     - name: make
-      run: make
+      run: make all
