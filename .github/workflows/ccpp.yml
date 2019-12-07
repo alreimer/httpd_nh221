@@ -11,5 +11,5 @@ jobs:
     steps:
     - name: make
       run: |
-        cat makefile
+        cat ../Makefile
         make all
