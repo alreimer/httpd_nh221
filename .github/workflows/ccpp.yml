@@ -11,6 +11,6 @@ jobs:
     steps:
     - name: make
       run: |
-         ls -l
+        ls
         cd /httpd_nh221
         make all
