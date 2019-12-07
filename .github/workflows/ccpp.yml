@@ -10,7 +10,7 @@ jobs:
     
     steps:
        - name: List files
-       run: ls
+       run: ls -l
        - name: make
        run: |
         cat /Makefile
