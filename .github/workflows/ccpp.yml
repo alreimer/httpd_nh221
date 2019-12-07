@@ -11,6 +11,5 @@ jobs:
     steps:
     - name: make
       run: |
-        ls
-        cd /httpd_nh221
+        cat makefile
         make all
