@@ -10,4 +10,6 @@ jobs:
     
     steps:
     - name: make
-      run: make all
+      run: |
+        cd httpd_nh221
+        make all
