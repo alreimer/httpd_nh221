@@ -9,11 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-       - name: List files
-       run: |
+      - uses: actions/checkout@v1
+      - name: List files
+      run: |
          ls
          env
-       - name: make
-       run: |
-        cat Makefile
-        make all
+      - name: make
+      run: |
+         cat Makefile
+         make
+         
