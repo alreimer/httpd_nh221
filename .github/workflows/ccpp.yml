@@ -15,7 +15,5 @@ jobs:
          ls
          env
       - name: make
-        run: |
-         cat Makefile
-         make
+        run:  make
          
