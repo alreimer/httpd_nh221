@@ -11,11 +11,11 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: List files
-      run: |
+        run: |
          ls
          env
       - name: make
-      run: |
+        run: |
          cat Makefile
          make
          
