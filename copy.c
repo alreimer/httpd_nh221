@@ -459,7 +459,7 @@ int copy_file_buf(char *file, char *buf, long long size)
 }
 
 // find there is a input type is "radio" in this line and insert the value for displaying
-inline void radio_value_insert(char *line, char *var_head, FILE *out)
+void radio_value_insert(char *line, char *var_head, FILE *out)
 {
     char *file_head1, *file_head2, *radio_var, *ptr;
 
@@ -507,7 +507,7 @@ int reg_par(char *name, char *value, long long size)
 
 }
 
-inline void include_(char *line, char *var_head, FILE *out)	//SSI made total brutal, no checks of file path, and include must be along in string of file!
+void include_(char *line, char *var_head, FILE *out)	//SSI made total brutal, no checks of file path, and include must be along in string of file!
 {
     char *var_head2;
     struct parsestr strct;
