@@ -25,5 +25,5 @@ char *get_var(unsigned long long *size_ptr, char *var_index);		//parse Varialble
 
 int reg_par(char *name, char *value, long long size);
 
-void radio_value_insert(char *line, char *var_head, FILE *out);
-void include_(char *line, char *var_head, FILE *out);
+//void radio_value_insert(char *line, char *var_head, FILE *out);
+//void include_(char *line, char *var_head, FILE *out);
