@@ -1,6 +1,6 @@
 name: C/C++ CI
 
-on: [push]
+on: [push,pull_request]
 
 jobs:
    build-linux:
@@ -10,8 +10,10 @@ jobs:
     
     steps:
        - name: List files
-       run: ls -l
+       run: |
+         ls
+         env
        - name: make
        run: |
-        cat /Makefile
+        cat Makefile
         make all
