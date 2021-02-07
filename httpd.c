@@ -32,6 +32,7 @@
 #include "include/httpd_config.h"
 #include "copy.h"
 #include "parse_CGI.h"
+#include "copy_CGI.h"
 
 
 #define SP_OPTIONS
@@ -334,7 +335,7 @@ if(wauth && tt == NULL){
 		    "<body bgcolor=\"#cc9999\" text=\"#000000\" link=\"#2020ff\" vlink=\"#4040cc\">\n"
 		    "<h2>Authorisation overflow</h2>\n"
 		    "<p>Login error. 3 Times. Please <a href=\"http://%s:%s\">try again</a> in a minute.</p></body>\n</html>\n",CONFIG.IP,CONFIG.ADMIN_PORT);
-	return;
+	return 0;
     }
     if(*(CONFIG.WEB_LOGIN) != '\0'){
 //	printf("WEB_LOGIN isnot empty!\n");

@@ -1,5 +1,6 @@
 char *strstrcfg(char *a, char *b, int *len);
 int  ReadConfiguration(void);
+int  ReadConfiguration1(void);
 int  SaveConfiguration(void);
 int cfg_arg_strcmp(char *parm, char flag);
 int cfg_arg_changed(char *web_name);

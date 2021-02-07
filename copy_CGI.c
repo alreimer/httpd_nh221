@@ -683,7 +683,7 @@ int save_bfile_1(FILE *out, char *form_name, unsigned long long size_limit, char
 
     if(method1 != POST_BOUNDARY || !postdata) return 0;
 
-printf("content_length = %d\n",content_length);
+printf("content_length = %ld\n",content_length);
 
     var_name = (char *) malloc(strlen(form_name) + 60);
     if(!var_name) return 0;
