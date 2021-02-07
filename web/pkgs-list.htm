@@ -1,4 +1,5 @@
 <!-- added by RAW -->
+<!--#include area="92100:AREA-1" -->
 <!--#include file="head.inc?name=Home%20Page" 
 file="side.inc?i=8&helper=1" -->
 
@@ -19,9 +20,14 @@ var g = window.open('http://??_srv_ip??:??_srv_port??/help/pkgs-list.help', 'nam
 <table border="0" width="70%" height="50" align="center">
 <tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;List of packages:</font></b></td><td></td><td></td></tr>
 <tr><td colspan="4">
-
+<!--#include wr_shell=":AREA-1:ipkg-cl -V 0 list_installed 2>/dev/null | cut -d' ' -f1" -->
+<!-- TABLE:list
+#-> parse_area: AREA-1
+while:/[/*/]\n
+if:
+END_TABLE -->
 <table border="0" width="100%" height="40" align="center">
-<!-- #include shell=""for i in $(ipkg-cl -V 0 list_installed 2>/dev/null | cut -d' ' -f1); do echo \"<tr><td><pre>$(ipkg-cl -V 0 list $i 2>/dev/null)</pre></td><td><a href=\\\"pkg_remove.cgi?file_name=$i\\\">remove</a></td></tr>\"; done "" -->
+<!--#include table="list_0:list_0::<tr><td><pre>?@@ ipkg-cl -V 0 list \"?$\" 2>/dev/null @@?</pre></td><td><a href=\"pkg_remove.cgi?list_0=?#+\">remove</a></td></tr>\n" -->
 </table>
 </td></tr>
 <tr><td></td><td></td>
@@ -40,22 +46,15 @@ var g = window.open('http://??_srv_ip??:??_srv_port??/help/pkgs-list.help', 'nam
 </table>
 
 </td></tr></table></body></html>
-
 <!-- CGI: pkg_remove.cgi
-
-    remove_chars ";:/\"<>`'$|::_#file_name";
-
-    if "_#file_name:/!/B/*.///\/*??/E"{
-//    not "_#file_name:/*.//"{
     get_file "./JavaReturn_.inc?name=Home%20Page&i=8";
-
-    print "<tr><td>Remove package:</td><td> ??_#file_name??</td></tr>
+	nnot "_@list:/\ "{
+	    print "<pre>False folder ID: ??_#list_0??</pre></td></tr></table><a href=\"pkgs-list.htm\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+    print "<tr><td>Remove package:</td><td> ??_@list??</td></tr>
     <tr><td colspan=\"2\"><pre>";
-    my_shell "ipkg-cl remove \"??_#file_name??\"";
-    print "</pre></td></tr></table><a href=\"pkgs-upload.htm\">Upload or Install packages</a>&nbsp;&nbsp;<a href=\"pkgs-list.htm\">Back</a></table></body></html>";
-    exit_cgi;
-//    }
-    }
-    boot_page "pkgs-list.htm";
+    my_shell "ipkg-cl remove \"??_@list??\"";
+    print "</pre></td></tr></table><a href=\"pkgs-list.htm\">Back</a></table></body></html>";
 
 END_CGI -->

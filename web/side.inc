@@ -14,42 +14,42 @@
  cellpadding="0" cellspacing="0" width="152">
               <tbody>
                 <tr align="left" valign="top">
-                  <td height="36" width="150"><a href="1-ShowMainHtml.htm"><img
+                  <td height="36" width="150"><a href="/1-ShowMainHtml.htm"><img
  id="Nav111" name="Nav1" src="/images/Bhome<!-- if="_##i:1/" -->-o<!-- /if -->.png"
  alt="Homepage" border="0" height="36" width="150"></a></td>
                 </tr>
                 <tr align="left" valign="top">
-                  <td height="36" width="150"><a href="1-network.htm"><img
+                  <td height="36" width="150"><a href="/1-network.htm"><img
  id="Nav2" name="Nav2" src="/images/Bnetwork<!-- if="_##i:2/" -->-o<!-- /if -->.png"
  alt="Networking" border="0" height="36" width="150"></a></td>
                 </tr>
                 <tr align="left" valign="top">
-                  <td height="36" width="150"><a href="1-system.htm"><img
+                  <td height="36" width="150"><a href="/1-system.htm"><img
  id="Nav3" name="Nav3" src="/images/Bsystem<!-- if="_##i:3/" -->-o<!-- /if -->.png"
  alt="System" border="0" height="36" width="150"></a></td>
                 </tr>
                 <tr align="left" valign="top">
-                  <td height="36" width="150"><a href="1-services.htm"><img
+                  <td height="36" width="150"><a href="/1-services.htm"><img
  id="Nav4" name="Nav4" src="/images/Bservices<!-- if="_##i:4/" -->-o<!-- /if -->.png"
  alt="Services" border="0" height="36" width="150"></a></td>
                 </tr>
                 <tr align="left" valign="top">
-                  <td height="36" width="150"><a href="1-access.htm"><img
+                  <td height="36" width="150"><a href="/1-access.htm"><img
  id="Nav5" name="Nav5" src="/images/Baccess<!-- if="_##i:5/" -->-o<!-- /if -->.png"
  alt="Access" border="0" height="36" width="150"></a></td>
                 </tr>
                 <tr align="left" valign="top">
-                  <td height="36" width="150"><a href="1-p2p-main.htm"><img
+                  <td height="36" width="150"><a href="/1-p2p-main.htm"><img
  id="Nav6" name="Nav6" src="/images/Bp2p<!-- if="_##i:6/" -->-o<!-- /if -->.png"
  alt="P2P" border="0" height="36" width="150"></a></td>
                 </tr>
                 <tr align="left" valign="top">
-                  <td height="36" width="150"><a href="1-USB.htm"><img
+                  <td height="36" width="150"><a href="/1-USB.htm"><img
  id="Nav7" name="Nav7" src="/images/Busb<!-- if="_##i:7/" -->-o<!-- /if -->.png"
  alt="USB" border="0" height="36" width="150"></a></td>
                 </tr>
                 <tr align="left" valign="top">
-                  <td height="36" width="150"><a href="1-packages.htm"><img
+                  <td height="36" width="150"><a href="/1-packages.htm"><img
  id="Nav8" name="Nav8" src="/images/Bpkgs<!-- if="_##i:8/" -->-o<!-- /if -->.png"
  alt="Packages" border="0" height="36" width="150"></a></td>
                 </tr>
@@ -63,7 +63,7 @@
 <!-- if="_etc_save:1/" -->
                 <tr>
                 <td height="36" width="150"><hr><div style="text-align:center;">
-<a href="etc_save.cgi">save</a> /etc dir</div>
+<a href="/etc_save.cgi">save</a> /etc dir</div>
                 </td>
                 </tr>
 <!-- CGI: etc_save.cgi

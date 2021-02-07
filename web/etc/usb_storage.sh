@@ -6,56 +6,59 @@
 # $3 = index of port
 # $4 = serialnumber
 
-for i in `cat known_usb | grep -v "#"`
+for i in `cat /etc/known_usb | grep -v "#" | grep $4`
     do
 	if [ -n "$4" ]; then
-	S=`echo $i | cut -d ":" -f 1 | grep $4 `
+	S=`echo $i | cut -d ":" -f 1`
 	    if [ "$S" == "$4" ]; then
 		P=`echo $i | cut -d ":" -f 2 `
 		M=`echo $i | cut -d ":" -f 3 `
-		C=`echo $i | cut -d ":" -f 4 `
 		if [ -z "$M" ]; then
-		    . /etc/config
-		    M=$BACKUP_PATH/storage
+		    M=/mnt/home/usb/$4
 		fi
-#		echo "Path:$P   mount:$M   cmd:$C"
-		if [ "$P" == "*" ]; then
-#		    echo ALL
-		    j=0
-		    for k in /dev/$1*
-		    do
-			#not use /dev/sdb, use only /dev/sdb1...
-			if [ $j != 0 ]; then
-			    if [ $2 == 1 ]; then
-#				echo "$k  $j"
-				mkdir -p "$M-part$j"
-				mount $k "$M-part$j"
-				[ $? != 0 ] && rm -rf "$M-part$j"
-			    elif [ $2 == 0 ]; then
-				umount -f $k
-				rm -rf "$M-part$j"
+		if [ $2 == 0 ]; then
+		    if [ "$P" == "*" ]; then
+			for k in "$M/part"*
+			do
+			    umount -f "$k"
+			    [ $? == 0 ] && rm -rf "$k"
+			done
+			[ ! -e "$M/"* ] && rm -rf "$M"
+		    else
+#			if [ -e /dev/$1$P ]; then
+			umount -f "$M"
+			[ $? == 0 ] && rm -rf "$M"
+#			else
+#			echo "device /dev/$1$P not found"
+#			fi
+		    fi
+		elif [ $2 == 1 ]; then
+		    C=`echo $i | cut -d ":" -f 4 `
+		    sleep 1
+		    if [ "$P" == "*" ]; then
+			j=0
+			for k in /dev/$1*
+			do
+			    #not use /dev/sdb, use only /dev/sdb1...
+			    if [ $j != 0 ]; then
+				mkdir -p "$M/part$j"
+				mount $k "$M/part$j"
+				[ $? != 0 ] && rm -rf "$M/part$j"
 			    fi
-			fi
 			j=$(($j+1))
-		    done
-		    $C
-		else
-		    if [ -e /dev/$1$P ]; then
-			if [ $2 == 1 ]; then
-#			echo "/dev/$1$P"
+			done
+			$C
+		    else
+			if [ -e /dev/$1$P ]; then
 			mkdir -p "$M"
 			mount /dev/$1$P "$M"
 			[ $? != 0 ] && rm -rf "$M"
-			elif [ $2 == 0 ]; then
-			umount -f /dev/$1$P
-			rm -rf "$M"
-			fi
-		    else
+			$C
+			else
 			echo "device /dev/$1$P not found"
+			fi
 		    fi
-		    $C
 		fi
 	    fi
 	fi
-
 done

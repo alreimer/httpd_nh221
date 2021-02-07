@@ -1,6 +1,6 @@
 /* copy_CGI.c:
  *
- * Copyright (C) 2010-2014  Alexander Reimer <alex_raw@rambler.ru>
+ * Copyright (C) 2010-2020  Alexander Reimer <alex_raw@rambler.ru>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,6 +12,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 //#include <errno.h>//errno
+#include <unistd.h>
 #include <string.h>
 #include <sys/stat.h>	//chmod
 #include "copy_CGI.h"
@@ -25,6 +26,9 @@
 
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 extern config CONFIG;
+//for my_system
+extern int fd;
+extern int sockfd;
 
 struct cgi *cgi_name = NULL;
 struct cgi *cgi_used = NULL;	//connect to cgi that is now in use. Used by print()
@@ -32,7 +36,7 @@ struct cgi *cgi_used = NULL;	//connect to cgi that is now in use. Used by print(
 //return 0 -exec in braces, 1 - jump
 /*used in get_cgi as print "text to \n be ??_%var?? "*/
 int print(FILE *out, char *tmp){
-    char *tmp1, *tmp2;//tmp2 can be replaced via tmp1!!
+    char ch, *tmp2;//tmp2 can be replaced via tmp1!!
     struct cgi *ptr;
     struct parsestr strct;
     ptr = cgi_used;
@@ -44,13 +48,19 @@ int print(FILE *out, char *tmp){
     loop_print++;
 
 	    while(*tmp){
-		tmp1 = tmp;
-		if(*tmp == '\\'){
-		    if(*(tmp+1) == '\"'){ tmp++; tmp1 = tmp;}
-		    else if(*(tmp+1) == 'n'){tmp++; tmp1 = "\n";}
-		    else if(*(tmp+1) == 't'){tmp++; tmp1 = "\t";}
-		    else if(*(tmp+1) == '\\'){tmp++; tmp1 = "\\";}
-		    else if(*(tmp+1) == '?' || *(tmp+1) == '{' || *(tmp+1) == '['){tmp++; tmp1 = tmp;}
+		ch = *tmp;
+		if(ch == '\\'){
+		    tmp++;
+		    switch (*tmp){
+			case '\"':
+			case '?':
+			case '{':
+			case '[':
+			case '\\':	ch = *tmp;break;
+			case 'n':	ch = '\n';break;
+			case 't':	ch = '\t';break;
+			default :	tmp--;
+		    }
 		} else
 		if(tmp2 = parsestr2(&strct, tmp, "??/[/N?N/*/]??")){		//??variable??
 			tmp2 = get_var(NULL, tmp2);		//get_var and get_variable
@@ -105,11 +115,66 @@ int print(FILE *out, char *tmp){
 			}
 			tmp = restore_str(&strct);
 			continue;		//it's or tmp=tmp+2 or tmp=tmp2+2
+		} else
+		if(tmp2 = parsestr2(&strct, tmp, "?TABLE:/ /[/*\n/]END_TABLE?\n")){	// ?TABLE:.....\nEND_TABLE?
+			parse_tbl(tmp2, 1);
+			tmp = restore_str(&strct);
+			continue;
+		} else
+		if(tmp2 = parsestr2(&strct, tmp, "?table?:/[/*/]/<1\n\\0/>")){	// ?table?:.....\n
+			tabs(tmp2, out);		//run table-ordered show of TABLE entries
+			tmp = restore_str(&strct);
+			continue;
+		} else
+		if(tmp2 = ticket_find(&tmp)){	//in tmp2 - ticket
+			fprintf(out, "%s", tmp2);
+			continue;
 		}
-		putc(*tmp1, out);
+
+		putc(ch, out);
 	    tmp++;
 	    }
 	loop_print--;
+	return 1;
+}
+
+int print_page(FILE *out, char *tmp){
+    char ch, arg_s = 0, *tmp2;//tmp2 can be replaced via tmp1!!
+    struct parsestr strct;
+
+	    while(*tmp){
+		ch = *tmp;
+		if(ch == '\\'){
+		    tmp++;
+		    switch (*tmp){
+			case '\"':
+			case '?':
+			case '{':
+			case '[':
+			case '\\':	ch = *tmp;break;
+			case 'n':	ch = '\n';break;
+			case 't':	ch = '\t';break;
+			default :	tmp--;
+		    }
+		} else
+		if(tmp2 = parsestr2(&strct, tmp, "??/[/N?N/*/]??")){		//??variable??
+			tmp2 = get_var(NULL, tmp2);		//get_var and get_variable
+			if(tmp2) print(out, tmp2); /*fprintf(out, "%s", tmp3);*/
+			tmp = restore_str(&strct);
+			continue;		//it's or tmp=tmp+2 or tmp=tmp2+2
+		} else
+		if(ch == '?') arg_s = 1;
+		else
+		if(arg_s == 0 && (tmp2 = ticket_find(&tmp)) != NULL){	
+				//in tmp2 - ticket. make it before '?'. after don't get a ticket.
+				// file?arg1=12&arg2=tffddf
+			fprintf(out, "%s", tmp2);
+			continue;
+		}
+
+		putc(ch, out);
+	    tmp++;
+	    }
 	return 1;
 }
 
@@ -235,7 +300,166 @@ int write_ppar(char *line){
 	return jump;
 }
 
-void write_system(char *b_in, long long s_in, char *buf, long long size, int mode, char *arg);
+//b_in(buffer) and s_in(size) are /dev/stdin. If (b_in == NULL) ->/dev/stdin is OFF!
+//buf and size are std(out, err) buffers.
+void write_system(char *b_in, long long s_in, char *buf, long long size, int mode, char *cmd)
+{
+	int pid, status;
+	int pipe_fd[2], pipe_[2]; //pipe_fd - is for read(stdout stderr) and pipe_ - is for write(stdin)
+	int wrote;
+	int err = 0;
+	long long i = 0;
+
+if(!size) return;
+
+if(mode){	//mode==1 -> cat mode
+	while(buf[i] && (size - 1 - i)){
+	    i++;
+	}
+}
+
+    if (pipe(pipe_fd) == 0) {
+      if (pipe(pipe_) == 0) {
+	if (!(pid=fork())){	//child
+	    close(pipe_fd[0]);	//read end
+
+	    close(fd);	    	//for inetd
+	    close(sockfd);
+
+	    close(1);
+	    close(2);
+	    dup2(pipe_fd[1], 1);	//1 -stdout
+	    dup2(pipe_fd[1], 2);	//2 -stderr
+	    close(pipe_fd[1]);
+
+	    close(pipe_[1]);	//write end
+	    close(0);
+	    dup2(pipe_[0], 0);	//1 -stdin
+	    close(pipe_[0]);
+
+//	    setsid();
+	    execl("/bin/sh", "sh", "-c", cmd, (char *) 0);
+//	    execl("/bin/sh", "sh", cmd, (char *) 0);
+
+	    exit(1);
+	}else{			//parent
+	    close(pipe_[0]);	//read end
+	    close(pipe_fd[1]);	//write end
+	    if (pid > 0) {	// fork -- parent
+
+		if(b_in != NULL){
+		    if(s_in == 0) s_in = strlen(b_in);
+		    if(s_in != 0) write(pipe_[1], b_in, s_in);
+		}
+		close(pipe_[1]);
+
+		while(i<(size-1) && read(pipe_fd[0], (buf+i), 1) > 0){
+//printf("n=%d w=%d",n,wrote);
+//		    if(i >= (size-1)) break;
+		    i++;
+		}
+		buf[i] = '\0';
+		wait(&status);
+	    } else {	//fork failed
+		err = 2;
+		close(pipe_[1]);
+	    }
+
+	    close(pipe_fd[0]);	//close rest
+	}
+      }else{
+        err = 1;
+        close(pipe_fd[0]);
+        close(pipe_fd[1]);
+      }
+
+    } else err = 1;	//make a pipe failed
+    if(err)	fprintf(stderr, "my_system: Unable to run child process %s, errno %d\n", cmd, err);
+}
+
+
+void my_system(FILE *out, char *cmd)
+{
+	int pid, status;
+	int pipe_fd[2];
+	int wrote;
+	int err = 0;
+	int buf;
+	
+    if (pipe(pipe_fd) == 0) {
+
+	if (!(pid=fork())){	//child
+	    close(pipe_fd[0]);	//read end
+
+	    close(fd);	    	//}for inetd
+	    close(sockfd);
+
+	    close(1);
+	    close(2);
+	    dup2(pipe_fd[1], 1);	//1 -stdout
+	    dup2(pipe_fd[1], 2);	//2 -stderr
+	    close(pipe_fd[1]);
+
+	    close(0);	//	/dev/stdin is off
+
+//	    setsid();
+	    execl("/bin/sh", "sh", "-c", cmd, (char *) 0);
+//	    execl("/bin/sh", "sh", cmd, (char *) 0);
+	    exit(1);
+	}else{			//parent
+	    close(pipe_fd[1]);	//write end
+	    if (pid > 0) {	// fork -- parent
+		while(read(pipe_fd[0], &buf, 1) > 0){
+		    wrote = fwrite(&buf, 1, 1, out);
+//printf("n=%d w=%d",n,wrote);
+		    if(wrote < 1){
+			err = 3;	//write failed
+			break;
+		    }
+		}
+//		waitpid(pid, &status, 0);
+		wait(&status);
+	    } else	//fork failed
+		err = 2;
+
+	    close(pipe_fd[0]);	//close rest
+	
+	}
+
+    } else err = 1;	//make a pipe failed
+    if(err)	fprintf(out, "my_system: Unable to run child process %s, errno %d\n", cmd, err);
+}
+
+void system_(char *cmd)
+{
+	int pid, status;
+	int err = 0;
+	
+	if (!(pid=fork())){	//child
+
+	    close(fd);	    	//for inetd
+	    close(sockfd);
+
+//	    close(1);
+//	    close(2);
+
+	    close(0);	//	/dev/stdin is off
+
+//	    setsid();
+	    execl("/bin/sh", "sh", "-c", cmd, (char *) 0);
+//	    execl("/bin/sh", "sh", cmd, (char *) 0);
+	    exit(1);
+	}else{			//parent
+	    if (pid > 0) {	// fork -- parent
+		wait(&status);
+	    } else	//fork failed
+		err = 1;
+
+	}
+
+    if(err)	fprintf(stderr, "system: Unable to run child process %s, errno %d\n", cmd, err);
+}
+
 
 void write_shell(char *buf_in, long long size_in, char *buf, long long size_1, int mode, char *cmd){ //tmp- is max. 2048byte  if runned from CGI-script
 	unsigned long long size = strncpy_(NULL, cmd, 0)+1;	//this is max. size of cmd-string
@@ -413,6 +637,94 @@ void remove_show_chars(char *parm, int sw){
     }
 }
 
+extern int method1;
+extern char *postdata;
+extern unsigned long content_length;
+
+/*search needle in haystack and return the end of needle
+    i - is offset from haystack to needle pointer
+*/
+void *memmem_in(char *haystack, long haystack_len, char *needle, unsigned long long *i)	/*other places witch use this function must be changed to end of needle*/
+{
+    char *last_possible;
+    int needle_len;
+    
+    needle_len = strlen(needle);// only one string is possible
+
+    *i = 0;
+
+    if (needle_len == 0)
+	/* The first occurrence of the empty string is deemed to occur at
+	   the beginning of the string.	 */
+	return (void *) haystack;
+
+    last_possible = (char *) haystack + haystack_len - needle_len;
+
+    for ( ;haystack <= last_possible; ++haystack)
+    {
+	if (*haystack == *needle &&
+	    !memcmp((void *) (haystack + 1),(void *) (needle + 1), needle_len - 1))
+	{
+		return (void *) (haystack + needle_len);
+	}
+	*i += 1;
+    }
+
+    *i = 0;
+    return NULL;
+}
+
+//name:size_limit:firmware:file_name
+int save_bfile_1(FILE *out, char *form_name, unsigned long long size_limit, char *firmware, char *file_name){
+
+    int jump = 0;
+    unsigned long long i = 0, b_len, t_len, size;
+    char bound[1060], *var_name = NULL, *file, *tmps;
+
+    if(method1 != POST_BOUNDARY || !postdata) return 0;
+
+printf("content_length = %d\n",content_length);
+
+    var_name = (char *) malloc(strlen(form_name) + 60);
+    if(!var_name) return 0;
+
+    sprintf(var_name, "Content-Disposition: form-data; name=\"%s\"; filename=\"", form_name);
+    file = (char *) memmem_in(postdata, content_length, var_name, &i);
+    free(var_name);
+
+    if(file && (*file != '\"')){
+	    tmps = strchr(file, '\"');
+	    if(tmps == NULL){
+		fprintf(out, "\" - not found\n");
+		return 0;
+	    }
+	    *tmps = '\0';
+
+	    size = tmps - file;	//size of file_name
+	    b_len = content_length - (tmps - postdata);	   // from tmps length, i is the offset
+
+	    tmps = (char *) memmem_in(tmps, b_len, "\r\n\r\n", &i);	// find data starting point
+
+	    if(i  && (b_len - i)){
+		b_len = b_len - i - 4;
+
+		sprintf(bound, "\r\n--%s", boundary);//0x0d,0x0a
+		memmem_in(tmps, b_len, bound, &t_len);
+		if(t_len > 0){// found end boundary, t_len is the offset to boundary from tmps
+		    if(size_limit && t_len > size_limit){
+			fprintf(out, "File size:%lld > Size limit: %lld\n", t_len, size_limit);
+			return 0;
+		    }
+		    jump = reg_par(file_name, file, size);
+		    if(jump){
+			jump = reg_par(firmware, tmps, t_len);
+		    }
+		}
+	    }
+	}
+return jump;
+}
+
 //name:size_limit:firmware:file_name
 int save_bfile_(FILE *out, char *parm){
     int i = 0, ret_val = 0;
@@ -432,6 +744,29 @@ int save_bfile_(FILE *out, char *parm){
 //    *(tmp[2]-1) = ':';
 //    *(tmp[3]-1) = ':';
     return ret_val;
+}
+
+// tmp1 = "from_par:to_par:cmd"
+//or ":to_par:cmd"
+void wr_shell(char *tmp1, char flag){
+    char *tmp, *tmp2, *tmp3;
+    unsigned long long size, size1;
+	tmp = w_strtok(&tmp1, ':');
+	if(tmp){
+		tmp3 = tmp1;
+		if(*tmp)  tmp = get_var(&size1, tmp);
+		else tmp = NULL;
+		tmp2 = w_strtok(&tmp1, ':');
+		if(tmp2 && *tmp2 && *tmp1){
+		    tmp2 = get_var(&size, tmp2);
+		    if(tmp2 && size){
+		    write_shell(tmp, size1, tmp2, size, flag, tmp1);
+//			else write_shell(tmp, size, 1, tmp1);
+		    }
+		if(tmp2 != tmp1) *(tmp1-1) = ':';
+		}
+		*(tmp3-1) = ':';
+	}
 }
 
 #define skipspaces(p) while(isspace(*p)) p++;
@@ -522,6 +857,7 @@ char *search[] = {"print",		//1
 			"fill_tbl",	//41
 			"copy_ppar",	//42
 			"clean_par",	//43
+			"get_ffile",	//44
 			NULL
 			};
 
@@ -546,7 +882,7 @@ char *cgi_loop(char *data, int *i, struct cgi *ptr){
 		data = data + len;
 		ptr->cmd[*i] = j + 1;
 //printf("cmd: %s:%d, len %d\n", search[j], *i, len);
-		strncpy(ptr->arg[*i], "", 1);
+//		strncpy(ptr->arg[*i], "", 1);
 		break;//see data++;
 	    }
 	    j++;
@@ -555,11 +891,18 @@ char *cgi_loop(char *data, int *i, struct cgi *ptr){
 	if(*data == '\"') {data++;
 			    tmp = data;
 			    while(*tmp){
-				if(*tmp == '\"' && *(tmp-1) != '\\'){// && *(tmp-1) != '/'){	//neither \" nor /"
-				    *tmp = '\0';
-				    tmp++;
-				    strncpy(ptr->arg[*i], data, MIN(tmp-data, GET_CGI_LEN));
+				if(*tmp == '\"' && *(tmp-1) != '\\'){
+//				    *tmp = '\0';
+				    len = tmp-data;
+				    if(ptr->arg[*i] == NULL){
+				    ptr->arg[*i] = (char *)malloc(len+2);
+				    if(ptr->arg[*i] != NULL){
+					strncpy(ptr->arg[*i], data, len);
+					*(ptr->arg[*i] + len) = '\0';
+				    }
+				    }else printf("ERR: Overwrite to \"\" line: %d\n", *i + 1);
 //printf("arg: %s", ptr->arg[*i]);
+				    tmp++;
 				    break;
 				}
 			    tmp++;
@@ -623,13 +966,19 @@ printf("script %s\n", (*ptr)->name);
 
 	while(i < GET_CGI_MAX){		//clear all cgi_lines
 	    (*ptr)->cmd[i] = 0;
-	    strncpy((*ptr)->arg[i], "", 1);
+	    (*ptr)->arg[i] = NULL;
+	    //strncpy((*ptr)->arg[i], "", 1);
 	    (*ptr)->bb[i] = i;
 	    i++;
 	}
 	(*ptr)->data_ptr = NULL;
 	i = 0;
 	if(!cgi_loop(data, &i, *ptr)){	//if something wrong - erase entry of this cgi-script
+	    i = 0;
+	    while(i < GET_CGI_MAX){		//clear all cgi_lines
+		if((*ptr)->arg[i] != NULL){ free((*ptr)->arg[i]); /*(*ptr)->arg[i] = NULL;*/}
+		i++;
+	    }
 	    free(*ptr);
 	    *ptr = NULL;
 	}
@@ -660,7 +1009,7 @@ inline int load_file(char *parm, FILE *out){
 */
 extern char *print200ok_mime;
 
-int get_cgi(FILE *out, char *filename){
+int get_cgi(FILE *out, char *filename, int flag){
 
     int i = 0, j = 0, jump = 0, allocated;
     unsigned long long size, size1, size2;//size2 - for copy_ppar
@@ -673,7 +1022,7 @@ int get_cgi(FILE *out, char *filename){
 //printf("cgi: %s\n", ptr->name );
 	if(!strcmp(ptr->name, filename)){
 	    cgi_used = ptr;
-	    if(*(ptr->name) != '_') fprintf(out, print200ok_mime, "text/html"); //script.cgi - with mime, _script.cgi - without
+	    if(*(ptr->name) != '_' && flag != 1) fprintf(out, print200ok_mime, "text/html"); //script.cgi - with mime, _script.cgi - without
 	    while(i < GET_CGI_MAX && ptr->cmd[i]){
 //printf("[%d]: %s\n", i, ptr->arg[i]);
 		arg = "";
@@ -689,11 +1038,11 @@ int get_cgi(FILE *out, char *filename){
 			cgi_used = NULL;
 			return 0;
 		    }
-		} else {
+		} /*else {
 		    printf("ptr->arg[i] is empty\n");
 		    cgi_used = NULL;
 		    return 0;
-		}
+		}*/
 		switch (ptr->cmd[i]){
 		    case 1: //print
 			    jump = print(out, arg); //run in braces if print returns 0;
@@ -701,13 +1050,15 @@ int get_cgi(FILE *out, char *filename){
 		    case 2: system_(arg);break;
 		    case 3: my_system(out, arg);break;
 		    case 4: //get_file
+		    case 44: //get_ffile  -> means get file without pasrsing of .html or .inc files
 			    size = strncpy_(NULL, arg, 0)+1;	//this is max. size of arg-string
 			    if(size > 1 && (tmp = malloc(size))){
 //			    if(tmp = malloc(size)){
 				strncpy_(tmp, arg, size);
 //printf("get_file:%s %ld\n", tmp, size);
-				if(!copy_file_include(tmp, out)) jump = 1; //exec in braces if file not found 
+				if(ptr->cmd[i] == 4) {if(!copy_file_include(tmp, out)) jump = 1;} //exec in braces if file not found 
 									//jump if error memory allocate
+				else {if(!copy_file(tmp, out)) jump = 1;}
 				free(tmp);
 			    }else jump = 1;//error allocate memory
 			    break;
@@ -738,7 +1089,20 @@ int get_cgi(FILE *out, char *filename){
 		    case 10: fill_cfg(arg);break;
 		    case 11: tmp = get_var(NULL, arg);
 			    if(tmp) fprintf(out, "%s", tmp);/*maybe here print(out, tmp);*/ break;
-		    case 12:	boot_page(out,arg);break;	//the same as: 
+		    case 12:		//boot_page
+/* -replace- to the page 'filename'
+    for work need IP and PORT from config file
+*/
+				fprintf(out,"<script language=\"JavaScript\">\n"
+					    "location.replace('http://%s:%s/"
+					    , CONFIG.IP, CONFIG.ADMIN_PORT);
+				print_page(out, arg);
+
+				fprintf(out,"');\n</script>\n<noscript>Follow <a href=\"http://%s:%s/", CONFIG.IP, CONFIG.ADMIN_PORT );
+				print_page(out, arg);
+				fprintf(out, "\">link</a></noscript>");
+				//fprintf(out,"window.location.href=\"%s\";\n",filename);
+			    break;	//the same as: 
 		/*	"<script language=\"JavaScript\">\n"
 			"location.replace('http://??_srv_ip??:??_srv_port??/filename.htm');\n</script>"
 			"\n<noscript><a href=\"http://??_srv_ip??:??_srv_port??/filename.htm\">filename.htm</a></noscript>"
@@ -828,21 +1192,7 @@ int get_cgi(FILE *out, char *filename){
 			    break;
 		    case 28:	// write_system  par:cmd
 		    case 29:	// cat_system  par:cmd
-			    tmp1 = arg;
-			    tmp = w_strtok(&tmp1, ':');
-			    if(tmp){
-				if(*tmp)  tmp = get_var(&size1, tmp);
-				else tmp = NULL;
-				tmp2 = w_strtok(&tmp1, ':');
-				if(tmp2 && *tmp2 && *tmp1){
-				    tmp2 = get_var(&size, tmp2);
-				    if(tmp2 && size){
-				    write_shell(tmp, size1, tmp2, size, (ptr->cmd[i] == 28) ? 0 : 1, tmp1);
-//					else write_shell(tmp, size, 1, tmp1);
-				    }
-//				if(tmp2 != tmp1) *(tmp1-1) = ':';
-				}
-			    }
+			    wr_shell(arg, (ptr->cmd[i] == 28) ? 0 : 1);
 			    break;
 		    case 30:	// bind_par  par
 			    tmp = get_var(&size, arg);
@@ -969,6 +1319,11 @@ void free_cgi(struct cgi *ptr){
     if(!ptr) return;
     free_cgi(ptr->next);
 printf("free %s\n", ptr->name);
+    int i = 0;
+    while(i < GET_CGI_MAX){		//clear all cgi_lines
+	if(ptr->arg[i] != NULL){ free(ptr->arg[i]);}
+	i++;
+    }
     free(ptr);	//at hier action
 }
 

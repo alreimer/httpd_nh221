@@ -1,4 +1,4 @@
-<!--#include area="16345:AREA-1" par="256:backup_path:BACKUP_PATH:" readcfg -->
+<!--#include area="90000:AREA-1" par="256:backup_path:BACKUP_PATH:" readcfg -->
 <!--#include file="head.inc?name=Home%20Page" 
 file="side.inc?i=7" -->
 <script src="/js/tools.js"></script>
@@ -7,28 +7,21 @@ file="side.inc?i=7" -->
 <td align="center" valign="top"><br>
 <table id="header" align="center"><tr><td><b>USB :: Storage manager</b></td></tr></table>
 <br>
-<!--<table border="0" width="70%" height="40" align="center">
-
-<tr><td width=2% valign=top></td>
-<td width=80% align=left><font color="#FFFFFF" size=2 face="Arial, Helvetica, sans-serif"><b>Please provide .</b></font></td></tr></table>-->
-
-<!-- need make: show only hard disk info!!-->
-<!-- CGI: _test.cgi
-    write_file "AREA-1:/proc/bus/usb/devices";
-    bind_par "AREA-1";
-    print "<table><tr bgcolor=\"#ff0000\"><td width=140 align=center class=style2>USB 2.0/1.1</td><td width=135 align=center class=style2>Vendor:ProdID</td><td width=135 align=center class=style2>Manufacturer</td><td width=140 align=center class=style2>Device Name</td><td width=140 align=center class=style2>Serial number</td></tr>\n" ;
-    do {
-	set "a = 0";
-	buf_parse_area "/[/*/]\nT:  " {
-	    set "a = 1";
-	}
-	    print "[?/*Cls=08(stor.)?]<tr><td>USB {?/*D:  Ver= /[/*/] ?}</td><td>{?/*P:  Vendor=/[/*/] ?}:{?ProdID=/[/*/] ?}</td><td>{?/*S:  Manufacturer=/[/*/]\n?}</td><td>{?/*S:  Product=/[/*/]\n?}</td><td>{?/*S:  SerialNumber=/[/*/]\n?}</td></tr>\n";
-
-    }	if_set "a == 0";	//stop if set!!!
-    print "</table>";
-END_CGI -->
-<!--#include cgi="_test.cgi" -->
-
+<!--#include wr_shell=":AREA-1:cat /proc/bus/usb/devices" -->
+<!-- TABLE:usb_info
+#-> parse_area: AREA-1
+while:/[/B/*/]\nT:  /\/*/]\n\0/E
+check:/*Cls=08(stor.)
+if:/*D:  Ver= /[/*/] 
+if:/*P:  Vendor=/[/*/] 
+if:ProdID=/[/*/] 
+if:/*S:  Manufacturer=/[/*/]\n
+if:/*S:  Product=/[/*/]\n
+if:/*S:  SerialNumber=/[/*/]\n
+END_TABLE -->
+<table><tr bgcolor="#ff0000"><td width=140 align=center class=style2>USB 2.0/1.1</td><td width=135 align=center class=style2>Vendor:ProdID</td><td width=135 align=center class=style2>Manufacturer</td><td width=140 align=center class=style2>Device Name</td><td width=140 align=center class=style2>Serial number</td></tr>
+<!--#include table="usb_info_0:usb_info_1:usb_info_2:usb_info_3:usb_info_4:usb_info_5::<tr><td>USB ?$</td><td>?$:?$</td><td>?$</td><td>?$</td><td>?$</td></tr>\n" -->
+</table>
 <br>
 <form method="post" name="host_" action="known_usb_stick.cgi">
 <table border="0" width="70%" height="50" align="center">
@@ -50,6 +43,14 @@ END_CGI -->
 
 <!-- TABLE:mnt_point
 ??backup_path??
+#-> get_folder: ??backup_path??
+#-> parse_file: /etc/known_usb
+while:/[/*/]\n
+if:/ /N#N/*:/[//mnt///!/B/!/*/]/<1:\0/>/\/*.///\/*/<1;"/>
+END_TABLE -->
+<!-- TABLE:mnt_point1
+??backup_path??
+#-> get_folder: ??backup_path??
 #-> parse_file: /etc/known_usb
 while:/[/*/]\n
 if:/ /N#N/*:/[//mnt///!/B/!/*/]/<1:\0/>/\/*.///\/*/<1;"/>
@@ -63,11 +64,11 @@ END_TABLE -->
 
 <form method="Get" action="MK_folders.cgi" >
 <tr><td bgcolor="#d6efff"><b><font size="3">Make folder(s):</font></b></td><td width="30%"><!--<input type="radio" value="mount" name="flag" checked>mount<input type="radio" value="umount" name="flag">umount--></td></tr>
-<tr><td bgcolor="#ffffff" colspan="2"><!--#include chtbl_stat="nd:mnt_point:" tbl_select="mnt_point" --><input type="submit" name="Apply" value="Make_ALL">&nbsp;<input type="submit" name="Apply" value="Make_ONE"></td></tr></form>
+<tr><td bgcolor="#ffffff" colspan="2"><!--#include chtbl_stat="nd:mnt_point1:" tbl_select="mnt_point1" --><input type="submit" name="Apply" value="Make_ALL">&nbsp;<input type="submit" name="Apply" value="Make_ONE"></td></tr></form>
 
 <form method="Get" action="show_folder.cgi" >
 <tr><td bgcolor="#d6efff"><b><font size="3">Show folder content:</font></b></td><td width="30%"><!--<input type="radio" value="mount" name="flag" checked>mount<input type="radio" value="umount" name="flag">umount--></td></tr>
-<tr><td bgcolor="#ffffff" colspan="2"><!--#include chtbl_stat="t:mnt_point:" tbl_select="mnt_point" --><input type="submit" name="Apply" value="OK"></td></tr></form>
+<tr><td bgcolor="#ffffff" colspan="2"><!--#include chtbl_stat="ne:mnt_point:" tbl_select="mnt_point" --><input type="submit" name="Apply" value="OK"></td></tr></form>
 </table>
 
 <table id="info" align="center">
@@ -105,16 +106,16 @@ END_CGI -->
 
     if "_#Apply:Make_ALL/"{
 	print "<pre>";
-	my_shell "for i in $(echo \"?@-_mnt_point@?\") ; do mkdir -p \"$i\"; [ $? -eq 0 ] && echo \"<tr><td>Dir: $i is made!</td></tr>\"; done ";
+	my_shell "for i in $(echo \"?@-_mnt_point1@?\") ; do mkdir -p \"$i\"; [ $? -eq 0 ] && echo \"<tr><td>Dir: $i is made!</td></tr>\"; done ";
 	print "</td></tr></table><a href=\"usb-storage.htm\">Back</a></table></body></html>";
     }
     if "_#Apply:Make_ONE/"{
-	nnot "_@mnt_point:/\ "{
-	    print "<pre>False folder ID: ??_#mnt_point_0??</pre></td></tr></table><a href=\"usb-storage.htm\">Back</a></table></body></html>";
+	nnot "_@mnt_point1:/\ "{
+	    print "<pre>False folder ID: ??_#mnt_point1_0??</pre></td></tr></table><a href=\"usb-storage.htm\">Back</a></table></body></html>";
 	    exit_cgi ;
 	}
 
-    my_shell "mkdir -p \"??_@mnt_point??\"; [ $? -eq 0 ] && echo \"<tr><td><pre>Dir: ??_@mnt_point?? is made!</pre></td></tr>\"; ";
+    my_shell "mkdir -p \"??_@mnt_point1??\"; [ $? -eq 0 ] && echo \"<tr><td><pre>Dir: ??_@mnt_point1?? is made!</pre></td></tr>\"; ";
     print "</td></tr></table><a href=\"usb-storage.htm\">Back</a></table></body></html>";
     }
 //    boot_page "usb-storage.htm";

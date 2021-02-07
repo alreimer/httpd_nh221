@@ -6,4 +6,4 @@ file="side.inc" -->
 <tr>
 <!--<td align="center" valign="top" bgcolor="#181C5B"><br>-->
 <td align="left" valign="top"><br>
-<table width=85% border="0" align="center"><tr>
+<table width=85% border="0" align="center">

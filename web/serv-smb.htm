@@ -40,7 +40,7 @@ var g = window.open('http://??_srv_ip??:??_srv_port??/help/serv-smb.help', 'name
 <tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;SMB Config File:</font></b></td><td></td><td></td></tr>
 <tr><td colspan="4">
 <textarea name="smb_cfg" cols="80" rows="20" onkeydown="insertTab(this, event);">
-<!-- #include file="/usr/etc/smb.conf" -->
+<!-- #include file="/etc/smb.conf" -->
 </textarea></td></tr>
 <!--see examples from ftp-conf, ftp-passw, ftp-mod and serv-ftp-->
 <tr><td></td><td></td>
@@ -48,9 +48,9 @@ var g = window.open('http://??_srv_ip??:??_srv_port??/help/serv-smb.help', 'name
 </table></form>
 
 <!-- TABLE: smb_folders
-#-> parse_file: /usr/etc/smb.conf
+#-> parse_file: /etc/smb.conf
 while:/[/*/]\n
-if:/ path/ =/ /[//mnt///!/*.//
+if:/ path/ =/ /[//mnt///!/B/!/*/]/<1"\0/>/\/*.//
 END_TABLE -->
 
 <!-- #include chtbl_stat="nd:smb_folders:" -->
@@ -140,7 +140,8 @@ function check_form(){
 <!-- CGI: mk_folder.cgi
     get_file "./JavaReturn_.inc?name=Home%20Page&i=4";
 
-    chtbl_stat "sn:smb_folders:";	//show dirs if not exist
+    chtbl_stat "se:smb_folders:";	//show dirs if not exist
+    chtbl_stat "nd:smb_folders:";
     if "_#Apply:Make_ALL/"{
 	print "<pre>";
 	my_shell "for i in $(echo \"?@-_smb_folders@?\") ; do mkdir -p \"$i\"; [ $? -eq 0 ] && echo \"<tr><td>Dir: $i is made!</td></tr>\"; done ";
@@ -191,11 +192,8 @@ END_CGI -->
 ?@-smb_folders@?</td><td><input type=\"submit\" name=\"get_folder\" value=\"Show\">
 </form>
 </td></tr>
-</table>";
-
-	print "<table border=\"0\" width=\"70%\" height=\"50\" align=\"center\">
-<tr><td></td><td id=\"varbox-list-name\"><b><font size=\"3\">&nbsp;SMB exist Folders:</font></b></td><td></td><td></td></tr>
-<tr><td colspan=\"4\"><pre>";
+<tr><td colspan=\"2\">Folder: ??_@smb_folders??</td></tr>
+<tr><td colspan=\"2\"><pre>";
 	my_shell "ls -l \"??_@smb_folders??\"";
 	print "</pre></td></tr>
 </table><a href=\"serv-smb.htm\">Back</a></table></body></html>";
@@ -236,7 +234,7 @@ END_CGI -->
 
 <!-- CGI: samba1.cgi
     remove_chars "\r::_#smb_cfg";
-    save_file "_#smb_cfg:/usr/etc/smb.conf";
+    save_file "_#smb_cfg:/etc/smb.conf";
 //    savecfg ;
 //    write_par "_etc_save:1";
     boot_page "serv-smb.htm";

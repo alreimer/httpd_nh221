@@ -2,7 +2,7 @@
  *
  * Copyright (C) 1998  Kenneth Albanowski <kjahds@kjahds.com>,
  *		       The Silver Hammer Group, Ltd.
- *		 2009-2018  Alexander Reimer <alex_raw@rambler.ru>
+ *		 2009-2020  Alexander Reimer <alex_raw@rambler.ru>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,14 +68,72 @@ struct cfg_parse1 **cfg_p = &cfg1;
     return NULL;
 }*/
 
-char *point[2];		//0 - place where is ch_zero by /]; 1 - end of string
-char ch_zero = '\0';
-unsigned int number = 0;
-
-char *parsestr1( char *d, char *c)	//try identic strings!, "xxx*NULL" combination
-{
-	char *tmp, *tmp2, ch;
+void print_pstr(FILE *out, char *tmp){
+	char ch, *tmp1, *tmp2;
 	unsigned int i;
+
+	while(*tmp){
+	    ch = *tmp;
+	    if(*tmp == '/'){
+		tmp++;
+		if(*tmp == '?'){
+			tmp++;
+			char *m;
+			tmp1 = tmp;
+			tmp2 = NULL;
+			while(*tmp1){	//   /?var/?
+			    if(*tmp1 == '/' && *(tmp1+1) == '?'){
+				i = tmp1 - tmp + 1;
+				if((i > 1) && (i < 33)){
+				m = malloc(i);
+				if(m){
+				    strmycpy(m, tmp, i);
+				    tmp2 = get_var(NULL, m);		//get_var and get_variable
+				    free(m);
+				}
+				}
+				tmp=tmp1+2;
+				break;
+			    }
+			    tmp1++;
+			}
+			if(tmp2 && *tmp2){
+				    unsigned long long size = strncpy_(NULL, tmp2, 0)+1;	//this is max. size of tmp2-string
+				    if(size > 1 && (m = malloc(size))){
+				    strncpy_(m, tmp2, size);
+				    fprintf(out, "%s", m);
+				    free(m);
+				    }
+			}
+			continue;
+		} else if(*tmp != '/') tmp--;
+	    } else
+	    if(*tmp == '\\'){
+		tmp++;
+		switch(*tmp){
+		    case 't':	ch = '\t'; break;
+		    case 'n':	ch = '\n'; break;
+		    case '\"':
+		    case '\\': ch = *tmp; break;
+		    case '0': return;
+		}
+	    }
+	    putc(ch, out);
+	    tmp++;
+	}
+}
+
+unsigned char *point[2];		//0 - place where is ch_zero by /]; 1 - end of string
+unsigned char ch_zero = '\0';
+unsigned long number = 0;
+unsigned long value_ = 0;
+unsigned long stack_ = 0;
+
+unsigned char *parsestr1(unsigned char *d, unsigned char *c)	//try identic strings!, "xxx*NULL" combination
+{
+	unsigned char *tmp, *tmp2, *tmp3, ch;
+	unsigned int i;
+	unsigned long digi;
 
 	while (*c)
 	{
@@ -102,35 +160,222 @@ char *parsestr1( char *d, char *c)	//try identic strings!, "xxx*NULL" combinatio
 				while(1){	//not matched
 				    tmp2 = parsestr1(d, c);
 				    if(tmp2) break;
+				    i = 0;
 				    while(1){
 					if(*c == '/' && *(c+1) == '/') c++; //c+=2
-					else if(*c == '/' && *(c+1) == '\\'){c = c + 2; break;} // if(/\) 
+					else if(*c == '/' && *(c+1) == 'B' && i <= 1024) {i++; c++;}
+					else if(i != 0 && *c == '/' && *(c+1) == 'E'){ i--; c++;}
+					else if(i == 0 && *c == '/' && *(c+1) == '\\'){c = c + 2; break;} // if(/\) 
 					else if((tmp && (c == tmp)) || (*c == '\0')) return NULL;	//end of compare-strings - no matches - return NULL
 					c++;
 				    }
 				}
 //printf("str:%s d=%s c=%s\n", tmp2,d,c);
-				if(tmp) {d = tmp2; /*tmp2 is not always the end of string!! check it out*/
+				if(tmp && *tmp2) {
+//					return parsestr1(tmp2, tmp+2);}
+					d = tmp2; /*tmp2 is not always the end of string!! check it out*/
 					c = tmp + 2; continue;}
 				else return tmp2;
+		    case '{': c++; ch = *c; c++; tmp = NULL; tmp2 = c; i = 0;
+					while(*tmp2){
+					    if(*tmp2 == '/' && *(tmp2+1) == '/') tmp2++; //tmp2+=2
+					    else if(*tmp2 == '/' && *(tmp2+1) == '{' && i <= 1024) i++; //if(/{)
+					    else if(*tmp2 == '/' && *(tmp2+1) == '}'){
+						if(i == 0){tmp = tmp2 + 2; break;}
+						else i--;
+					    }
+					    tmp2++;
+					}
+				//tmp - end of compare-string
+				//tmp2 - can be used,
+				
+				//  /t/{*/*="/*/N\\N"/t/}-->
+				//  /t/{-/*="/*/N\\N"/t/}-->
+				//	 |		 |
+				//	 c		tmp
+				if(ch == '*'){//  /{*..../}  - 0 Times or more
+					while(1){
+					    if(tmp){
+						tmp2 = parsestr1(d, tmp);
+						if(tmp2) return tmp2;
+					    }
+					    tmp2 = parsestr1(d, c);
+					    if(tmp2 == NULL) return NULL;
+					    if(*tmp2 == '\0') return tmp2;
+					    d = tmp2;
+					}
+				}
+				if(ch == '-'){//  /{-..../}  - 1 Time or more
+					while(1){
+					    tmp2 = parsestr1(d, c);
+					    if(tmp2 == NULL) return NULL;
+					    if(*tmp2 == '\0') return tmp2;
+					    d = tmp2;
+					    if(tmp){
+						tmp2 = parsestr1(d, tmp);
+						if(tmp2) return tmp2;
+					    }
+					}
+				}
+				if(ch == 'R' || ch == 'r'){//  /{R..../}  - Repead 1 Time or more
+					i = 0;			// /{r..../}  - Repead 0 Time or more
+					while(1){
+					    tmp2 = parsestr1(d, c);
+					    if(tmp2 == NULL) break;
+					    if(tmp2 == d) break;	//no progress
+					    d = tmp2; i = 1;
+					}
+					if(ch == 'R' && i == 0) return NULL;
+					c = tmp; continue;
+				}
+				if(ch == 'C'){//  /{C..../}  - Compare witch pointer is bigger
+					tmp2 = parsestr1(d, c);
+					if(tmp2 == NULL) return NULL;
+					tmp3 = parsestr1(d, tmp);
+					if(tmp3 == NULL) return NULL;
+					if(tmp3 > tmp2) return tmp3;
+					return NULL;
+				}
+				return NULL;	//default, if not '*' and not '-'
+		    case '(': c++; ch = *c; c++; tmp = c; i = 0;
+					while(1){
+					    if(*tmp == '\0') return NULL;
+					    else if(*tmp == '/' && *(tmp+1) == '/') tmp++; //tmp+=2
+					    else if(*tmp == '/' && *(tmp+1) == '(' && i <= 1024) i++; //if( /( )
+					    else if(*tmp == '/' && *(tmp+1) == ')'){	//if( /) )
+						if(i == 0){tmp = tmp + 2; break;}//think about!! this is /) before /: found
+						else i--;
+					    }
+					    else if(i == 0 && *tmp == '/' && *(tmp+1) == ':'){
+						tmp = tmp + 2;
+						break;	//if( /) )
+					    }
+					    tmp++;
+					}
+				// in c - plus, and in tmp - minus
+					if(ch == 'S'){		///(S.../:.../) - use Stack with !manual! inc- decrimintation
+					i = 0; tmp2 = d; tmp3 = d;
+					while(1){
+						tmp2 = parsestr1(d, c);
+						if(tmp2){
+						    if(tmp2 != d) d = tmp2;	//progress!!
+						    else tmp2 = NULL;
+						}
+						if(i && stack_ == 0) break;
+						if(tmp2 == NULL && tmp3 == NULL) return NULL;
 
+						tmp3 = parsestr1(d, tmp);
+						if(tmp3){
+						    if(tmp3 != d) d = tmp3;	//progress!!
+						    else tmp3 = NULL;
+						}
+						if(i && stack_ == 0) break;
+						if(tmp2 == NULL && tmp3 == NULL) return NULL;
+
+						i = 1;
+					}
+					} else return NULL;
+				// in d - end of parsed string
+					i = 0;
+					while(1){
+					    if(*tmp == '\0') return NULL;
+					    else if(*tmp == '/' && *(tmp+1) == '/') tmp++; //tmp+=2
+					    else if(*tmp == '/' && *(tmp+1) == '(' && i <= 1024) i++; //if( /( )
+					    else if(*tmp == '/' && *(tmp+1) == ')'){	//if( /) )
+						if(i == 0){c = tmp + 2; break;}
+						else i--;
+					    }
+					    tmp++;
+					}
+				continue;
 		    case '\\':
-		    case 'E': point[1] = d;//NEW 20.03.2016
+		    case 'E':
+		    case ':':
+		    case ')':
+		    case '}':	point[1] = d;
 				return d;
-	    /*  set number to /n10n   */
+	    /*  set number to /n10n   or stack to /n15s*/
 		    case 'n': c++; tmp = c;
-				while(*tmp && *tmp != 'n') tmp++;
-				    int digi = 0; i = 0;
+				while(*tmp && *tmp != 'n' && *tmp != 's') tmp++;
+				    digi = 0;
+				    i = 0;
 				    while(c[i] >= '0' && c[i] <= '9'){ digi = digi*10 + (c[i] - '0'); i++; if(i > 5) break;}
-				    number = digi;	//set number to digi
 				    c = tmp;
-				    if(*tmp) c++; //if not end - increase c.
+				    if(*c == 'n') number = digi;	//set number to digi
+				    else if(*c == 's') stack_ = digi;
+				    if(*c) c++; //if not end - increase c.
 				    continue;
+	    /* by /sn   - set number = source */
+	    /* by /sv   - set value = source */
+	    /* by /ss   - set stack = source */
+		    case 's': c++; ch = *c; i = 0;
+				digi = 0;
+				while(*d >= '0' && *d <= '9'){
+				    if(i < 7){ digi = digi*10 + (*d - '0'); i++;}
+				    d++;
+				}
+				if(i == 0) return NULL; //in *d no digits
+				if(ch == 'n'){ c++; number = digi; continue;}
+				else if(ch == 'v'){ c++; value_ = digi; continue;}
+				else if(ch == 's'){ c++; stack_ = digi; continue;}
+				else { c = c - 2; break;} //go back to c = /sv(n) and parse it
+	    /* by /hn   - set number = source (hex) */
+	    /* by /hv   - set value = source (hex) */
+	    /* by /hs   - set stack = source (hex) */
+		    case 'h': digi = 0; ch = 0;
+				while(1){
+				    i = *d;
+				    if(i >= '0' && i <= '9') ch = '0';
+				    else if(i >= 'A' && i <= 'F') ch = 'A' - 10;
+				    else if(i >= 'a' && i <= 'f') ch = 'a' - 10;
+				    else break;
+				    digi = (digi<<4) + i - ch;
+				    d++;
+				}
+				if(ch == 0) return NULL;
+				c++;
+				if(*c == 'n'){ c++; number = digi; continue;}
+				else if(*c == 'v'){ c++; value_ = digi; continue;}
+				else if(*c == 's'){ c++; stack_ = digi; continue;}
+				else { c = c - 2; break;} //go back to c = /hv(n) and parse it
+	    /* by /iv<10v or /iv>5v or /in<45n or /in>24n or /is>0s - if not matches return NULL */
+	    /* by /iv+10v or /iv-5v or /in-45n or /in+24n or /is+1s */
+		    case 'i': c++; ch = *c; 
+				if(ch != 'v' && ch != 'n' && ch != 's'){ c = c - 2; break;}
+				c++; i = *c;
+				if(i != '<' && i != '>' && i != '+' && i != '-'){ c = c - 3; break;}
+				c++; digi = 0;
+				while(*c){
+				    if(*c >= '0' && *c <= '9'){ digi = digi*10 + (*c - '0'); c++; continue;}
+				    else if(*c == ch) break;
+				    else{ break;}
+				}
+				if(*c == ch){
+				    if(i == '+'){
+					if(ch == 'v'){ value_ += digi;}
+					else if(ch == 'n'){ number += digi;}
+					else if(ch == 's'){ stack_ += digi;}
+					c++; continue;
+				    }else if(i == '-'){
+					if(ch == 'v'){ value_ -= digi;}
+					else if(ch == 'n'){ number -= digi;}
+					else if(ch == 's'){ stack_ -= digi;}
+					c++; continue;
+				    }
+				    unsigned long val = 0;
+				    if(ch == 'v'){ val = value_;}
+				    else if(ch == 'n'){ val = number;}
+				    else if(ch == 's'){ val = stack_;}
+				    if(i == '>'){ if(val <= digi) return NULL;}
+				    else if(i == '<'){ if(val >= digi) return NULL;}
+				    c++; continue;
+				}else return NULL;
 	    /* skip zero or one character*/
 		    case '0': tmp = d; while(tmp <= d+1){tmp = parsestr1(tmp, c+1); if (tmp) return tmp; tmp++;} return NULL;
 	    /* skip one symbol in d, exept \0 */
 		    case '|': c++; if(*d == '\0') return NULL; d++; continue;
-	    /* by /.x. skip x-symbol all at once */
+	    /* by x/.x. skip x-symbol 1 or more times */
+	    /* by /.x. skip x-symbol all at once (0 or more times)*/
 		    case '.': if(*c != *(c+2) || *(c+1)=='\0') return NULL; //error! - or make it with continue
 				    c=c+1; while(*d == *c) d++; c=c+2; continue;
 	    /* by /,x, skip x-symbol 0 or 1-time */
@@ -148,6 +393,8 @@ char *parsestr1( char *d, char *c)	//try identic strings!, "xxx*NULL" combinatio
 	    /* skip all blanks or tabs or enters in d */
 //		    case ' ': tmp = d; while(*d == ' ' || *d == '\t' || *d == '\n' || *d == '\r') d++; if(tmp == d) return NULL; c++; continue;
 		    case ' ': while(*d == ' ' || *d == '\t' || *d == '\n' || *d == '\r') d++; c++; continue;
+	    /* skip all blanks and tabs */
+		    case 't': while(*d == ' ' || *d == '\t') d++; c++; continue;
 	    /* /<xCHARS/> matches CHARS with d, continue if matches and return null if not */
 		    case '<': c++;
 			switch(*c){
@@ -157,13 +404,24 @@ char *parsestr1( char *d, char *c)	//try identic strings!, "xxx*NULL" combinatio
 				if(*c == '\\'){
 				    c++;
 				    switch(*c){
-				    case '\\':	ch = '\\';break;
+				    case '\\':
+				    case '-':
+				    case '\"':	ch = *c;break;
 				    case 't':	ch = '\t';break;
 				    case 'n':	ch = '\n';break;
-				    case '\"':	ch = '\"';break;
 				    default: c--; ch = *c; break;
 				    }
-				} else ch = *c;
+				} else {
+				    ch = *c;
+				    if(*(c+1) == '-' && *(c+2)){	//if /<-a-z/> --> (ch=a <= *d <= *(c+2)=z)
+					if((ch < *(c+2)) && (*d >= ch) && (*d <= *(c+2))){
+					    do{if(*d == '\0') break; d++;}while((*d >= ch) && (*d <= *(c+2)));
+					    i = 1;
+					    if(*d){ c = tmp; continue;}
+					}
+					c = c + 3; continue;
+				    }
+				}
 				if(ch==*d){ do{d++;}while(ch==*d);
 				    c = tmp; i=1; continue;
 				}
@@ -177,15 +435,22 @@ char *parsestr1( char *d, char *c)	//try identic strings!, "xxx*NULL" combinatio
 				if(*c == '\\'){
 				    c++;
 				    switch(*c){
-				    case '\\':	ch = '\\';break;
+				    case '\\':
+				    case '-':
+				    case '\"':	ch = *c;break;
 				    case 't':	ch = '\t';break;
 				    case 'n':	ch = '\n';break;
-				    case '\"':	ch = '\"';break;
 				    case '0':	ch = '\0';break;//check if *d == '\0'.
 							//In /* is set until zero, inclusive zero!
 				    default: c--; ch = *c; break;
 				    }
-				} else ch = *c;
+				} else {
+				    ch = *c;
+				    if(*(c+1) == '-' && *(c+2)){	//if /<1a-z/> --> (ch=a <= *d <= *(c+2)=z)
+					if((ch < *(c+2)) && (*d >= ch) && (*d <= *(c+2))) i = 1;
+					c = c + 3; continue;
+				    }
+				}
 				if(ch == *d) i = 1; c++;}
 				if(*(tmp)=='1' && i==0) return NULL;
 				if(*(tmp)=='N' && i==1) return NULL;
@@ -224,9 +489,9 @@ char *parsestr1( char *d, char *c)	//try identic strings!, "xxx*NULL" combinatio
 			char *m;
 			tmp = c;
 			tmp2 = NULL;
-			while(*tmp){
-			    if(*tmp == '?' && *(tmp+1) == '/'){
-				i = tmp - c;
+			while(*tmp){	//   /?var?/ - is old, /?var/? - is new
+			    if((*tmp == '?' && *(tmp+1) == '/') || (*tmp == '/' && *(tmp+1) == '?')){
+				i = tmp - c + 1;
 				if((i > 1) && (i < 33)){
 				m = malloc(i);
 				if(m){
@@ -270,6 +535,20 @@ char *parsestr1( char *d, char *c)	//try identic strings!, "xxx*NULL" combinatio
 		    case '-': if(*(c+1) == '-') { d=d-1; c=c+2;} //  /--   -means d-1
 			continue;
 
+		    case 'm': c++; ch = *c; c++; tmp2 = c;// /m-WARN: not matched!\0 -thisIsNotMatched!
+			while(*tmp2){
+			    if(*tmp2 == '\\' && *(tmp2+1) == '\\') tmp2++;	//tmp2 = tmp2 + 2
+			    else if(*tmp2 == '\\' && *(tmp2+1) == '0'){ tmp2 = tmp2 + 2; break;}	//string must have \\0 at the end
+			    tmp2++;						//and don't have /\\ or /}, /), /E, /:
+			}
+			if(ch == 'w') print_pstr(fdcr, c); //putout to WEB: /mw....\0  without matching!
+			tmp = parsestr1(d, tmp2);
+			if(ch == '-' && tmp == NULL) print_pstr(stderr, c);
+			if(ch == 'N' && tmp == NULL) print_pstr(fdcr, c); //if not mantched the rest - putout to WEB: /mN...\0
+			if(ch == 'W' && tmp != NULL) print_pstr(fdcr, c); //if matched the rest - putout to WEB: /mW....\0
+			return tmp;
+			// /mw..\0/mW..\0/?par/?	==	/mw..\0/?par/?/mW..\0
+
 		    default: c--;
 		}
 	    } else if(*c == '\\'){
@@ -286,6 +565,7 @@ char *parsestr1( char *d, char *c)	//try identic strings!, "xxx*NULL" combinatio
 				    c++; int digi = 0; i = 0;
 				    while(c[i] >= '0' && c[i] <= '9'){ digi = digi*10 + (c[i] - '0'); i++; if(i > 5) break;}
 				    if(i) number = digi;	//set number to digi
+				point[1] = d;//new 14.07.2019
 				return d;
 		    case '\\': break;
 		    default: c--;
@@ -459,34 +739,36 @@ int copy_file_buf(char *file, char *buf, long long size)
 }
 
 // find there is a input type is "radio" in this line and insert the value for displaying
-void radio_value_insert(char *line, char *var_head, FILE *out)
+//inline char *radio_value_insert(char *line, char *var_head, FILE *out)
+char *radio_value_insert(char *line, char *var_head, FILE *out)
 {
     char *file_head1, *file_head2, *radio_var, *ptr;
 
     if((radio_var=parsestr1(var_head,"/*value=\"")) && (file_head1=parsestr1(var_head,"/*name=\"")))
     {
 	if(file_head1<radio_var){
-	    file_head2=radio_var;
-	    ptr=file_head1;
+	    file_head2=radio_var;	//last pointer
+	    ptr=file_head1;		//neaher pointer
 	}else{
-	    file_head2=file_head1;
-	    ptr=radio_var;
+	    file_head2=file_head1;	//last pointer
+	    ptr=radio_var;		//neaher pointer
 	}
 	file_head2=strchr(file_head2,'\"');
 	file_head2[0]='\0';
 	file_head2++;
-	fprintf(out,"%s\" %s\"", line, var_head);
+	fprintf(out,"%s\"", line);
 
 	ptr=strchr(ptr,'\"');
 	ptr[0]='\0';
-	ptr++;
 
 	ptr = get_cfg_value(NULL, file_head1, 0);	//another ptr
 	if(ptr && (strcmp(ptr,radio_var)==0) )
 		    fprintf(out,"checked");
-	point[1] = file_head2;
+	return file_head2;
+    } else {
+	putc(*line, out);	//put out "<" the rest will be made by handle_get
+	return (line+1);
     }
-    else fprintf(out, "%s\"", line);	/* send out the remain of line */
 }
 
 //register new parameter called name, from value, size-lang.
@@ -507,7 +789,8 @@ int reg_par(char *name, char *value, long long size)
 
 }
 
-void include_(char *line, char *var_head, FILE *out)	//SSI made total brutal, no checks of file path, and include must be along in string of file!
+//inline void include_(char *var_head, FILE *out)	//SSI made total brutal, no checks of file path, and include must be along in string of file!
+void include_(char *var_head, FILE *out)
 {
     char *var_head2;
     struct parsestr strct;
@@ -592,7 +875,7 @@ printf("Collected parameter: %s:%s:%lld:%s\n", cfg_pointer->web_name, cfg_pointe
 	        if(a)
 		    switch(i){
 		    case 0:	val_size = atoll(a);
-				if(val_size > 32 *1024) return;	//size is in impassable range - so skip it all (whole parameter string will be skipped!)
+				if(val_size > (100 *1024)) return;	//size is in impassable range - so skip it all (whole parameter string will be skipped!)
 				a = ptr;
 				str_size = strlen(a)+1;
 				ptr = (char*)malloc(str_size + val_size);//str = "[part of var_head2][value]"
@@ -648,12 +931,12 @@ printf("Collected parameter: [%s:%lld]\n", cfg_pointer->web_name, cfg_pointer->s
     if ((var_head2 = parsestr2(&strct, var_head,"exec=\"/[/*/]\"/ "))!=NULL){	//<!--#include exec="..." -->
 
         my_system(out, var_head2);
-    } else if ((var_head2 = parsestr2(&strct, var_head,"shell=\"\"/[/*/]\"\"/ "))!=NULL){	//<!--#include shell=""..."" -->
+    } else if ((var_head2 = parsestr2(&strct, var_head,"shell=\"/[/*/N\\N/]\"/ "))!=NULL){	//<!--#include shell="..." -->
 
         my_shell(out, var_head2);
     } else if ((var_head2 = parsestr2(&strct, var_head,"cgi=\"/[/*/]\"/ "))!=NULL){	//<!--#include cgi="..." -->
 
-	if(DoCGI(out, var_head2))  fprintf(out, "Not Found: %s\n", var_head2);// what about arg??
+	if(DoCGI(out, var_head2, 1))  fprintf(out, "Not Found: %s\n", var_head2);// what about arg??
 	else  free_par_tmp();//clear all "temp"-parameters
 
     } else if((var_head2 = parsestr2(&strct, var_head, "tbl_select=\"/[/*/]\"/ "))!=NULL){
@@ -662,9 +945,21 @@ printf("Collected parameter: [%s:%lld]\n", cfg_pointer->web_name, cfg_pointer->s
     } else if((var_head2 = parsestr2(&strct, var_head, "tbl_check=\"/[/*/]\"/ "))!=NULL){
 
 	show_tbl_chck(var_head2, out);
+    } else if((var_head2 = parsestr2(&strct, var_head, "table=\"/[/*/N\\N/]\"/ "))!=NULL){
+
+	tabs(var_head2, out);
+    } else if((var_head2 = parsestr2(&strct, var_head, "exchange=\"/[/*/N\\N/]\"/ "))!=NULL){
+
+	reg_ticket(var_head2, 0);
+    } else if((var_head2 = parsestr2(&strct, var_head, "ticket=\"/[/*/N\\N/]\"/ "))!=NULL){
+
+	reg_ticket(var_head2, 1);
     } else if((var_head2 = parsestr2(&strct, var_head, "chtbl_stat=\"/[/*/]\"/ "))!=NULL){
 
 	change_tbl_stat(var_head2);
+    } else if((var_head2 = parsestr2(&strct, var_head, "wr_shell=\"/[/*/N\\N/]\"/ "))!=NULL){
+
+	wr_shell(var_head2, 0);//0->write_system, not cat!!
     } else if((var_head2 = parsestr2(&strct, var_head, "InIt/ "))!=NULL){		//<!--#include InIt -->
 
 	ReadConfiguration();
@@ -719,6 +1014,7 @@ void free_page_mem(void){
     free_cgi(cgi_name);
     cgi_name = NULL;
     free_tbl();
+    free_ticket();
 }
 
 extern config CONFIG;	//used by get_var function
@@ -740,6 +1036,10 @@ char *get_var(unsigned long long *size_ptr, char *var_index){
 	    if(*var_index == '#'){	//??_##variable?? - show local command variable index.html?variable=5
 		var_index++;
 		return get_arg(var_index, size_ptr, 1);
+	    }else if(*var_index == '&'){	//??_#&variable?? - show local command variable, if not exist - show global variable index.html?variable=5
+		var_index++;
+		ptr = get_arg(var_index, size_ptr, 1);
+		if(ptr) return ptr;
 	    }
 	    return get_arg(var_index, size_ptr, 0);
 //	    if(ptr) size = strlen(ptr) + 1;//for remove_show_chars needed
@@ -817,11 +1117,144 @@ char *get_var(unsigned long long *size_ptr, char *var_index){
     return ptr;
 }
 /**used by DoHTML for scanning some values in http-files and insert DATA and send them to browser**/
+//inline char *handle_get_(char *data, FILE *write_f, int make, int loop)
+char *handle_get_(char *data, FILE *write_f, int make, int loop)
+{
+    char *var_index, *ticket;
+    char *sel_value='\0';
+    int mk = 1;
+
+//in search used parsestr1()
+
+    struct parsestr strct;
+    char *file_head;
+
+while(*data){
+    if(var_index = parsestr2(&strct, data, "/<1<?/>/--/n0n/B"
+		  "<!--/ if=\"/[/*/N\\N/]\"/ -->/,\n,/n1n"	//1
+		  "/\\<!--/ else/ -->/,\n,/n2n"		//2
+		  "/\\<!--/ //if/ -->/,\n,/n3n"		//3
+		  "/\\<!--/ CGI:/m-ERR:incorrect cgi\n\\0/t/[/<-a-zA-Z0-9._/>\n/{-/n0s"
+				"/(S/B/is>0s{/\\/E"
+				    "/{R/{*/ /B//*/**///\\/////*\n/E/}/ /<-a-zA-Z0-9_/>/ /B\"\"/\\\"/*/N\\N\"/\\/E/ "
+										    "/B;/\\{/--/is+1s/E/}"
+				"/:/is>0s/{*/ /B//*/**///\\/////*\n/E/}/ }/is-1s/)"
+			"/}/{*/ /B//*/**///\\/////*\n/E/}/ /]END_CGI/ -->/n4n"	//4
+//		  "/\\<!--/ CGI:/ /[/*/]END_CGI/ -->/n4n"	//4
+		  "/\\??/[/*/]??/n5n"		//5
+		  "/\\<!--/ #include/ /[/{-/BInIt/\\readcfg/\\/*=\"/*/N\\N\"/E/ /}/]-->/,\n,/n6n"
+		  "/\\<!--/ TABLE:/ /[/*\n/]END_TABLE/ -->/n7n"	//7
+//		  "/\\<input/ type=\"/[/*/]\""	//maybe replace via 4
+		  "/\\<input/ type=\"radio\"/n8n"
+		  "/\\<select/*name=\"/[/*/]\"/n9n"		//9
+		  "/\\<option/*value=\"/[/*/]\"/n10n"
+		  "/\\<!--/{*/B\"\"/\\\"/*/N\\N\"/\\//*/**///\\/////*\n/\\\\\"/\\/|/E/}/B-->/,\n,/n11n/\\\\011/E"
+//		  "/\\<!--/*-->/n11n"
+		  )){
+	//do something with i.
+	switch(strct.num){
+	    case 1:
+		mk = 1;
+		if(make){
+		    if(cfg_arg_strcmp(var_index, 0)){//par -not exist or not match
+			mk = 0;
+		    }
+		}
+		data = restore_str(&strct);
+		data = handle_get_(data, write_f, (make && mk), loop + 1);
+		if(var_index = parsestr1(data, "<!--/ else/ -->/,\n,")){
+		    if(mk) mk = 0;
+		    else mk = 1;
+		    data = handle_get_(var_index, write_f, (make && mk), loop + 1);
+		}
+		if(var_index = parsestr1(data, "<!--/ //if/ -->/,\n,")){
+		    data = var_index;
+		}
+		continue;
+	    case 3: //end of if, go out
+//		    data = restore_str(&strct);
+	    case 2: //end of else
+		if(loop) return data;
+		else {
+		    printf("handle_get: \"if\" or \"else\" not present!\n");
+		    break;
+		}
+	}
+	if(make) switch(strct.num){
+	    case 4: //CGI script
+		    parse_cgi_script(var_index);
+	    case 5:
+		    //show variables value
+		    file_head = get_var(NULL, var_index);
+
+		    if(file_head) print(write_f, file_head);/*fprintf(write_f,"%s", file_head);*/
+#ifdef DEBUG
+		    printf(" Var_index %s file_head %s\n", var_index, file_head);
+#endif
+		    break;
+	    case 6:
+		    //include descriptor
+#ifdef DEBUG
+printf("INCLUDE:%s:END\n", var_index);
+#endif
+			include_(var_index, write_f);
+		    break;
+	    case 7:
+		    //table
+#ifdef DEBUG
+printf("TAB:%s:END\n", var_index);
+#endif
+			parse_tbl(var_index, 0);//without clean
+		    break;
+	    case 8:
+		    //input-form-atribute
+/*        	    if (!strcmp(var_index, "text") || 
+			!strcmp(var_index, "password") ||
+			!strcmp(var_index, "hidden"))	//main used for def. input text
+			text_value_insert(file_head, point[1], write_f);
+//			text_value_insert(file_head, ptr, write_f);
+		    else */ 
+//		    if (!strcmp(var_index, "radio"))
+			data = radio_value_insert(data, var_index, write_f);
+//		    else fprintf(write_f,"%s\"", data);
+//		    break;
+		    continue;
+	    case 9:
+		    //select-form-attribute
+		    // find there is a 'select drop-down list' in this line and insert the value for displaying
+		    fprintf(write_f,"%s\"", data);
+		    sel_value = get_cfg_value(NULL, var_index, 0);
+		    break;
+	    case 10:
+		    //option-form-attribute
+		    fprintf(write_f,"%s\"", data);
+		    if(sel_value && strcmp(sel_value,var_index)==0)
+			fprintf(write_f, " selected");
+#ifdef DEBUG
+		    printf("select_value_insert: %s, =? value: %s\n", var_index, sel_value);
+#endif
+		    break;
+	    case 11: break;//comments not show!!
+	}
+	data = restore_str(&strct);
+//printf("INDEX %d\n", i);
+    }
+    else {
+	if(make) {
+	    if(ticket = ticket_find(&data)){ fprintf(write_f, "%s", ticket); continue;}
+	    putc(*data, write_f);
+	}
+	data++;
+    }
+}
+
+    if(loop) printf("handle_get: \"fi\" not present!\n");
+    return data;
+}
+
+
 int handle_get(char *data, FILE *write_f)
 {
-    char *var_index;
-    char *sel_value='\0';
-    int if_prm = 1;
 
 static int loop_counter = 0;	// used if loops exissted
 if(loop_counter > 10){
@@ -834,115 +1267,105 @@ loop_counter++;
 
 //    free_page_mem();	//free memory of page includes
 
-//in search used parsestr1()
-char *search[] = {"<!--/ if=\"/[/*/]\"/ -->/,\n,",	//0
-		  "<!--/ else/ -->/,\n,",		//1
-		  "<!--/ //if/ -->/,\n,",		//2
-		  "<!--/ CGI:/ /[/*/]END_CGI/ -->",	//3
-		  "??/[/*/]??",		//4
-		  "<!--/ #include/ /[/*/]-->/,\n,",
-		  "<!--/ TABLE:/ /[/*/]END_TABLE/ -->",	//6
-//		  "<input/ type=\"/[/*/]\"",	//maybe replace via 4
-		  "<input/ type=\"radio\"",
-		  "<select/*name=\"/[/*/]\"",		//8
-		  "<option/*value=\"/[/*/]\"",
-		  "<!--/*-->",
-		  NULL};
 
-
-
-int i = 0;
-char *ptr, *file_head;
-
-while(*data){
-    if(*data == *search[i] && (var_index = parsestr1(data+1, search[i]+1))){
-    ptr = point[1];
-	//do something with i.
-	switch(i){
-	    case 0:
-	    	    if(cfg_arg_strcmp(var_index, 0)){		//compare WEB_NAME
-		    //not matching, skip
-		    if_prm = 0;
-		    } else
-		    // is matching, print
-		    if_prm = 1;
-		    break;
-	    case 1: if_prm = !if_prm;	//invers
-		    break;
-	    case 2:
-		    //is matching, print
-		    if_prm = 1;
-		    break;
-	}
-	if(if_prm) switch(i){
-	    case 3: //CGI script
-		    parse_cgi_script(var_index);
-		    point[1] = ptr;
-	    case 4:
-		    //show variables value
-		    file_head = get_var(NULL, var_index);
-
-		    if(file_head) print(write_f, file_head);/*fprintf(write_f,"%s", file_head);*/
-#ifdef DEBUG
-		    printf(" Var_index %s file_head %s\n", var_index, file_head);
-#endif
-			point[1] = ptr;
-		    break;
-	    case 5:
-		    //include descriptor
-			include_(data, var_index, write_f);
-			point[1] = ptr;
-		    break;
-	    case 6:
-		    //table
-			parse_tbl(var_index);
-			point[1] = ptr;
-		    break;
-	    case 7:
-		    //input-form-atribute
-/*        	    if (!strcmp(var_index, "text") || 
-			!strcmp(var_index, "password") ||
-			!strcmp(var_index, "hidden"))	//main used for def. input text
-			text_value_insert(file_head, point[1], write_f);
-//			text_value_insert(file_head, ptr, write_f);
-		    else */ 
-//		    if (!strcmp(var_index, "radio"))
-			radio_value_insert(data, point[1], write_f);
-//		    else fprintf(write_f,"%s\"", data);
-		    break;
-	    case 8:
-		    //select-form-attribute
-		    // find there is a 'select drop-down list' in this line and insert the value for displaying
-		    fprintf(write_f,"%s\"", data);
-		    sel_value = get_cfg_value(NULL, var_index, 0);
-		    break;
-	    case 9:
-		    //option-form-attribute
-		    fprintf(write_f,"%s\"", data);
-		    if(sel_value && strcmp(sel_value,var_index)==0)
-			fprintf(write_f, " selected");
-#ifdef DEBUG
-		    printf("select_value_insert: %s, =? value: %s\n", var_index, sel_value);
-#endif
-		    break;
-	    case 10: break;//comments not show!!
-	}
-	data = point[1];
-	i = 0;
-//printf("INDEX %d\n", i);
-    }
-    else {
-        i++;
-//	if(!if_prm && (i==4)) {i= 0;continue;}//if_prm ==0 =>check only first three lines
-	if(search[i]) continue;
-	i = 0;
-//	if(if_prm) fprintf(write_f,"%c", *file_head);
-	if(if_prm) putc(*data, write_f);
-	data++;
-    }
-}
+handle_get_(data, write_f, 1, 0);
 
 loop_counter--;
 //    printf("Time to ALARM: %d\n", alarm(0));//RAW
   return 0;
 }
+
+//begin of ticket------------------------------------
+struct ticket *ticket_list = NULL;
+
+void reg_ticket(char *name, int type){
+//if type == 0 -> exchange=""
+//overweis == 1 -> ticket=""
+    char *str;
+//    if(type == 0){
+    unsigned long long size;
+    if(type == 0) size = strncpy_(NULL, name, 0)+1;
+    else size = strlen(name)+1;
+    if(size > 1 && (str = malloc(size))){
+	if(type == 0) strncpy_(str, name, size);
+	else sprintf(str, "%s", name);
+    } else {
+	printf("ERR: len_size of argument <= 1 or unable allocate memory for ticket\n");
+	return;
+    }
+//    }else str = name;
+
+    struct ticket *tmp, **t = &ticket_list;
+    while(*t){
+	if(!strcmp((*t)->fname, str)){//if exist - free end exit
+	    free(str);
+	    return;
+	}
+	t = &((*t)->next);
+    }
+    tmp = (struct ticket *)malloc(sizeof(struct ticket));
+    if(tmp == NULL){
+	printf("ERR: Unable allocate memory for ticket\n");
+	return;
+    }
+    *t = tmp;
+    tmp->type = type;
+    tmp->fname = str;
+    if(type == 0) sprintf(tmp->ticket, "%ld_%ld", random(), random());//max 64byte
+    else *(tmp->ticket) = '\0';
+    tmp->next = NULL;
+//#ifdef DEBUG
+printf("%s\n", tmp->ticket);
+printf("Ticket registered: %s\n", tmp->fname);
+//#endif
+}
+
+char *check_ticket(char *name, int type){
+    struct ticket *t = ticket_list;
+    char *ptr;
+
+    if(type == 0){
+	while(t){
+	    if(t->type == 0 && !strcmp(t->ticket, name)) return t->fname;
+	t = t->next;
+	}
+    }else{
+	while(t){
+	    if(t->type == 1 && (ptr = parsestr1(name, t->fname))!=NULL) return ptr;
+	t = t->next;
+	}
+    }
+
+    return NULL;
+}
+
+char *ticket_find(char **name){
+    if(name == NULL) return NULL;
+    struct ticket *t = ticket_list;
+    unsigned long size;
+    while(t){
+    if(t->type == 0){
+	size = strlen(t->fname);
+	if(!strncmp(t->fname, *name, size)){ *name = *name + size; return t->ticket;}
+    }
+	t = t->next;
+    }
+    return NULL;
+}
+
+void free_ticket_1(struct ticket **ptr){
+    if(!ptr || !*ptr) return;
+    free_ticket_1(&((*ptr)->next));
+#ifdef DEBUG
+    printf("free ticket '%s'\n", (*ptr)->fname);
+#endif
+    free((*ptr)->fname);	//at hier action
+    free(*ptr);
+    *ptr = NULL;
+}
+
+void free_ticket(void){
+    free_ticket_1(&ticket_list);
+//    ticket_list = NULL;
+}
+

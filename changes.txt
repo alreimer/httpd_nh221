@@ -1,3 +1,63 @@
+20200319
+- some changes in print() according to ?table?..\n or \0.  and changes in handle_get_ : <!-- /if -->
+- in copy_cgi.c: now exist: print_page() as derived from print()
+		get_ffile "file_name??file??";		for simple getting file 
+- in DoCGI() and get_cgi() added flag. if it is 1 - without mime. This is used if cgi is executed in
+	    include: <!--include cgi="cgi_name" -->
+- in copy_tbl.c added  #-> get_ofolder: /path/		- means reg all foldernames without path
+- In httpd.c removed 'arg' from global to local variable. (ParseReq function)
+- changes in httpd.c, copy.c, copy_CGI.c, copy_tbl.c Implemented exchange="" & ticket="" in includes. At now tickets can 
+	be used. Exchange uses random ticket.
+- correction of 'inline' functions by removing of inline-declaraion for github
+- NEW: parsestr:
+	/mN...\0			- if not mantched the rest - putout to WEB
+	/mw....\0			- //putout to WEB
+	/mW....\0 			- if matched the rest - putout to WEB
+	/m-WARN: not matched!\0		- thisIsNotMatched! putout to /dev/stderr if the rest of parseing string not matched
+20191028
+- /etc/usb_storage.sh is changed
+20190812
+- parsestr: /?var?/ - is old, /?var/? - is new. Both in use!
+20190714
+- bug in parsestr1: \0 without point[1]
+- changes in parsing of <!-- include --> and <!-- CGI: --> and <!-- -->
+- NEW: parsestr:
+	/* by /is>0s - if not matches return NULL */
+	/* by /iv+10v or /iv-5v or /in-45n or /in+24n or /is+1s */
+	/* by /hs   - set stack = source (hex) */
+	/* by /ss   - set stack = source */
+	/*  set number to /n10n   or stack to /n15s*/
+	/{R..../}  - Repead 1 Time or more
+	/{r..../}  - Repead 0 Time or more
+	/(Splus/:minus/)	-stack increase(plus) or decrease(minus), if stack == 0 break. if booth plus and minus are
+    not matched - return NULL.
+	/t	- is now here
+20190518
+- NEW: /etc/S26lprinter script and in web/usb-printer.htm switch on/off of printer server
+- NEW: usb-printer_que.htm
+- changed p2p-torrent_add.htm, p2p-upload.htm, pkgs-upload.htm, pkgs-list.htm from shell="""" to TABLE:
+- added "get_ofiles:" in table stuct for only filenames without paths
+- added "check: " after "get_folder:", "get_files:" in table struct
+- modified /B/\/\/E body in parsestr1. Changed parsing string in handle_get_() according to /{/}
+- in parsestr1 added /{/}, and in /</> added /<-a-fA-F/>, !!!!plase replace!! /<- -*/> to /<- \-*/> in files!!!!
+20190402
+- in print-function of CGI added "?TABLE:/ /[/*\n/]END_TABLE?\n" and "?table?:/[/*/]\n", and improoved body
+- increased size of AREA from 32kb to 100kb
+- 1-USB.htm, usb-storage.htm changed according to table=""
+- added <--#include table="tab_1:!tab_4::string" -->
+- some changes in serv-smb.htm and usb-storage.htm
+- removed bug: "ptr-arg[i] is empty" from copy_CGI.c see [a]
+20181110
+- parsestr: added /hn or /hv for hex-source
+- cgi_struct changed arg from string with length to string pointer *arg[GET_CGI_MAX] in copy_CGI.c   [a]
+- changed "/etc/known_usb" and "/etc/usb_storage.sh"
+- added in ??_#&par?? for switching local-global-comman-variables
+- fixed bug in radio_value_insert()
+20180925
+- changed handle_get() function in copy.c (parsestr1 -> parsestr2, used /nXn in string)
+- parsestr: /iv<10v or /iv>5v or /in<45n or /in>24n
+- parsestr: added /sn (number = source) and /sv (value = source)
+- no more httpd_scrips.c	!!!!
 - parsestr: added /Qvar?/ and /n8n and "bla\04"(bla\0 + number=4)
 - changed authentication rules
 20180818
@@ -97,7 +157,7 @@ added f-file exist, d-dir exist, e-dir not exist.
 - bugfix in get_cgi with free(arg) and arg = "", allocated;
 
 20131105
-Addad <-- #includes file="*.inc?par=value" -->, cgi_script: exit_cgi;
+Added <-- #includes file="*.inc?par=value" -->, cgi_script: exit_cgi;
 
 suser, spassw, adminport must be variables in programm		-done
 

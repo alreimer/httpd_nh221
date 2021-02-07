@@ -10,12 +10,12 @@
 <tr><td>ps:</td></tr>
 <tr><td><pre>
 <font color="black">
-<!--#include shell=""ps | grep wget"" -->
+<!--#include shell="ps | grep wget" -->
 </font></pre></td></tr>
 <tr><td>wget_logs:</td></tr>
 <tr><td><pre>
 <font color="black">
-<!--#include shell=""for i in $(ls /var/wget_[0-9].log 2>/dev/null); do echo -e "\\n$i *******\\n"; cat $i; done"" -->
+<!--#include shell="for i in $(ls /var/wget_[0-9].log 2>/dev/null); do echo -e \"\\n$i *******\\n\"; cat $i; done" -->
 </font></pre></td></tr>
 <tr><td align="center"><input value="Back" onclick="history.back()" type="button"></td></tr>
 </tbody></table>

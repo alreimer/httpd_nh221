@@ -44,7 +44,7 @@ CFLAGS += -static
 LDFLAGS = -s
 #LDFLAGS = -s -static
 
-OBJS = httpd_scripts.o copy.o copy_CGI.o copy_tbl.o parse_CGI.o parser.o httpd.o
+OBJS = copy.o copy_CGI.o copy_tbl.o parse_CGI.o parser.o httpd.o
 OBJS1 = parser.o pnmd.o
 OBJS2 = ide_ioctl.o
 OBJS3 = httpd_cfg.o

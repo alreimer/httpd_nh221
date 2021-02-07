@@ -1,0 +1,80 @@
+<!--#include area="92100:AREA-1" -->
+<!--#include file="head.inc?name=Home%20Page" 
+file="side.inc?i=7" -->
+<table id="maintab" height=290 align="center"><tr>
+<td align="center" valign="top"><br>
+<table id="header" align="center"><tr><td><b>USB :: Printer Queue</b></td></tr></table>
+<br>
+
+<!--#include wr_shell=":AREA-1:/usr/bin/lpq > /dev/null" -->
+<!-- if="AREA-1:/" -->
+<table border="0" width="70%" height="50" align="center">
+<tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;Remove Jobs:</font></b></td><td></td><td></td></tr>
+<tr><td colspan="4">
+<!--#include wr_shell=":AREA-1:/usr/bin/lpq 2> /dev/null | grep -v active | sed -n '/root/s/.*+\\([0-9]\\+\\).*/\\1/pg'" -->
+<!-- TABLE:que
+#-> parse_area: AREA-1
+while:/[/*/]\n
+if:
+END_TABLE -->
+<table>
+<tr><td><pre>Do you want to delete all queue jobs of printer?</pre></td><td><a href="Set_usbque.cgi?remove=0">Yes</a></td></tr>
+<tr><td colspan="2"><hr></td></tr>
+<!--#include table="que_0:que_0::<tr><td><pre>?$</pre></td><td><a href=\"queue_remove.cgi?remove=0&que_0=?#+\">remove</a></td></tr>\n" -->
+</table>
+</td></tr>
+<tr><td></td><td></td>
+<td id="varbox-list-val">
+</td><td></td></tr>
+</table><br>
+<!-- else -->
+??AREA-1??
+<br>
+<!-- /if -->
+
+<table id="info" align="center">
+<tr><td><br>Note: by clearing the
+print queue of the devices, all current and pending print jobs will be
+deleted and need to be resent to the printer to proceed. The
+process cannot be stopped once it has begun.</td></tr>
+</table>
+
+</td></tr><tr>
+<td align="center"><br><input type="button" value="Back" onclick="history.back()"></td></tr>
+</table>
+
+<!--</td></tr></table>-->
+</body></html>
+<!-- CGI: queue_remove.cgi
+	get_file "./JavaReturn_.inc?name=Home%20Page&i=7";
+
+	nnot "_@que:/\ "{
+	    print "<pre>False folder ID: ??_#que_0??</pre></td></tr></table><a href=\"usb-printer_que.htm\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+	if "_#remove:0/" {
+	    print "Are you sure you want to clear the print queue?</td></tr></table><a href=\"queue_remove.cgi?remove=1&que_0=??_#que_0??\">Remove All</a>&nbsp;&nbsp;<a href=\"usb-printer_que.htm\">Back</a></table></body></html>";
+	    exit_cgi;
+	}
+	if "_#remove:1/" {
+	print "<table><tr><td>Queue job: ??_@que?? to delete</td></tr></table><pre>";
+	my_shell "/usr/bin/lprm \"??_@que??\" ";
+	print " </pre></td></tr></table><a href=\"usb-printer_que.htm\">Back</a></table></body></html>";
+	exit_cgi;
+	}
+	boot_page "usb-printer_que.htm";
+END_CGI -->
+<!-- CGI: Set_usbque.cgi
+	get_file "./JavaReturn_.inc?name=Home%20Page&i=7";
+	if "_#remove:0/" {
+	    print "Are you sure you want to clear the print queue?</td></tr></table><a href=\"Set_usbque.cgi?remove=1\">Remove All</a>&nbsp;&nbsp;<a href=\"usb-printer_que.htm\">Back</a></table></body></html>";
+	    exit_cgi;
+	}
+	if "_#remove:1/" {
+	print "<table><tr><td>All queue jobs will be deleted</td></tr></table><pre>";
+	my_shell "/usr/bin/lprm `/usr/bin/lpq | grep -v active | sed -n '/root/s/.*+\\([0-9]\\+\\).*/\\1/pg'`";
+	print " </pre></td></tr></table><a href=\"usb-printer_que.htm\">Back</a></table></body></html>";
+	exit_cgi;
+	}
+	boot_page "usb-printer_que.htm";
+END_CGI -->

@@ -1,13 +1,10 @@
-void parse_tbl(char *data);
-void free_tbl(void);
+void parse_tbl(char *data, char clean);
 struct rnd_tbl *find_tbl(char *name);
 void show_tbl(char *var, FILE *out);
 void show_tbl_chck(char *var, FILE *out);
 unsigned long long show_tbl_str(char *var, char *buf, unsigned long long size);
 char *get_tbl(char *var);
 void change_tbl_stat(char *data);	//data="flag:name:frase(forParsing)"
-
-char *parsestr_mass(char *parsestr, char **massive, int *i);
 
 #define TAB_LEN 10
 
@@ -26,5 +23,16 @@ struct tbl {
     struct tbl		*next;
 };
 
+void free_rnd_tbl(struct rnd_tbl **ptr);
+void free_tbl(void);
 extern struct tbl *tbl_name;	//begin of cgi
 
+struct tabs {
+    struct rnd_tbl	*n;
+    int			flag;		//0-not matched, 1-full tab (table), 2-one column of tab (table_3)
+    int			num;
+    struct tabs		*next;
+};
+void reg_tabs(struct tabs **t, struct rnd_tbl **p, char **name);
+void free_tabs(struct tabs **ptr);
+void tabs(char *str, FILE *out);

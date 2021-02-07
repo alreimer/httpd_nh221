@@ -5,13 +5,15 @@ int copy(FILE *read_f, FILE *write_f);
 int handle_get(char *data, FILE *write_f);
 //char *stristr(/*const*/ char *a, /*const*/ char *b);
 //char *strstrend( char *a, char *b);
-extern char *point[2];
+extern unsigned char *point[2];
+extern unsigned long number;
+extern unsigned long value_;
 //char *parsestr( char *a, char *b);
-char *parsestr1( char *a, char *b);
+unsigned char *parsestr1(unsigned char *a, unsigned char *b);
 char *parsestr1_( char *a, char *b);
 struct parsestr{
     char ch;
-    unsigned int num;
+    unsigned long num;
     char *zero;		//place, were ch was stored (for restoring)
     char *end;		//end of matched string
 };
@@ -25,5 +27,17 @@ char *get_var(unsigned long long *size_ptr, char *var_index);		//parse Varialble
 
 int reg_par(char *name, char *value, long long size);
 
-//void radio_value_insert(char *line, char *var_head, FILE *out);
-//void include_(char *line, char *var_head, FILE *out);
+//begin of ticket
+struct ticket{
+    int type;
+    char *fname;
+    char ticket[64];	//1233284374_7986543949
+    struct ticket *next;
+};
+extern struct ticket *ticket_list;
+
+void reg_ticket(char *name, int type);
+char *check_ticket(char *name, int type);
+char *ticket_find(char **name);
+void free_ticket(void);
+//end of ticket

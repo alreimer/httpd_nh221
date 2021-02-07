@@ -1,6 +1,6 @@
 /* parse_CGI.c:
  *
- * Copyright (C) 2009-2014  Alexander Reimer <alex_raw@rambler.ru>
+ * Copyright (C) 2009-2020  Alexander Reimer <alex_raw@rambler.ru>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,13 +18,18 @@
 #include "include/httpd.h"
 #include "parse_CGI.h"
 #include "copy_tbl.h"		//for find_tbl()
+#include "copy_CGI.h"
 #include "copy.h"
 
 
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 //#define DEBUG
 
-extern CGI_ENTRY cgi_entries[];
+CGI_ENTRY cgi_entries[] = {
+    {"_show_CGIs.cgi",show_CGIs},		//used from copy_CGI.c
+    {"",NULL}
+};
+
 extern char *print200ok_mime;
 
 //#include "include/httpd_config.h"		//for cfg_parse? struct
@@ -132,11 +137,21 @@ void fill_tbl(char *parm){
 
     struct rnd_tbl *ptr, *p;
     struct ARGS *p_args;
-    char *tmp;
+    char *tmp, *point, *name;
+    unsigned int part=0;
 
     while(tmp = w_strtok(&parm, ':')){
 	if(*tmp){
-		if(ptr = find_tbl(tmp)){
+	    name = w_strtok(&tmp, '#');
+	    if(name && *name){
+		if(!*tmp) part = 0;
+		else part = atoi(tmp);
+
+		if(ptr = find_tbl(name)){
+		    point = malloc(strlen(name) + 10);
+		    if(point == NULL) continue;
+		    sprintf(point, "%s_%d", name, part);
+
 		    p = ptr;
 		    while(p){
 			p->flag = 1; //hide all elements!
@@ -146,7 +161,7 @@ void fill_tbl(char *parm){
 		    while(ptr){
 		    p_args = args_ptr_global;
 			while(p_args && p_args->name && p_args->value){
-			    if((strcmp(tmp, p_args->name) == 0) && (strcmp(ptr->rnd_entry, p_args->value) == 0)){
+			    if((strcmp(point, p_args->name) == 0) && (strcmp(ptr->rnd_entry, p_args->value) == 0)){
 				ptr->flag = 0;
 				break;//have found, break
 			    }
@@ -154,15 +169,18 @@ void fill_tbl(char *parm){
 			}
 		    ptr = ptr->next;
 		    }
+
+		    free(point);
 		}
+	    }
 	}
     }
 }
 
-
+/*
 int parseargs(ARGUMENT *arg)
 {
-/*    int i, value_len, ret = 0;
+    int i, value_len, ret = 0;
 
     while (i < ARGS_MAX && args[i].name && args[i].value){
 
@@ -191,11 +209,11 @@ int parseargs(ARGUMENT *arg)
 	i++;
     }
     return ret;
-*/return 0;
+return 0;
 }
-
+*/
 /* Given a www-form encoded string, restore the original: */
-void httpd_decode(char *string)		/*had name unescape*/
+char *httpd_decode(char *string)		/*had name unescape*/
 {
     char *src = string, *dest = string;
     int digit1, digit2;
@@ -225,7 +243,7 @@ void httpd_decode(char *string)		/*had name unescape*/
 	dest ++;
     }
     *dest = '\0';
-    return;
+    return dest;	//needed for getting the end of string
 }
 
 
@@ -273,7 +291,7 @@ void delete_crlf( char *plag )	//find \n or \r and make end of string at this pl
     }
 }
 
-int DoCGI(FILE *out, char *filename){
+int DoCGI(FILE *out, char *filename, int flag){//if flag == 0 -with mime, == 1 - without mime
 
     CGI_ENTRY *p = cgi_entries;
 
@@ -283,14 +301,14 @@ int DoCGI(FILE *out, char *filename){
 
     while((p->name[0] != ' ') && (p->name[0] != '\0')){
 	if(strcmp(p->name, filename) == 0){
-printf("%s %p\n",p->name, p->handler);
-	    if(*filename != '_') fprintf(out, print200ok_mime, "text/html");
+printf("%s %p    %d\n",p->name, p->handler, flag);
+	    if(*filename != '_' && flag != 1) fprintf(out, print200ok_mime, "text/html");
 	    p->handler(out);
 	    return 0;
 	}
 	p++;
     }
-    if(get_cgi(out, filename)) return 0; //from copy_cgi.c
+    if(get_cgi(out, filename, flag)) return 0; //from copy_cgi.c
 /*    if(mime){ 
 	    fprintf(out, "HTTP/1.0 404 Not Found\n"
 		 "Content-type: text/html\n\n"

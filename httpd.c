@@ -3,7 +3,7 @@
  * Copyright (c) 1997-1999 D. Jeff Dionne <jeff@rt-control.com>
  * Copyright (c) 1998	   Kenneth Albanowski <kjahds@kjahds.com>
  * Copyright (c) 1999	   Nick Brok <nick@nbrok.iaehv.nl>
- * Copyright (c) 2009-2018 Alexander Reimer <alex_raw@rambler.ru>
+ * Copyright (c) 2009-2020 Alexander Reimer <alex_raw@rambler.ru>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,18 +80,20 @@ char check_ip[20];		//if == '\0'- so release ip.
 char dns_name[128];
 char etc_save[2];
 char buf[16384];
-char *arg;
+//char *arg;
 char *file;
 //char os[6];
 
+int wauth;
 int fd;
 int sockfd;
-
+FILE *fdcr;
 
 char *print200ok_mime = "HTTP/1.0 200 OK\n"
 			"Content-type: %s\n"
 //			"Server: uClinux-httpd 0.2.2\n"
 			"Server: thttpd/2.25b\n"
+			"Cache-Control: no-cache,no-store\n"	//new here RAW
 			"Expires: 0\n\n";
 
 int DoFile(FILE *f, char *name, char *type){
@@ -123,19 +125,6 @@ int DoHTML(FILE *f, char *name, char *type){
     FILE *infile;
     struct stat stbuf;
     char *data;
-
-//    if(!strcmp(name,"network-ip.htm"))		//insert in that files <!--#include InIt -->
-//	Init_Http_Var();
-//    if(!strcmp(name,"user_add.htm"))		//insert in that files <!--#include select_show_dir="sel_dir" -->
-//	show_directory("sel_dir");
-//    if(!strcmp(name,"torrent_basic.htm"))
-//	show_directory("torrent_dir");
-//    if(!strcmp(name,"web-server.htm")){
-//	Init_Http_Var();
-//	show_directory("web_dir");
-//    }
-//    if(!strcmp(name,"admin-codeset.htm"))
-//	show_directory("code_dir");
 
 #ifdef NOVAC
     if(!strcmp(name,"close.htm")){
@@ -273,69 +262,50 @@ void decodebase64(char *string){
     *dest = '\0';
 }
 
-int ParseReq(FILE *f, char *r){
+int ParseReq(FILE *f, char *c){
 
     struct stat stbuf;
-    char *c;
+    char *r, *r1, *tt;
 //    char *file = NULL;
-//    char *dir_ptr, *end_dir;
 
-    arg = NULL;
-    file = NULL;
+    char *arg = NULL;
+//    file = NULL;
 
 #ifdef DEBUG
-    printf("req is '%s'\n", r);
+    printf("req is '%s'\n", c);
 #endif
 
-    while(*(++r) != ' ');  /*skip non-white space*/
-    while(isspace(*r))
-	    r++;
-/*	move it in cgi-struct RAW
-	//========== let CGI knows '/' without decoding for P2P directory ======================
-	if(strstr(r,"list_torrent_file.cgi") || strstr(r,"show_download_folder.cgi")){
-		dir_ptr = strchr(r,'?');
-		dir_ptr++;
-		if((end_dir = strchr(dir_ptr,' ')) != NULL)
-		*end_dir = '\0';
-		list_torrent_file(dir_ptr,f);
-		return 0;
-	}
-	if(strstr(r,"Show_download_status.cgi")){
-		dir_ptr = strchr(r,'?');
-		dir_ptr++;
-		if((end_dir = strchr(dir_ptr,' ')) != NULL)
-		*end_dir = '\0';
-	    Show_download_status(dir_ptr,f);
-	    return 0;
-	}
-	if(strstr(r,"Show_queue_config.cgi")){
-		dir_ptr = strchr(r,'?');
-		dir_ptr++;
-		if((end_dir = strchr(dir_ptr,' ')) != NULL)
-		*end_dir = '\0';
-	    Show_queue_config(dir_ptr,f);
-	    return 0;
-	}
-	if(strstr(r,"change_queue_config.cgi")){
-		dir_ptr = strchr(r,'?');
-		dir_ptr++;
-		if((end_dir = strchr(dir_ptr,' ')) != NULL)
-		*end_dir = '\0';
-	    change_queue_config(dir_ptr,f);
-	    return 0;
-	}
-	//======================================================================================
-*/
+//    while(*(++r) != ' ');  /*skip non-white space*/
+//    while(isspace(*r)) r++;
 //r = "?fdkfdhgod/sdgjsoidfjdfj.html";
 //r = "a";
-    if(!strstr(r,"dir.js"))  //snop adds for showing FTP folder
-	while (*r == '/') r++;
-    file = c = r;
-
-#ifdef DEBUG
-    printf("r: %s file: %s\n", r, file);
-#endif
-
+    r1 = c;
+    while(*r1){ 
+        if(*r1 == '?'){
+	    *r1 = '\0';
+	    arg = r1 + 1;
+	    break;
+	}
+	r1++;
+    }
+    httpd_decode(c);
+    tt = check_ticket(c, 0);	//exchange ticket to file name
+    if(tt != NULL) c = tt;
+    tt = check_ticket(c, 1);	//get this filename throw password free
+    if(tt != NULL) c = tt;
+    while(*c == '/') c++;
+    file = r = c;
+    while(*r){ 
+	if(*r == '.' && *(r+1) == '/'){
+	    fprintf(stderr, "MSG: ./ in string!\n");
+	    return 0;
+	}
+	if(*r == '/'){
+	    file = r + 1;
+	}
+	r++;
+    }
+/*
      while(*r && (*r != ' ')){
 	switch(*r){
 	    case '?':	*r = '\0';
@@ -350,17 +320,47 @@ int ParseReq(FILE *f, char *r){
 	r++;
     }
     *r = '\0';
-
+*/
 #ifdef DEBUG
     printf("c='%s', r='%s'\narg='%s' file='%s'\n", c, r, arg, file);
 #endif
 
-    if (!c) return 0;		//no '/' in request
-    if (c[0] == '\0')	strcat(c,".");
-#ifdef DEBUG
-printf("c %s\n", c);
-#endif
-    if(arg) r = arg - 1;
+//printf("WEB_LOGIN: %s\n", CONFIG.WEB_LOGIN);
+if(wauth && tt == NULL){
+    if(wauth > 3){
+	fprintf(f, "HTTP/1.0 404 Not Found\n"
+		    "Content-type: text/html\n\n"
+		    "<html>\n<head><title>404 Authorisation overflow</title></head>\n"
+		    "<body bgcolor=\"#cc9999\" text=\"#000000\" link=\"#2020ff\" vlink=\"#4040cc\">\n"
+		    "<h2>Authorisation overflow</h2>\n"
+		    "<p>Login error. 3 Times. Please <a href=\"http://%s:%s\">try again</a> in a minute.</p></body>\n</html>\n",CONFIG.IP,CONFIG.ADMIN_PORT);
+	return;
+    }
+    if(*(CONFIG.WEB_LOGIN) != '\0'){
+//	printf("WEB_LOGIN isnot empty!\n");
+	if(!strcmp(file, CONFIG.WEB_LOGIN)){
+	    wauth = 0;
+	    c = "./index.htm";
+	} else {
+	    wauth++;
+	    c = "./login.htm";
+	}
+	r = c + strlen(c);
+    }
+}
+//printf("LOGIN:%s\n", c);
+
+//    if(arg) r = arg - 1;	//this is comment because of next string
+//    r = httpd_decode(c);	//*file can be moved from origin!
+
+//r - point to the end of file.htm
+//c - point to the begin of file with path, without '/'
+//arg - point to begin of arguments
+//file - point to the begin of only file (used by DoCGI())
+//  /path/file.htm?arg1=bla&arg2=blabla
+//   |    |       ||
+//   c    file   r arg
+
     switch(method){
 	case M_GET:
 	    handle_arg(0, arg);
@@ -371,30 +371,41 @@ printf("c %s\n", c);
 	    }
 	    break;
     }
+
+    if (c[0] == '\0'){	strcat(c,"."); r++;}
+#ifdef DEBUG
+    printf("c %s\n", c);
+#endif
+
     if(!stat(c, &stbuf)){
 
+	if(tt == NULL){
 	if(S_ISDIR(stbuf.st_mode)){	/*OK exist is dir*/
-	    char * end = c + strlen(c);
+		char buff[3000];	//buff size must be bigger as 2048bytes from *c
 	    #if defined(LOBOS) || defined(NOVAC)
 		if(*check_ip && strcmp(check_ip,ip))	//if not identical
-		    strcat(c, "/limit-warn.htm");
+		    r1 = "limit-warn.htm";
 		    //must be return
 		else
 	    #endif
 		{
-		    strcat(c, "/index.htm");
-		    r = end + 10;		//to parse it after(r - points to end of name)
+		    r1 = "index.htm";
+//		    r = end + 10;
 		}
+		r = buff + sprintf(buff, "%s/%s", c, r1);//to parse it after(r - points to end of name)
+		c = buff;
 		if(stat(c, &stbuf)){	// %dir%/index.htm - such file not exist
 #ifdef DO_DIR
-		    *end = '\0';
-		    DoDir(f,c);
+		    while(*c){if(*c == '/') r1=c; c++;}
+		    *r1 = '\0';
+		    DoDir(f,buff);
 		    //must be return
 #else
 		    goto NotFound;
 #endif
 		}
 	}
+	}//end of tt == NULL
 	/**parsing of supported filetypes**/
 	MIME_TYPES *p = mime;
 	while(p->ext[0] != '\0'){
@@ -404,17 +415,15 @@ printf("c %s\n", c);
 		return 0;
 	    }
 	    p++;
-    	}
+	}
 
 	printf("UNknown type of file - not supported\n");
-//	goto NotFound;
 
     }else{				/*file c not exist*/
 	//handle CGI function
-//	if(!strcmp(r-4,".cgi")){
-	if(!DoCGI(f, file)){
+	if(!DoCGI(f, file, 0)){//with mime
 #ifdef DEBUG
-		printf("CGI c:%s\n",c);
+	    printf("CGI c:%s\n",c);
 #endif
 	    free_par_tmp();//clear all "temp"-parameters
 	    free_arg(0);
@@ -441,7 +450,7 @@ int HandleConnect(int fd){
     //this accomodates Wget.cgi (extra long GET request)
     char buf[2048];
     char buf1[2048];
-    char *password, *c;
+    char *password, *c, *file_name;
     int agent = 0, auth = 0;
 
     f = fdopen(fd,"r+");    //FILE *out, LATER
@@ -454,10 +463,11 @@ int HandleConnect(int fd){
     }
     setbuf(f, 0);
 
+    fdcr = f;
 //    alarm(TIMEOUT);
-
-/*FILE *fp;
-if((fp=fopen("/text1","w+")) == NULL) return;
+/*
+FILE *fp;
+if((fp=fopen("/text_","w+")) == NULL) return;
 
 while(fgets(buf, 2048, f)){
 fprintf(fp, "%s\n", buf);
@@ -472,6 +482,8 @@ fclose(fp);
 //	alarm(0);
 	return 0;
     }
+    buf[2047] = '\0';
+
 #ifdef DEBUG
   printf("\nbuf = '%s'\n", buf);
 #endif
@@ -481,11 +493,14 @@ fclose(fp);
 /*****************************hier must be switch for methods!! */
     method = 0;
     method1 = POST_NO;
-    if(!strncmp(buf,"GET",3))		method = M_GET;
-    else if(!strncmp(buf,"POST",4))	method = M_POST;
+//    if(!strncmp(buf,"GET",3))		method = M_GET;
+//    else if(!strncmp(buf,"POST",4))	method = M_POST;
+    if(file_name = parsestr1(buf, "GET ///././[/!/B/!/*/] HTTP///\\/{C/*.///}/*/<1?\\0/>/E")) method = M_GET;
+    else if(file_name = parsestr1(buf, "POST ///././[/!/B/!/*/] HTTP///\\/*?/\\/*.///E")) method = M_POST;
 #ifdef SP_OPTIONS
     else if(!strncmp(buf,"OPTIONS",7))	method = M_OPTIONS;
-#endif    
+#endif
+    else fprintf(stderr, "ERR: Unsupported method\n%s", buf);
 
     switch (method){
 	case M_GET:	
@@ -532,7 +547,6 @@ fclose(fp);
 
 		}else if(c = parsestr1(buf1, "Refer/,r,er:/ ")){
 	            strmycpy(referer, c, 128);
-//		    referer[127] = '\0';
 		}else if(c = parsestr1(buf1, "Content-/<1Ll/>ength:/ ")){
 		    content_length = atol(c);
 		}else if (c = parsestr1(buf1, "Content-/<1Tt/>ype:/ ")){
@@ -548,7 +562,6 @@ fclose(fp);
 		    }
 		}else if(c = parsestr1(buf1, "User-Agent:/ ")){    //To identify the OS
 	            strmycpy(user_agent, c, 128);
-//		    user_agent[127] = '\0';
 		    agent = 1;
 /*		    if(strstr(c,"Linux"))	//used in post parsing only!
 	    		strcpy(os,"LINUX");
@@ -607,7 +620,7 @@ fclose(fp);
 	    log_time = 1;
 //	printf("auth = %d, log_time = %d\n",auth, log_time);
 //	if((auth !=0 && log_time !=1) || strcmp(check_ip,ip))
-    	    ParseReq(f, buf);
+    	    ParseReq(f, file_name);
 	    }
 	}//else		need some action for limit access of this IP
 
@@ -666,10 +679,11 @@ void sig_handler(int signo){
 	    alarm(60);
 	    alrm_counter++;	//1 counter = 60 sec.
 //	    printf("time: %d\n", alrm_counter); 
-	    if(alrm_counter == 1){if(log_time > 3) log_time = 1;}
+	    if(alrm_counter == 1){if(log_time > 3) log_time = 1; if(wauth > 3) wauth = 1;}
 	    else if(alrm_counter == 5)  chdir(CONFIG.WEB_ROOT);
 	    else if(alrm_counter == 10){
 		    check_ip[0] = '\0';		//ip is released
+		    wauth = 1;
 		    free_page_mem();
 //		    close(fd);
 	    }
@@ -700,6 +714,7 @@ int main(int argc, char *argv[]){
     etc_save[0] = '0';
     etc_save[1] = '\0';
     check_ip[0] = '\0';		//ip is released
+    wauth = 1;			//not authenticated
     char no_dns[] = ".";
 
     printf("Starting main()!!\n");
@@ -787,7 +802,6 @@ printf("%d == %d\n", ec.sin_addr.s_addr,inet_addr("127.0.0.1"));//important!!!
 
 	tmp = (char *)inet_ntoa(ec.sin_addr);		//unsecure
 	strmycpy(ip, tmp, 20);
-//	ip[19] = '\0';
 
 //printf("main ip: %s  --  check_ip: %s\n", ip, check_ip);
 	
@@ -807,7 +821,6 @@ printf("%d == %d\n", ec.sin_addr.s_addr,inet_addr("127.0.0.1"));//important!!!
 	    tmp = hp->h_name;
 	}else tmp = no_dns;
 	strmycpy(dns_name, tmp, 128);
-//	dns_name[127] = '\0';
 
 	}
 

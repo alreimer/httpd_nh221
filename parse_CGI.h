@@ -1,7 +1,15 @@
-void httpd_decode(char *string);	/*had name unescape*/
+//data: a pointer to the encoded form data
+//out: a file pointer used for output
+typedef void cgi_handler(FILE *out);
+typedef struct{
+    const char *name;	   /* The name of the script as given in the URL */
+    cgi_handler *handler;  /* The function which should be called */
+} CGI_ENTRY;
+
+char *httpd_decode(char *string);	/*had name unescape*/
 char *w_strtok(char **s, char d);/*finds d in s and replaced by '\0' s move to next char and returns pointer to beginning of s */
 
-int DoCGI(FILE *out, char *filename);
+int DoCGI(FILE *out, char *filename, int flag);//if flag == 0 -with mime, == 1 - without mime
 
 #define	ARGS_MAX		40
 struct ARGS{

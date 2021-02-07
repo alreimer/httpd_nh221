@@ -1,4 +1,4 @@
-<!--#include area="16345:AREA-1" -->
+<!--#include par="2:lpd_enable:LPD_ENABLE:[01]" readcfg area="92100:AREA-1" -->
 <!--#include file="head.inc?name=Home%20Page" 
 file="side.inc?i=7&helper=1" -->
 <script src="/js/tools.js"></script>
@@ -17,24 +17,42 @@ var g = window.open('http://??_srv_ip??:??_srv_port??/help/usb-printcap.help', '
 <tr><td width=2% valign=top></td>
 <td width=80% align=left><font color="#FFFFFF" size=2 face="Arial, Helvetica, sans-serif"><b>Please provide .</b></font></td></tr></table>-->
 
-<!-- need make: show only printer info!!-->
-<!-- CGI: _test.cgi
-    write_file "AREA-1:/proc/bus/usb/devices";
-    bind_par "AREA-1";
-    print "<table><tr bgcolor=\"#ff0000\"><td width=140 align=center class=style2>USB 2.0/1.1</td><td width=135 align=center class=style2>Vendor:ProdID</td><td width=135 align=center class=style2>Manufacturer</td><td width=140 align=center class=style2>Device Name</td><td width=140 align=center class=style2>Serial number</td></tr>\n" ;
-    do {
-	set "a = 0";
-	buf_parse_area "/[/*/]\nT:  " {
-	    set "a = 1";
-	}
-	    print "[?/*Cls=07(print)?]<tr><td>USB {?/*D:  Ver= /[/*/] ?}</td><td>{?/*P:  Vendor=/[/*/] ?}:{?ProdID=/[/*/] ?}</td><td>{?/*S:  Manufacturer=/[/*/]\n?}</td><td>{?/*S:  Product=/[/*/]\n?}</td><td>{?/*S:  SerialNumber=/[/*/]\n?}</td></tr>\n";
-
-    }	if_set "a == 0";	//stop if set!!!
-    print "</table>";
-END_CGI -->
-<!--#include cgi="_test.cgi" -->
-
+<!--#include wr_shell=":AREA-1:cat /proc/bus/usb/devices" -->
+<!-- TABLE:usb_info
+#-> parse_area: AREA-1
+while:/[/B/*/]\nT:  /\/*/]\n\0/E
+check:/*Cls=07(print)
+if:/*D:  Ver= /[/*/] 
+if:/*P:  Vendor=/[/*/] 
+if:ProdID=/[/*/] 
+if:/*S:  Manufacturer=/[/*/]\n
+if:/*S:  Product=/[/*/]\n
+if:/*S:  SerialNumber=/[/*/]\n
+END_TABLE -->
+<table><tr bgcolor="#ff0000"><td width=140 align=center class=style2>USB 2.0/1.1</td><td width=135 align=center class=style2>Vendor:ProdID</td><td width=135 align=center class=style2>Manufacturer</td><td width=140 align=center class=style2>Device Name</td><td width=140 align=center class=style2>Serial number</td></tr>
+<!--#include table="usb_info_0:usb_info_1:usb_info_2:usb_info_3:usb_info_4:usb_info_5::<tr><td>USB ?$</td><td>?$:?$</td><td>?$</td><td>?$</td><td>?$</td></tr>\n" -->
+</table>
 <br>
+
+<form method="get" name="host" action="lpd.cgi" >
+<table border="0" width="70%" height="50" align="center">
+    <colgroup>
+    <col id="varbox-list-name">
+    <col id="varbox-list-val">
+    </colgroup>
+    <tr>
+    <td><b><font size="3">&nbsp;LPD Enable:</font></b></td>
+    <td>
+	<input type="radio" name="lpd_enable" value="1">Yes
+        <input type="radio" name="lpd_enable" value="0">No
+    </td></tr>
+    <tr>
+    <td bgcolor="#ffffff" align="center"><a href="reload_lpd.cgi">reload</a></td>
+    <td><input type="submit" name="save_lpd" value="Apply">&nbsp;<input type="reset" value="Cancel"></td>
+    </tr>
+</table></form>
+<br>
+
 <form method="post" name="host_" action="Set_printcap.cgi">
 <table border="0" width="70%" height="50" align="center">
 <tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;Printcap File:</font></b></td><td></td><td></td></tr>
@@ -78,4 +96,15 @@ END_CGI -->
     print "grep printer:\n";
     my_system "grep printer /var/log/messages";
     print "</pre></table><a href=\"usb-printer.htm\">Back</a></table></body></html>";
+END_CGI -->
+<!-- CGI: lpd.cgi
+    fill_cfg "lpd_enable";
+    savecfg;
+    boot_page "usb-printer.htm";
+END_CGI -->
+<!-- CGI: reload_lpd.cgi
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=7";
+    print "<tr><td><pre>";
+    my_system "/etc/init.d/S26lprinter restart";
+    print "</pre></td></tr></table><a href=\"usb-printer.htm\">Back</a></table></body></html>";
 END_CGI -->

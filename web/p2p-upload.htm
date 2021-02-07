@@ -15,8 +15,11 @@ file="side.inc?i=6&helper=1" -->
 <table border="0" width="70%" height="50" align="center">
 <tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;ls -l files:</font></b></td><td></td><td></td></tr>
 <tr><td colspan="4">
+<!-- TABLE:file
+#-> get_ofiles: /mnt/wget_files
+END_TABLE -->
 <table border="0" width="100%" height="40" align="center">
-<!-- #include shell=""cd /mnt/wget_files/ 2>/dev/null; [ $? -eq 0 ] && for i in * ; do [[ -f \"$i\" ]] && echo \"<tr><td><pre>$(ls -l \"$i\")</pre></td><td><a href=\\\"file_remove.cgi?file_name=$i\\\">remove</a></td></tr>\"; done "" -->
+<!-- #include table="file:file::<tr><td><pre>?@@cd /mnt/wget_files/ 2>/dev/null; [ $? -eq 0 ] && ls -l \"?$\" @@?</pre></td><td><a href=\"file_remove.cgi?file_0=?#+\">remove</a></td></tr>\n" -->
 </table>
 </td></tr>
 <tr><td></td><td></td>
@@ -107,21 +110,14 @@ function warming_b(){
 
 END_CGI -->
 <!-- CGI: file_remove.cgi
-
-    set "a=1";
-    remove_chars ";:/\"<>`'$*?|::_#file_name";
-
-    if_set "a == 1"{
-//    not "_#file_name:/*.//"{
     get_file "./JavaReturn_.inc?name=Home%20Page&i=6";
-
-    print "<tr><td>Remove file:</td><td> ??_#file_name??</td></tr>
+	nnot "_@file:/\ "{
+	    print "<pre>False folder ID: ??_#file_0??</pre></td></tr></table><a href=\"p2p-upload.htm\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+    print "<tr><td>Remove file:</td><td> ??_@file??</td></tr>
     <tr><td colspan=\"2\"><pre>";
-    my_shell "rm \"/mnt/wget_files/??_#file_name??\"
-	[ $? -eq 0 ] && echo \"File ??_#file_name?? removed\"";
+    my_shell "rm \"/mnt/wget_files/??_@file??\"; [ $? -eq 0 ] && echo \"File ??_@file?? removed\"";
     print "</pre></td></tr></table><a href=\"p2p-upload.htm\">Back</a></table></body></html>";
-    exit_cgi;
-//    }
-    }
-    boot_page "p2p-upload.htm";
+
 END_CGI -->
