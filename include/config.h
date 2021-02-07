@@ -11,6 +11,7 @@ cfg_line(USERNAME,	supername, 20)			//   6. SuperUser name
 cfg_line(PASSWORD,	,20)///*superpasswd*/, 20)			//   7. SuperUser Password
 cfg_line(ADMIN_PORT,	admin_port, 6)			//  60. Admin Port Number
 cfg_line(IP,		ip,	20)				//   0. WAN IP Address used in boot_page (script)
+cfg_line(WEB_LOGIN,	web_login,	128)			//   used for login
 
 cfg_line(IP_SECURITY_MODE,ip_security_mode, 2)	//  26. Security Mode:0->Disable, 1->Allow, 2->Not Allow
 cfg_line1(LEGAL_IP,	ip1,0,	20)			//  16. Legal IP1	!!!!must be changed- /etc/config must begin from LEGAL_IP0 .. _IP9!!!!
