@@ -32,7 +32,7 @@
 #include "include/httpd_config.h"
 #include "copy.h"
 #include "parse_CGI.h"
-#include "parse_CGI.h"
+#include "copy_CGI.h"
 #include "parser.h"
 
 
