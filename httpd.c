@@ -32,7 +32,8 @@
 #include "include/httpd_config.h"
 #include "copy.h"
 #include "parse_CGI.h"
-#include "copy_CGI.h"
+#include "parse_CGI.h"
+#include "parser.h"
 
 
 #define SP_OPTIONS
@@ -56,6 +57,8 @@
 
 config CONFIG;
 #include "include/config.h"
+
+int Get_Security(char *test_ip);
 
 //add by snop to get the method
 int method;

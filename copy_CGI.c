@@ -15,6 +15,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/stat.h>	//chmod
+#include <sys/types.h>
+#include <sys/wait.h>
 #include "copy_CGI.h"
 #include "copy_tbl.h"
 #include "parse_CGI.h"	//w_strtok, cfg_arg_strcmp, cfg_arg_changed
