@@ -465,7 +465,7 @@ int HandleConnect(int fd){
 //	alarm(0);
 	return 0;
     }
-    setbuf(f, 0);
+//    setbuf(f, 0);
 
     fdcr = f;
 //    alarm(TIMEOUT);
