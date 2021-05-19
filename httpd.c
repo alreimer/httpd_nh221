@@ -479,6 +479,10 @@ printf("printfcopy %d  %s\n", strlen(buf), buf);
 }
 fclose(fp);
 */
+
+/*here is the problem with microsoft EDGE - it doesnot send the method on 1st click
+needed 2 clicks*/
+
 /**Get a method and HTTP version line maxlinesize=2048**/
     if(!fgets(buf, 2048, f)){
 	fprintf(stderr, "httpd: Error reading connection, error %d\n", errno);
