@@ -78,12 +78,13 @@ END_TABLE -->
 	boot_page "admin-crond.htm";
 END_CGI -->
 <!-- CGI: touch_file.cgi
-	nnot "_#file:/!/B/*.///\/*??/E"{
+	remove_chars ";:\"<>/`'$*?|::_#file";
+//	nnot "_#file:/!/B/*.///\/*\??/E"{
+	nnot "_#file:/!/B/*.///\\0/E"{
 	get_file "./JavaReturn_.inc?name=Home%20Page&i=3";
 	    print "<pre>False file</pre></td></tr></table><a href=\"admin-crond.htm\">Back</a></table></body></html>";
 	    exit_cgi ;
 	}
-	remove_chars ";:/\"<>`'$*?|::_#file";
 	shell "touch \"/etc/crontab/??_#file??\"";
 	write_par "_etc_save:1";
 	boot_page "admin-crond.htm";
@@ -162,5 +163,5 @@ END_CGI -->
 	remove_chars "\r::_#file_content";
 	save_file "_#file_content:??_@cron_files??";
 	write_par "_etc_save:1";
-	boot_page "get_file.cgi?cron_files=??_#cron_files??";
+	boot_page "get_file.cgi?cron_files_0=??_#cron_files_0??";
 END_CGI -->
