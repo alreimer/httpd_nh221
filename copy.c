@@ -544,6 +544,7 @@ unsigned char *parsestr1(unsigned char *d, unsigned char *c)	//try identic strin
 			if(ch == 'w') print_pstr(fdcr, c); //putout to WEB: /mw....\0  without matching!
 			tmp = parsestr1(d, tmp2);
 			if(ch == '-' && tmp == NULL) print_pstr(stderr, c);
+			if(ch == '+' && tmp != NULL) print_pstr(stderr, c);
 			if(ch == 'N' && tmp == NULL) print_pstr(fdcr, c); //if not mantched the rest - putout to WEB: /mN...\0
 			if(ch == 'W' && tmp != NULL) print_pstr(fdcr, c); //if matched the rest - putout to WEB: /mW....\0
 			return tmp;

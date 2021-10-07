@@ -1,6 +1,7 @@
 <!--#include par="17:hostname:HOSTNAME:" par="20:ip:IP:" area="220:AREA-1" readcfg -->
 <!--#include file="head.inc?name=Home%20Page" 
 file="side.inc?i=1" -->
+<!--#include exchange="Clean_IP.cgi" exchange="info.cgi" -->
 
 
 <!-- CGI: _test.cgi
@@ -46,6 +47,10 @@ END_CGI -->
 <tr>
 <td width="44%" bgcolor="#d6efff"><b><font size="3">Kernel:</font></b></td>
 <td width="56%" bgcolor="#FFFFFF"><!--#include file="/proc/version" --></td>
+</tr>
+<tr>
+<td width="44%" bgcolor="#d6efff"><b><font size="3">Ask me:</font></b></td>
+<td width="56%" bgcolor="#FFFFFF"><a href="askme.htm">here</a></td>
 </tr>
 </table><br>
 <br><br>
