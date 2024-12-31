@@ -1,0 +1,474 @@
+<!--#include exchange="main.cgi" exchange="mk_folder.cgi" exchange="del_qfolder.cgi" exchange="del_folder.cgi"
+exchange="get_dir_1.cgi" exchange="get_dir_main.cgi" exchange="get_dir.cgi" exchange="ch_dir_lists.cgi" exchange="list.cgi" 
+exchange="chom.cgi" exchange="chown.cgi" exchange="chmod.cgi" exchange="del_qfile.cgi" exchange="del_file.cgi" 
+exchange="del_qfold.cgi" exchange="del_fold.cgi"-->
+
+<!-- TABLE: smb_folders
+#-> parse_file: ./etc/smb.conf
+while:/[/*/]\n
+if:/ path/ =/ /[//mnt///!/*.//
+END_TABLE -->
+
+<!-- CGI: main.cgi
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=4";
+
+    print "
+<table id=\"maintab\" height=290 align=\"center\"><tr>
+<td align=\"center\" valign=\"top\">
+<table id=\"header\" align=\"center\"><tr><td><b>Services :: Samba (Folders)</b></td></tr></table>
+<br>
+<table border=\"0\" width=\"70%\" height=\"50\" align=\"center\">
+?table?:smb_folders_0:smb_folders_0:smb_folders_0:smb_folders_0:smb_folders_0::<tr>?@@[ ! -d \"?$\" ] && echo -n \"<td>?$</td><td><a href=\\\"mk_folder.cgi?smb_folders_0=?#+\\\">mkdir</a></td>\" || echo -n \"<td><a href=\\\"get_dir_1.cgi?smb_folders_0=?#\\\">?$</a></td><td><a href=\\\"del_qfolder.cgi?smb_folders_0=?#+\\\">delete</a></td>\"@@?</tr>\n
+</table>
+</td></tr><tr>
+<td align=\"center\"><br><a href=\"1-services.htm\">Back</a></td></tr>
+</table>
+</body></html>";
+
+END_CGI -->
+<!--#include cgi="main.cgi" -->
+
+<!-- CGI: mk_folder.cgi
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=4";
+
+	nnot "_@smb_folders:/\ "{
+	    print "<pre>False folder ID: ??_#smb_folders_0??</pre></td></tr></table><a href=\"main.cgi\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+
+	my_shell "mkdir -p ??_@smb_folders??; [ $? -eq 0 ] && echo \"<tr><td><pre>Dir: ??_@smb_folders?? is made!</pre></td></tr>\"; ";
+	print "</td></tr></table><a href=\"main.cgi\">Back</a></table></body></html>";
+END_CGI -->
+
+<!-- CGI: del_qfolder.cgi
+	get_file "./JavaReturn_.inc?name=Home%20Page&i=4";
+	nnot "_@smb_folders:/\ "{
+	    print "<pre>False folder ID: ??_#smb_folders_0??</pre></td></tr></table><a href=\"main.cgi\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+	print "Do You really want to delete folder: ??_@smb_folders??</td></tr></table><a href=\"del_folder.cgi?smb_folders_0=??_#smb_folders_0??\">Yes</a>&nbsp;&nbsp;<a href=\"main.cgi\">No</a></table></body></html>";
+END_CGI -->
+
+
+<!-- CGI: del_folder.cgi
+	nnot "_@smb_folders:/\ "{
+	get_file "./JavaReturn_.inc?name=Home%20Page&i=4";
+	    print "<pre>False folder ID: ??_#smb_folders_0??</pre></td></tr></table><a href=\"main.cgi\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+	shell "rm -r \"??_@smb_folders??\"";
+//	write_par "_etc_save:1";
+	boot_page "main.cgi";
+END_CGI -->
+
+
+
+<!--#include area="6000:path" area="6000:orig_path" -->
+<!--#include write_par="orig_path:/mnt"  -->
+
+<!-- CGI: get_dir_1.cgi
+	nnot "_@smb_folders:/\ "{
+	    get_file "./JavaReturn_.inc?name=Home%20Page&i=4";
+	    print "<pre>False folder ID: ??_#user_5??</pre></td></tr></table><a href=\"main.cgi\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+	write_par "orig_path:??_@smb_folders??";
+	write_par "path:??orig_path??";
+
+    boot_cgi "get_dir_main.cgi";
+END_CGI -->
+
+<!-- CGI: get_dir_main.cgi
+
+    if "_#path_tbl_0:"{
+	not "_@path_tbl:.." {
+	cat_par "path:/??_@path_tbl??";
+	}
+	if "_@path_tbl:.." {
+	write_ppar "path:path:/[/l/l/--/]";
+	}
+    }
+    free_tbl "file_tbl:path_tbl";
+
+
+if "path:/?orig_path/?/" {
+    print "
+?TABLE: path_tbl
+#-> get_ofolder: ??path??
+END_TABLE?
+";
+}
+if "path:/?orig_path/?/!/"{
+    print "
+?TABLE: path_tbl
+..
+#-> get_ofolder: ??path??
+END_TABLE?
+";
+}
+    print "
+?TABLE: file_tbl
+#-> get_ofiles: ??path??
+END_TABLE?
+";
+
+     boot_cgi "get_dir.cgi";
+END_CGI -->
+
+<!-- CGI: get_dir.cgi
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=4";
+
+//    print "</table><table><tr><td>Path: ??path??</td></tr>";
+    print "<table id=\"header\" align=\"center\"><tr><td><b>Services :: Samba (Folders)</b></td></tr></table>
+<br>
+<table><tr>
+<td align=\"center\">
+<br><a href=\"main.cgi\">Back</a></td></tr>
+</table>
+<table><tr><td colspan=\"4\">Path: ??path??</td></tr>
+<tr><td>";
+	    set_tbl "path_tbl != 0"{
+		print "<a href=\"ch_dir_lists.cgi?dir=back\">back</a>";
+	    }
+print "</td><td></td><td id=\"varbox-list-val\"></td><td>";
+	    if "_**$path_tbl+20:" {
+		print "<a href=\"ch_dir_lists.cgi?dir=next\">next</a>";
+	    }
+print "</td></tr><tr><td colspan=\"4\">
+<table border=\"0\" width=\"100%\" height=\"40\" align=\"center\">";
+
+set_tbl "path_tbl == 0"{
+if "path:/?orig_path/?/" {
+    print "<tr><td></td><td><a href=\"list.cgi\">list</a>&nbsp;</td><td><a href=\"chom.cgi\">chown/chmod</a>&nbsp;</td><td>..</td></tr>";
+}
+}
+//print "?table?:path_tbl:path_tbl::<tr><td><a href=\"get_dir.cgi?path_tbl_0=?#+\">?@@cd ??path?? 2>/dev/null; [ $? -eq 0 ] && ls -l \"?$\" @@?</a></td></tr>\n
+print "?table?:20:path_tbl:path_tbl:path_tbl::<tr><td>?@@[ \"?$\" != \"..\" ] && echo -n \"<a href=\\\"del_qfold.cgi?path_tbl_0=?#\\\">del</a>&nbsp;\" @@?</td><td><a href=\"list.cgi?path_tbl_0=?#\">list</a>&nbsp;</td><td><a href=\"chom.cgi?path_tbl_0=?#\">chown/chmod</a>&nbsp;</td><td><a href=\"get_dir_main.cgi?path_tbl_0=?#+\">?$</a></td></tr>\n
+</table>
+</td></tr>
+<tr><td>";
+	    set_tbl "path_tbl != 0"{
+		print "<a href=\"ch_dir_lists.cgi?dir=back\">back</a>";
+	    }
+print "</td><td></td><td id=\"varbox-list-val\"></td><td>";
+	    if "_**$path_tbl+20:" {
+		print "<a href=\"ch_dir_lists.cgi?dir=next\">next</a>";
+	    }
+print "
+</td></tr></table>
+<hr><table>
+<tr><td>";
+	    set_tbl "file_tbl != 0"{
+		print "<a href=\"ch_dir_lists.cgi?dir=fback\">back</a>";
+	    }
+print "</td><td></td><td id=\"varbox-list-val\"></td><td>";
+	    if "_**$file_tbl+20:" {
+		print "<a href=\"ch_dir_lists.cgi?dir=fnext\">next</a>";
+	    }
+print "
+</td></tr>
+<tr><td>Files:</td></tr><tr><td colspan=\"4\">
+<table border=\"0\" width=\"100%\" height=\"40\" align=\"center\">";
+print "?table?:20:file_tbl::<tr><td><a href=\"del_qfile.cgi?file_tbl_0=?#\">del</a>&nbsp;</td><td><pre>?@@cd ??path?? 2>/dev/null; [ $? -eq 0 ] && echo -n \"$(ls -l \"?$\")\" 2>/dev/null @@?</pre></td></tr>\n";
+
+print "</table>
+</td></tr>
+<tr><td>";
+	    set_tbl "file_tbl != 0"{
+		print "<a href=\"ch_dir_lists.cgi?dir=fback\">back</a>";
+	    }
+print "</td><td></td><td id=\"varbox-list-val\"></td><td>";
+	    if "_**$file_tbl+20:" {
+		print "<a href=\"ch_dir_lists.cgi?dir=fnext\">next</a>";
+	    }
+print "
+</td></tr>
+</table><hr>
+<table><tr>
+<td align=\"center\"><a href=\"main.cgi\">Back</a></td></tr>
+</table></td></tr></table></td></tr></table></body></html>";
+END_CGI -->
+
+<!-- CGI: ch_dir_lists.cgi
+	if "_#dir:back/" {
+	    set_tbl "path_tbl != 0"{
+		set_tbl "path_tbl -= 20";
+	    }
+	}
+
+	if "_#dir:next/" {
+	    if "_**$path_tbl+20:" {
+		set_tbl "path_tbl += 20";
+	    }
+	}
+
+	if "_#dir:fback/" {
+	    set_tbl "file_tbl != 0"{
+		set_tbl "file_tbl -= 20";
+	    }
+	}
+
+	if "_#dir:fnext/" {
+	    if "_**$file_tbl+20:" {
+		set_tbl "file_tbl += 20";
+	    }
+	}
+
+	boot_cgi "get_dir.cgi";
+END_CGI -->
+
+
+
+<!-- CGI: list.cgi
+	get_file "./JavaReturn_.inc?name=Home%20Page&i=4";
+	not "path:/?orig_path/?/"{
+	nnot "_@path_tbl:"{
+	    print "<pre>False folder ID: ??_#path_tbl_0??</pre></td></tr></table><a href=\"get_dir.cgi\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+	}
+	print "<table id=\"header\" align=\"center\"><tr><td><b>Services :: Samba (Folders)</b></td></tr></table>
+<br>
+<table><tr>
+<td align=\"center\">
+<br><a href=\"get_dir.cgi\">Back</a></td></tr>
+</table>
+<table border=\"0\" width=\"70%\" height=\"50\" align=\"center\">
+<tr><td></td><td id=\"varbox-list-name\"><b><font size=\"3\">&nbsp;Folder:</font></b></td><td></td><td></td></tr>
+<tr><td></td><td></td>
+<td id=\"varbox-list-val\">
+</td><td></td></tr>
+</table>
+
+<table border=\"0\">
+<tr><td>";
+	if "path:/!///"{
+	print "??path??";
+	}
+	print "/??_@path_tbl??";
+	print "</td></tr><tr><td colspan=\"4\"><pre>";
+	nnot "_@path_tbl:"{
+	if "path:/?orig_path/?/"{
+	my_shell "cd ??path?? 2>/dev/null; [ $? -eq 0 ] && echo -n \"$(ls -l)\" 2>/dev/null";
+	}
+	}
+	not "_@path_tbl:../"{
+	my_shell "cd ??path??/??_@path_tbl?? 2>/dev/null; [ $? -eq 0 ] && echo -n \"$(ls -l)\" 2>/dev/null";
+	}
+	if "_@path_tbl:../"{
+	my_shell "cd ??path?? 2>/dev/null; [ $? -eq 0 ] && echo -n \"$(ls -l)\" 2>/dev/null";
+	}
+	print "</pre>
+</td></tr>
+</table>
+
+<br>
+<table><tr>
+<td align=\"center\"><br><a href=\"get_dir.cgi\">Back</a></td></tr>
+</table>
+</td></tr></table></body></html>";
+END_CGI -->
+
+<!-- CGI: chom.cgi
+	get_file "./JavaReturn_.inc?name=Home%20Page&i=4";
+	not "path:/?orig_path/?/"{
+	nnot "_@path_tbl:"{
+	    print "<pre>False folder ID: ??_#path_tbl_0??</pre></td></tr></table><a href=\"get_dir.cgi\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+	}
+	print "<table id=\"maintab\" height=290 align=\"center\"><tr>
+<td align=\"center\" valign=\"top\"><br>
+<table id=\"header\" align=\"center\"><tr><td><b>Services :: chown / chmod of directory</b></td></tr></table>
+<br>
+<table align=\"center\"><tr><td><pre>";
+
+	not "_@path_tbl:/"{
+	print "Path: ??path??\n";
+	my_shell "cd ??path?? 2>/dev/null; [ $? -eq 0 ] && echo -n \"$(ls -ld \"??_@path_tbl??\")\" 2>/dev/null";
+	}
+	nnot "_@path_tbl:"{
+	my_shell "echo -n \"$(ls -ld ??path??)\" 2>/dev/null";
+	}
+	print "</pre></td></tr></table>
+<br>
+?TABLE:owner
+#-> parse_file: /etc/passwd
+while:/[/*/]\n
+if:/[/*/]:/*:/*:/*:/*:/*:
+END_TABLE?
+?TABLE:group
+#-> parse_file: /etc/group
+while:/[/*/]\n
+if:/[/*/]:/*:/*:
+END_TABLE?
+
+<table border=\"0\" width=\"70%\" height=\"50\" align=\"center\">
+<tr><td></td><td id=\"varbox-list-name\"><b><font size=\"3\">&nbsp;Change owner and group:</font></b></td><td></td><td></td></tr>
+<tr><td colspan=\"2\"><form method=\"GET\" name=\"chown\" action=\"chown.cgi\">
+<table>
+<tr><td>Owner</td><td>?@-owner@?</td></tr><tr><td>Group</td><td>?@-group@?</td></tr>
+<tr><td>Recursive</td><td><input type=\"checkbox\" name=\"recurs\" value=\"1\"></td></tr>
+</table>
+<input type=\"hidden\" name=\"path_tbl_0\" value=\"??_#path_tbl_0??\">
+</td><td></td><td></td></tr>
+<tr><td></td><td></td>
+<td id=\"varbox-list-val\">
+<input type=\"submit\" name=\"save\" value=\"Apply\">
+</form></td><td></td></tr>
+
+<tr><td></td><td id=\"varbox-list-name\"><b><font size=\"3\">&nbsp;Change mode bits:</font></b></td><td></td><td></td></tr>
+<tr><td></td><td><form method=\"GET\" name=\"chmod\" action=\"chmod.cgi\">
+<table>
+<tr><td>Mode</td><td><input type=\"text\" name=\"mode\" maxlength=\"5\" size=\"5\" value=\"\"></td></tr>
+<tr><td>Recursive</td><td><input type=\"checkbox\" name=\"recurs\" value=\"1\"></td></tr>
+</table>
+<input type=\"hidden\" name=\"path_tbl_0\" value=\"??_#path_tbl_0??\">
+</td><td></td><td></td></tr>
+<tr><td></td><td></td>
+<td id=\"varbox-list-val\">
+<input type=\"submit\" name=\"save\" value=\"Apply\">
+</form></td><td></td></tr>
+</table>
+
+<br>
+<table><tr>
+<td align=\"center\"><br><a href=\"get_dir.cgi\">Back</a></td></tr>
+</table>
+</td></tr></table></td></tr></table></td></tr></table></body></html>";
+END_CGI -->
+
+<!-- CGI: chown.cgi
+	not "path:/?orig_path/?/"{
+	nnot "_@path_tbl:"{
+	    get_file "./JavaReturn_.inc?name=Home%20Page&i=4";
+	    print "<pre>False folder ID: ??_#path_tbl_0??</pre></td></tr></table><a href=\"get_dir.cgi\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+	}
+	nnot "_@owner:"{
+	    get_file "./JavaReturn_.inc?name=Home%20Page&i=4";
+	    print "<pre>False owner ID: ??_#owner_0??</pre></td></tr></table><a href=\"chom.cgi?path_tbl_0=??_#path_tbl_0??\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+	nnot "_@group:"{
+	    get_file "./JavaReturn_.inc?name=Home%20Page&i=4";
+	    print "<pre>False group ID: ??_#group_0??</pre></td></tr></table><a href=\"chom.cgi?path_tbl_0=??_#path_tbl_0??\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+
+	nnot "_#recurs:1/"{
+	nnot "_@path_tbl:"{
+	if "path:/?orig_path/?/"{
+	shell "chown ??_@owner??:??_@group?? ??path??";
+	}
+	}
+	not "_@path_tbl:../"{
+	shell "chown ??_@owner??:??_@group?? ??path??/??_@path_tbl??";
+	}
+	}
+
+	if "_#recurs:1/"{
+	nnot "_@path_tbl:"{
+	if "path:/?orig_path/?/"{
+	shell "chown -R ??_@owner??:??_@group?? ??path??";
+	}
+	}
+	not "_@path_tbl:../"{
+	shell "chown -R ??_@owner??:??_@group?? ??path??/??_@path_tbl??";
+	}
+	}
+
+	if "_@path_tbl:../"{
+	shell "chown ??_@owner??:??_@group?? ??path??/..";
+	}
+
+	boot_page "chom.cgi?path_tbl_0=??_#path_tbl_0??";
+//	boot_cgi "chom.cgi";
+END_CGI -->
+
+<!-- CGI: chmod.cgi
+	not "path:/?orig_path/?/"{
+	nnot "_@path_tbl:"{
+	    get_file "./JavaReturn_.inc?name=Home%20Page&i=4";
+	    print "<pre>False folder ID: ??_#path_tbl_0??</pre></td></tr></table><a href=\"get_dir.cgi\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+	}
+	nnot "_#mode:/<101234567/>/<101234567/>/<101234567/>/"{
+	    get_file "./JavaReturn_.inc?name=Home%20Page&i=4";
+	    print "<pre>Mode is wrong written!</pre></td></tr></table><a href=\"chom.cgi?path_tbl_0=??_#path_tbl_0??\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+
+
+	nnot "_#recurs:1/"{
+	nnot "_@path_tbl:"{
+	if "path:/?orig_path/?/"{
+	shell "chmod ??_#mode?? ??path??";
+	}
+	}
+	not "_@path_tbl:../"{
+	shell "chmod ??_#mode?? ??path??/??_@path_tbl??";
+	}
+	}
+
+	if "_#recurs:1/"{
+	nnot "_@path_tbl:"{
+	if "path:/?orig_path/?/"{
+	shell "chmod -R ??_#mode?? ??path??";
+	}
+	}
+	not "_@path_tbl:../"{
+	shell "chmod -R ??_#mode?? ??path??/??_@path_tbl??";
+	}
+	}
+
+	if "_@path_tbl:../"{
+	shell "chmod ??_#mode?? ??path??/..";
+	}
+
+	boot_page "chom.cgi?path_tbl_0=??_#path_tbl_0??";
+//	boot_cgi "chom.cgi";
+END_CGI -->
+
+
+
+<!-- CGI: del_qfile.cgi
+	get_file "./JavaReturn_.inc?name=Home%20Page&i=4";
+	nnot "_@file_tbl:/\ "{
+	    print "<pre>False file ID: ??_#file_tbl_0??</pre></td></tr></table><a href=\"get_dir.cgi\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+	print "Do You really want to delete file: ??path??/??_@file_tbl??</td></tr></table><a href=\"del_file.cgi?file_tbl_0=??_#file_tbl_0??\">Yes</a>&nbsp;&nbsp;<a href=\"get_dir.cgi\">No</a></table></body></html>";
+END_CGI -->
+
+<!-- CGI: del_file.cgi
+	nnot "_@file_tbl:/\ "{
+	get_file "./JavaReturn_.inc?name=Home%20Page&i=4";
+	    print "<pre>False file ID: ??_#file_tbl_0??</pre></td></tr></table><a href=\"get_dir.cgi\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+	shell "rm -r \"??path??/??_@file_tbl??\" > /dev/null";
+	boot_page "get_dir_main.cgi";
+END_CGI -->
+
+<!-- CGI: del_qfold.cgi
+	get_file "./JavaReturn_.inc?name=Home%20Page&i=4";
+	nnot "_@path_tbl:/\ "{
+	    print "<pre>False folder ID: ??_#path_tbl_0??</pre></td></tr></table><a href=\"get_dir.cgi\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+	print "Do You really want to delete folder: ??path??/??_@path_tbl??</td></tr></table><a href=\"del_fold.cgi?path_tbl_0=??_#path_tbl_0??\">Yes</a>&nbsp;&nbsp;<a href=\"get_dir.cgi\">No</a></table></body></html>";
+END_CGI -->
+
+<!-- CGI: del_fold.cgi
+	nnot "_@path_tbl:/\ "{
+	get_file "./JavaReturn_.inc?name=Home%20Page&i=4";
+	    print "<pre>False folder ID: ??_#path_tbl_0??</pre></td></tr></table><a href=\"get_dir.cgi\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+	shell "rm -r \"??path??/??_@path_tbl??\" > /dev/null";
+	boot_page "get_dir_main.cgi";
+END_CGI -->
+

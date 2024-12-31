@@ -1,0 +1,82 @@
+<html><head><title>Gigabit SOHO NAS</title>
+
+<style type="text/css">
+body {font-family: ArIal, Helvetica, sans-serif}
+p {font-family: Arial, Helvetica, sans-serif}
+td {font-family: Arial, Helvetica, sans-serif}
+</style>
+<script language="JavaScript">
+function Fcheck() {
+	return confirm("Are you sure you want to clear the print queue?");
+}
+</script></head><body>
+<table border="0" width="100%">
+<tbody><tr><td width="80%"><div align="right"><b></b></div></td>
+  <td width="13%"><div align="right"><b></b></div></td>
+  <td width="10%"><div align="right"><b></b></div></td></tr></tbody></table>
+<table align="center" border="0" height="290" width="100%"><tbody><tr>
+<td align="center" bgcolor="#ffffff" valign="top"><br>
+<table align="center" border="0" width="85%"><tbody><tr>
+<td bgcolor="#0050a0" width="602"><b><font color="#ffffff" face="Arial, Helvetica, sans-serif" size="3">Clean Printer Job Queue</font></b><br></td></tr></tbody></table>
+<br>
+<form name="host" method="get" action="Set_usbque.cgi" onsubmit="return Fcheck()">
+<table align="center" border="0" height="40" width="70%">
+<tbody><tr><td bgcolor="#bdbebd"><font color="#000000" size="3"><b>&nbsp;&nbsp;Do you want to delete the queue job of printer?&nbsp;&nbsp;<input name="reset" value="Yes" type="submit">&nbsp;&nbsp;<input name="reset" value="No" onclick="history.back();" type="button"></b></font></td></tr></tbody></table></form>
+
+<table border="0" width="70%">
+<tbody><tr><td align="left"><font size="2"><b>Note: by clearing the
+print queue of the devices, all current and pending print jobs will be
+deleted and need to be resent to the printer to proceed. The
+process cannot be stopped once it has begun.</b></font></td>
+</tr></tbody></table>
+
+<!--
+<HTML><HEAD>
+<TITLE>Gigabit SOHO NAS</TITLE>
+<link rel="stylesheet" type="text/css" href="styles/default.css">
+<script language="JavaScript">
+function Fcheck() {
+	return confirm("Are you sure you want to clear the print queue?");
+}
+</script>
+</HEAD>
+<BODY text=#000000 bgColor=#ffffff>
+<P><FONT class=style9>&nbsp;&nbsp;USB Setup</FONT></P>
+<table width="550" border="0" cellpadding="0" cellspacing="0">
+<tr> 
+	<td width="100%" bgcolor="#FFFFFF" height="31"> 
+		<div align="left">&nbsp;&nbsp;<img src="images/usb_que.gif" usemap="#Map" border="0"></div>
+	</td>
+</tr>
+<tr height="005"><td></td></tr>
+</table>
+<TABLE borderColor=#ccccdd cellSpacing=0 cellPadding=0 width=550 border=1>
+<TBODY>
+  
+	<form name=host method="Get" action="Set_usbque.cgi" onSubmit="return Fcheck()">
+  <tr bgcolor=#333399> 
+	<td width="140" height="30" class="style2">&nbsp;&nbsp;Delete Print &nbsp;&nbsp;Queue</td>
+	<td width="410" height="30">&nbsp;&nbsp;
+    <input type="submit" value="Execute">&nbsp;&nbsp;
+    <INPUT type="button" value="Cancel" onclick="history.back()">
+	¤W¤È 11:34 2005/8/4</td>
+</tr>
+  <tr class="style4">
+        <th bgcolor="#FFFFFF" align=center>&nbsp;&nbsp;Note</th>
+        <td bgcolor="#FFFFFF">
+		&nbsp;&nbsp;By clearing the print queue of the devices, all current and pending print<br>
+		&nbsp;&nbsp;jobs will be deleted and need to be resent to the printer to complete. The<br>
+		&nbsp;&nbsp;process cannot be stopped once it has begun.
+	</td>
+  </tr>
+</TBODY>
+</TABLE>
+
+<MAP name=Map><AREA shape=RECT coords=10,1,109,23 href="Show_USB_Detail.cgi">
+<AREA shape=RECT coords=110,1,209,23 href="Show_USB_Disk.cgi">
+<AREA shape=RECT coords=210,1,318,23 href="Show_USB_Printer.cgi">
+<AREA shape=RECT coords=321,1,512,23 href="usbque.htm"></MAP>
+</form>
+</BODY>
+</HTML>
+--></td></tr></tbody></table></body></html>

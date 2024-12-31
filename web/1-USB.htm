@@ -1,4 +1,4 @@
-<!--#include area="90345:AREA-1" -->
+<!--#include area="25345:AREA-1" -->
 <!--#include file="head.inc?name=USB" 
 file="side.inc?i=7" -->
 
@@ -8,6 +8,23 @@ file="side.inc?i=7" -->
 <td align="center" valign="top"><br>
 <table id="header" align="center"><tr><td width="602">USB devices<br></td></tr></table>
 <br>
+<!--#incl ude cgi="_lsusb_table" -->
+<!-- CGI: _test.cgi
+    write_file "AREA-1:/proc/bus/usb/devices";
+    bind_par "AREA-1";
+    print "<table><tr bgcolor=\"#ff0000\"><td width=140 align=center class=style2>USB 2.0/1.1</td><td width=135 align=center class=style2>Vendor:ProdID</td><td width=135 align=center class=style2>Manufacturer</td><td width=140 align=center class=style2>Device Name</td><td width=140 align=center class=style2>Serial number</td></tr>\n" ;
+    do {
+	set "a = 0";
+	buf_parse_area "/[/*/]\nT:  " {
+	    set "a = 1";
+	}
+	    print "[?/!/*Cls=09(hub  )?]<tr><td>USB {?/*D:  Ver= /[/*/] ?}</td><td>{?/*P:  Vendor=/[/*/] ?}:{?ProdID=/[/*/] ?}</td><td>{?/*S:  Manufacturer=/[/*/]\n?}</td><td>{?/*S:  Product=/[/*/]\n?}</td><td>{?/*S:  SerialNumber=/[/*/]\n?}</td></tr>\n";
+
+    }	if_set "a == 0";	//stop if set!!!
+    print "</table>";
+END_CGI -->
+<!--#include cgi="_test.cgi" -->
+
 <!--#include wr_shell=":AREA-1:cat /proc/bus/usb/devices" -->
 <!-- TABLE:usb_info
 #-> parse_area: AREA-1
@@ -20,6 +37,7 @@ if:/*S:  Manufacturer=/[/*/]\n
 if:/*S:  Product=/[/*/]\n
 if:/*S:  SerialNumber=/[/*/]\n
 END_TABLE -->
+<br>
 <table><tr bgcolor="#ff0000"><td width=140 align=center class=style2>USB 2.0/1.1</td><td width=135 align=center class=style2>Vendor:ProdID</td><td width=135 align=center class=style2>Manufacturer</td><td width=140 align=center class=style2>Device Name</td><td width=140 align=center class=style2>Serial number</td></tr>
 <!--#include table="usb_info_0:usb_info_1:usb_info_2:usb_info_3:usb_info_4:usb_info_5::<tr><td>USB ?$</td><td>?$:?$</td><td>?$</td><td>?$</td><td>?$</td></tr>\n" -->
 </table>
@@ -28,7 +46,7 @@ END_TABLE -->
 
 <tbody>
 <tr>
-	<td id="td_link"><a href="usb-storage.htm">USB Storage managment</a></td>
+	<td id="td_link"><a href="usb-storage.htm">USB Storage managment</a>&nbsp;&nbsp;<a href="usb-storage_folder.htm">USB Storage folders</a>&nbsp;&nbsp;<a href="usb-backup.htm">BackUp</a></td>
 </tr>
 <tr>
 	<td id="td_help">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Managment of USB Disks</td>

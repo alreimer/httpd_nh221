@@ -1,5 +1,6 @@
 <!--#include file="head.inc?name=Home%20Page&body=onload%3D\"check_smb()\"" 
 file="side.inc?i=4" -->
+
 <script src="/js/tools.js"></script>
 
 <table id="maintab" height=290 align="center"><tr>
@@ -11,14 +12,13 @@ file="side.inc?i=4" -->
 <tr><td width=2% valign=top></td>
 <td width=80% align=left><font color="#FFFFFF" size=2 face="Arial, Helvetica, sans-serif"><b>Please provide .</b></font></td></tr></table>-->
 <br>
-<a href="inetd_reload.cgi">reload inetd</a>
 
 <form method="post" name="host_" action="serv_inetdconf.cgi">
 <table border="0" width="70%" height="50" align="center">
 <tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;Inetd.conf File:</font></b></td><td></td><td></td></tr>
 <tr><td colspan="4">
 <textarea name="inetdconf" cols="80" rows="20" onkeydown="insertTab(this, event);">
-<!-- #include file="/etc/inetd.conf" -->
+<!-- #include file="etc/inetd.conf" -->
 </textarea></td></tr>
 <tr><td></td><td>Note: will made automaticly</td>
 <td id="varbox-list-val"><input type="submit" name="save_inetd" value="Apply">&nbsp;<input type="reset" value="Cancel"></td><td></td></tr>
@@ -29,7 +29,7 @@ file="side.inc?i=4" -->
 <tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;Hosts allow File:</font></b></td><td></td><td></td></tr>
 <tr><td colspan="4">
 <textarea name="hostsallow" cols="80" rows="20" onkeydown="insertTab(this, event);">
-<!-- #include file="/etc/hosts.allow" -->
+<!-- #include file="etc/hosts.allow" -->
 </textarea></td></tr>
 <tr><td></td><td></td>
 <td id="varbox-list-val"><input type="submit" name="save_hosts" value="Apply">&nbsp;<input type="reset" value="Cancel"></td><td></td></tr>
@@ -40,7 +40,7 @@ file="side.inc?i=4" -->
 <tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;Hosts deny File:</font></b></td><td></td><td></td></tr>
 <tr><td colspan="4">
 <textarea name="hostsdeny" cols="80" rows="20" onkeydown="insertTab(this, event);">
-<!-- #include file="/etc/hosts.deny" -->
+<!-- #include file="etc/hosts.deny" -->
 </textarea></td></tr>
 <tr><td></td><td></td>
 <td id="varbox-list-val"><input type="submit" name="save_hosts" value="Apply">&nbsp;<input type="reset" value="Cancel"></td><td></td></tr>
@@ -54,30 +54,19 @@ file="side.inc?i=4" -->
 </body></html>
 <!-- CGI: serv_inetdconf.cgi
     remove_chars "\r::_#inetdconf";
-    save_file "_#inetdconf:/etc/inetd.conf";
-//    system "/etc/init.d/S30inetd reload";
+    save_file "_#inetdconf:etc/inetd.conf";
     write_par "_etc_save:1";
     boot_page "serv-inetd.htm";
 END_CGI -->
 <!-- CGI: hostsallow.cgi
     remove_chars "\r::_#hostsallow";
-    save_file "_#hostsallow:/etc/hosts.allow";
-//    system "/etc/init.d/S30inetd reload";
+    save_file "_#hostsallow:etc/hosts.allow";
     write_par "_etc_save:1";
     boot_page "serv-inetd.htm";
 END_CGI -->
 <!-- CGI: hostsdeny.cgi
     remove_chars "\r::_#hostsdeny";
-    save_file "_#hostsdeny:/etc/hosts.deny";
-//    system "/etc/init.d/S30inetd reload";
+    save_file "_#hostsdeny:etc/hosts.deny";
     write_par "_etc_save:1";
     boot_page "serv-inetd.htm";
-END_CGI -->
-<!-- CGI: inetd_reload.cgi
-    get_file "./JavaReturn_.inc?name=Home%20Page&i=4";
-
-    print "<pre>";
-    my_system "/etc/init.d/S30inetd reload";
-    print "</pre></table><a href=\"serv-inetd.htm\">Back</a>&nbsp;&nbsp;</table></body></html>";
-
 END_CGI -->

@@ -1,4 +1,5 @@
-<!-- "path" is exist "path1", "path_org", "i", "file" are in use.  if "file" exist - runs _get_file.cgi -->
+<!-- "path" is exist, "i", "file" are in use.  if "file" exist - runs _get_file.cgi -->
+<!--#include area="5000:path_origin" -->
 
 <!-- if="path:" -->
 <!--#include write_par="path_origin:??path??" exchange="get_dir.cgi" exchange="_get_file.cgi" -->
@@ -6,8 +7,7 @@
     get_file "./JavaReturn_.inc?name=Home%20Page&i=??i??";
     if "_#path_tbl_0:"{
 	not "_@path_tbl:.." {
-	write_par "path1:??path??";
-	write_par "path:??path1??/??_@path_tbl??";
+	cat_par "path:/??_@path_tbl??";
 	}
 	if "_@path_tbl:.." {
 	write_ppar "path:path:/[/l/l/--/]";

@@ -1,0 +1,391 @@
+<!-- added by RAW -->
+<!--#include area="1025:AREApw" exchange="get_users.cgi" exchange="ch_group.cgi" exchange="ch_usrgroup.cgi"
+exchange="ch_groups_lists.cgi" exchange="ch_ugroup.cgi" exchange="ch_user.cgi" exchange="set_user.cgi" exchange="del_quser.cgi"
+exchange="del_user.cgi" exchange="new_user.cgi" exchange="create_user.cgi" exchange="ch_users_lists.cgi" -->
+
+<!-- CGI: get_users.cgi
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=5";
+    print "
+<table id=\"maintab\" height=290 align=\"center\"><tr>
+<td align=\"center\" valign=\"top\"><br>
+<table id=\"header\" align=\"center\"><tr><td><b>Access :: Users list</b></td></tr></table>
+<br>
+<a href=\"new_user.cgi\">Create new user</a>
+<br>
+<table><tr>
+<td align=\"center\"><br><a href=\"1-access.htm\">Back</a></td></tr>
+</table>
+?TABLE:user
+#-> parse_file: /etc/passwd
+while:/[/*/]\n
+if:/[/*/]:
+if:/[/*/]:
+if:/[/*/]:
+if:/[/*/]:
+if:/[/*/]:
+if:/[/*/]:
+if:
+END_TABLE?
+<table border=\"0\" width=\"70%\" height=\"50\" align=\"center\">
+<tr><td></td><td id=\"varbox-list-name\"><b><font size=\"3\">&nbsp;/etc/passwd:</font></b></td><td></td><td></td></tr>
+<tr><td>";
+	    set_tbl "user != 0"{
+		print "<a href=\"ch_users_lists.cgi?dir=back\">back</a>";
+	    }
+print "</td><td></td><td id=\"varbox-list-val\"></td><td>";
+	    if "_**$user+20:" {
+		print "<a href=\"ch_users_lists.cgi?dir=next\">next</a>";
+	    }
+print "
+</td></tr>
+<tr><td colspan=\"4\">
+<table border=\"0\" width=\"100%\" height=\"40\" align=\"center\">
+<tr bgcolor=\"#d6efff\" ><td>delete user</td><td>user</td><td>password</td><td>user ID</td><td>group ID</td><td>comment field</td><td>home dir.</td><td>cmd interpreter</td></tr>
+?table?:20:user_0:user_1:user_2:user_3:user_4:user_5:user_6::<tr><td><a href=\"del_quser.cgi?user_0=?#\">delete</a></td><td><a href=\"ch_user.cgi?user_0=?#\">?$</a></td><td>?$</td><td>?$</td><td><a href=\"ch_group.cgi?user_3=?#\">?$</a></td><td>?$</td><td>?$</td><td>?$</td></tr>\n
+</table>
+</td></tr>
+<tr><td>";
+	    set_tbl "user != 0"{
+		print "<a href=\"ch_users_lists.cgi?dir=back\">back</a>";
+	    }
+print "</td><td></td><td id=\"varbox-list-val\"></td><td>";
+	    if "_**$user+20:" {
+		print "<a href=\"ch_users_lists.cgi?dir=next\">next</a>";
+	    }
+print "
+</td></tr>
+</table>
+<table><tr>
+<td align=\"center\"><br><a href=\"1-access.htm\">Back</a></td></tr>
+</table>
+</td></tr></table></body></html>";
+    free_tbl "group";
+END_CGI -->
+<!--#include cgi="get_users.cgi" -->
+
+<!-- CGI: ch_group.cgi
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=5";
+	nnot "_@user+3:/\ "{
+	    print "<pre>False user table ID: ??_#user_3??</pre></td></tr></table><a href=\"get_users.cgi\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+    print "
+<table id=\"maintab\" height=290 align=\"center\"><tr>
+<td align=\"center\" valign=\"top\"><br>
+<table id=\"header\" align=\"center\"><tr><td><b>Access :: Change group</b></td></tr></table>
+<table><tr>
+<td align=\"center\"><br><a href=\"get_users.cgi\">Back</a></td></tr>
+</table>
+?TABLE:group
+#-> parse_file: /etc/group
+while:/[/*/]\n
+if:/[/*/]:
+if:/[/*/]:
+if:/[/*/]:
+if:
+END_TABLE?
+<table border=\"0\" width=\"70%\" height=\"50\" align=\"center\">
+<tr><td></td><td id=\"varbox-list-name\"><b><font size=\"3\">&nbsp;Change for user: '??_@user+3#0??'</font></b></td><td></td><td></td></tr>
+<tr><td>";
+	    set_tbl "group != 0"{
+		print "<a href=\"ch_groups_lists.cgi?user_3=??_#user_3??&dir=back\">back</a>";
+	    }
+print "</td><td></td><td id=\"varbox-list-val\"></td><td>";
+	    if "_**$group+20:" {
+		print "<a href=\"ch_groups_lists.cgi?user_3=??_#user_3??&dir=next\">next</a>";
+	    }
+print "
+</td></tr>
+<tr><td colspan=\"4\">
+<table border=\"0\" width=\"100%\" height=\"40\" align=\"center\">
+<tr bgcolor=\"#d6efff\"><td>group name</td><td>password</td><td>group ID</td><td>switch user</td><td></td><td>user list</td></tr>
+?table?:20:group_2:!group_0:group_1:group_2:group_3:group_3:group_3:group_3::<tr ?if?:/?_@user+3/?\0:bgcolor=\"#9f0000\" ?fi?><td><a href=\"ch_usrgroup.cgi?user_3=??_#user_3??&group_2=?#\">?$</a></td><td>?$</td><td>?$</td><td><a href=\"ch_ugroup.cgi?user_3=??_#user_3??&group_3=?#\">?if?:/B/?_@user+3#0/?/<1,\0/>/\/*,/?_@user+3#0/?,/\/*,/?_@user+3#0/?\0/E:remove?fi??if?:/!/B/?_@user+3#0/?/<1,\0/>/\/*,/?_@user+3#0/?,/\/*,/?_@user+3#0/?\0/E:add?fi?</a></td><td><input type=\"checkbox\" name=\"group_3\" value=\"?#\" ?if?:/B/?_@user+3#0/?/<1,\0/>/\/*,/?_@user+3#0/?,/\/*,/?_@user+3#0/?\0/E:checked ?fi?></td><td>?$</td></tr>\n
+</table>
+</td></tr>
+<tr><td>";
+	    set_tbl "group != 0"{
+		print "<a href=\"ch_groups_lists.cgi?user_3=??_#user_3??&dir=back\">back</a>";
+	    }
+print "</td><td></td><td id=\"varbox-list-val\"></td><td>";
+	    if "_**$group+20:" {
+		print "<a href=\"ch_groups_lists.cgi?user_3=??_#user_3??&dir=next\">next</a>";
+	    }
+print "
+</td></tr>
+</table>
+<table><tr>
+<td align=\"center\"><br><a href=\"get_users.cgi\">Back</a></td></tr>
+</table>
+</td></tr></table></body></html>";
+END_CGI -->
+
+<!-- CGI: ch_users_lists.cgi
+	if "_#dir:back/" {
+	    set_tbl "user != 0"{
+		set_tbl "user -= 20";
+	    }
+	}
+
+	if "_#dir:next/" {
+	    if "_**$user+20:" {
+		set_tbl "user += 20";
+	    }
+	}
+
+	boot_cgi "get_users.cgi";
+END_CGI -->
+<!-- CGI: ch_groups_lists.cgi
+	nnot "_@user+3:/\ "{
+	    get_file "./JavaReturn_.inc?name=Home%20Page&i=5";
+	    print "<pre>False user table ID: ??_#user_3??</pre></td></tr></table><a href=\"get_users.cgi\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+
+	if "_#dir:back/" {
+	    set_tbl "group != 0"{
+		set_tbl "group -= 20";
+	    }
+	}
+
+	if "_#dir:next/" {
+	    if "_**$group+20:" {
+		set_tbl "group += 20";
+	    }
+	}
+
+//	boot_page "ch_group.cgi?user_3=??_#user_3??";
+	boot_cgi "ch_group.cgi";
+END_CGI -->
+
+
+<!-- CGI: ch_usrgroup.cgi
+	nnot "_@user+3:/\ "{
+	    get_file "./JavaReturn_.inc?name=Home%20Page&i=5";
+	    print "<pre>False user table ID: ??_#user_3??</pre></td></tr></table><a href=\"get_users.cgi\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+	nnot "_@group+2:/\ "{
+	    get_file "./JavaReturn_.inc?name=Home%20Page&i=5";
+	    print "<pre>False group table ID: ??_#group_2??</pre></td></tr></table><a href=\"get_users.cgi\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+
+	change_line "/etc/passwd:/?_@user+3#0/?\:/?_@user+3#1/?\:/?_@user+3#2/?\:/?_@user+3/?\:/?_@user+3#4/?\:/?_@user+3#5/?\:/?_@user+3#6/?:??_@user+3#0??:??_@user+3#1??:??_@user+3#2??:??_@group+2??:??_@user+3#4??:??_@user+3#5??:??_@user+3#6??\n"{
+	    boot_page "get_users.cgi";//and exit
+//	    exit_cgi;
+	}
+
+	write_par "_etc_save:1";
+	boot_page "get_users.cgi";
+END_CGI -->
+
+<!-- CGI: ch_ugroup.cgi
+//switch between add and remove user from/to selected group
+	nnot "_@user+3:/\ "{
+	    get_file "./JavaReturn_.inc?name=Home%20Page&i=5";
+	    print "<pre>False user table ID: ??_#user_3??</pre></td></tr></table><a href=\"get_users.cgi\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+	nnot "_@group+3:/\ "{
+	    get_file "./JavaReturn_.inc?name=Home%20Page&i=5";
+	    print "<pre>False group table ID: ??_#group_3??</pre></td></tr></table><a href=\"get_users.cgi\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+
+    not "_@group+3:/B/?_@user+3#0/?/<1,\0/>/\/*,/?_@user+3#0/?,/\/*,/?_@user+3#0/?\0/E"{
+//not exist
+	change_line "/etc/group:/?_@group+3#0/?\:/?_@group+3#1/?\:/?_@group+3#2/?\:/ /<1\n\0/>:??_@group+3#0??:??_@group+3#1??:??_@group+3#2??:??_@user+3#0??\n" {
+	    change_line "/etc/group:/?_@group+3#0/?\:/?_@group+3#1/?\:/?_@group+3#2/?\::{?/[/*/]/<1\n\0/>?},??_@user+3#0??\n";
+	}
+	write_par "_etc_save:1";
+	boot_page "ch_group.cgi?user_3=??_#user_3??";
+	exit_cgi;
+    }
+
+    if "_@group+3:/B/?_@user+3#0/?/<1,\0/>/\/*,/?_@user+3#0/?,/\/*,/?_@user+3#0/?\0/E"{
+	change_line "/etc/group:/?_@group+3#0/?\:/?_@group+3#1/?\:/?_@group+3#2/?\:/?_@user+3#0/?/<1\n\0/>:{?/[/*:/*:/*:/]?}\n"{
+	    change_line "/etc/group:/?_@group+3#0/?\:/?_@group+3#1/?\:/?_@group+3#2/?\:/?_@user+3#0/?,:{?/[/*:/*:/*:/]/?_@user+3#0/?,?}{?/\?}"{
+		change_line "/etc/group:/?_@group+3#0/?\:/?_@group+3#1/?\:/?_@group+3#2/?\:/*,/?_@user+3#0/?,:{?/[/*:/*:/*:/*/],/?_@user+3#0/?,?},{?/\?}"{
+		    change_line "/etc/group:/?_@group+3#0/?\:/?_@group+3#1/?\:/?_@group+3#2/?\:/*,/?_@user+3#0/?/<1\n\0/>:{?/[/*:/*:/*:/*/],/?_@user+3#0/?/<1\n\0/>?}\n";
+		}
+	    }
+	}
+	write_par "_etc_save:1";
+    }
+	boot_page "ch_group.cgi?user_3=??_#user_3??";
+//	boot_cgi "ch_group.cgi";
+END_CGI -->
+
+
+
+<!-- CGI: ch_user.cgi
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=5";
+	nnot "_@user+0:/\ "{
+	    print "<pre>False user ID: ??_#user_0??</pre></td></tr></table><a href=\"get_users.cgi\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+    print "
+<table id=\"maintab\" height=290 align=\"center\"><tr>
+<td align=\"center\" valign=\"top\"><br>
+<table id=\"header\" align=\"center\"><tr><td><b>Access :: User: '??_@user+0??'</b></td></tr></table>
+<br>
+<table border=\"0\" width=\"70%\" height=\"50\" align=\"center\">
+<tr><td></td><td id=\"varbox-list-name\"><b><font size=\"3\">&nbsp;Change user name:</font></b></td><td></td><td></td></tr>
+<tr><td colspan=\"4\">
+<form method=\"GET\" name=\"main\" action=\"set_user.cgi\">
+<input type=\"hidden\" name=\"user_0\" value=\"??_#user_0??\">
+<input type=\"text\" name=\"usrname\" size=\"20\" value=\"??_@user+0??\">
+&nbsp;<input type=\"submit\" name=\"save\" value=\"Apply\">
+</td></tr>
+</form>
+<tr><td></td><td></td>
+<td id=\"varbox-list-val\">
+</td><td></td></tr>
+</table>
+<table><tr>
+<td align=\"center\"><br><a href=\"get_users.cgi\">Back</a></td></tr>
+</table>
+</td></tr></table></body></html>";
+END_CGI -->
+
+<!-- CGI: set_user.cgi
+	nnot "_@user+0:/\ "{
+	    get_file "./JavaReturn_.inc?name=Home%20Page&i=5";
+	    print "<pre>False user_ID: ??_#user_0??</pre></td></tr></table><a href=\"get_users.cgi\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+	nnot "_#usrname:/!/B/*/<1;,:\"<>`'$*?| />/\\0"{
+	    get_file "./JavaReturn_.inc?name=Home%20Page&i=5";
+	    print "<pre>Path not exists or has unsupported chars or is empty</pre></td></tr></table><a href=\"get_users.cgi\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+
+	change_line "/etc/passwd:/?_@user+0/?\:/?_@user+0#1/?\:/?_@user+0#2/?\:/?_@user+0#3/?\:/?_@user+0#4/?\:/?_@user+0#5/?\:/?_@user+0#6/?:??_#usrname??:??_@user+0#1??:??_@user+0#2??:??_@user+0#3??:??_@user+0#4??:??_@user+0#5??:??_@user+0#6??\n";
+
+	change_alines "/etc/group:/*\:/*\:/*\:/?_@user+0/?/<1\n\0/>:{?/[/*:/*:/*:/]?}??_#usrname??\n";
+	change_alines "/etc/group:/*\:/*\:/*\:/?_@user+0/?,:{?/[/*:/*:/*:/]/?_@user+0/?,?}??_#usrname??,{?/\?}";
+	change_alines "/etc/group:/*\:/*\:/*\:/*,/?_@user+0/?,:{?/[/*:/*:/*:/*/],/?_@user+0/?,?},??_#usrname??,{?/\?}";
+	change_alines "/etc/group:/*\:/*\:/*\:/*,/?_@user+0/?/<1\n\0/>:{?/[/*:/*:/*:/*/],/?_@user+0/?/<1\n\0/>?},??_#usrname??\n";
+
+	write_par "_etc_save:1";
+	boot_page "get_users.cgi";
+END_CGI -->
+
+
+
+<!-- CGI: del_quser.cgi
+	get_file "./JavaReturn_.inc?name=Home%20Page&i=5";
+	nnot "_@user+0:/\ "{
+	    print "<pre>False user_ID: ??_#user_0??</pre></td></tr></table><a href=\"get_users.cgi\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+	print "Do You really want to delete user: ??_@user+0??</td></tr></table><a href=\"del_user.cgi?user_0=??_#user_0??\">Yes</a>&nbsp;&nbsp;<a href=\"get_users.cgi\">No</a></table></body></html>";
+
+END_CGI -->
+
+<!-- CGI: del_user.cgi
+	nnot "_@user+0:/\ "{
+	    get_file "./JavaReturn_.inc?name=Home%20Page&i=5";
+	    print "<pre>False user_ID: ??_#user_0??</pre></td></tr></table><a href=\"get_users.cgi\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+
+	change_alines "/etc/group:/*\:/*\:/*\:/?_@user+0/?/<1\n\0/>:{?/[/*:/*:/*:/]?}\n";
+	change_alines "/etc/group:/*\:/*\:/*\:/?_@user+0/?,:{?/[/*:/*:/*:/]/?_@user+0/?,?}{?/\?}";
+	change_alines "/etc/group:/*\:/*\:/*\:/*,/?_@user+0/?,:{?/[/*:/*:/*:/*/],/?_@user+0/?,?},{?/\?}";
+	change_alines "/etc/group:/*\:/*\:/*\:/*,/?_@user+0/?/<1\n\0/>:{?/[/*:/*:/*:/*/],/?_@user+0/?/<1\n\0/>?}\n";
+
+	change_line "/etc/passwd:/?_@user+0/?\:/?_@user+0#1/?\:/?_@user+0#2/?\:/?_@user+0#3/?\:/?_@user+0#4/?\:/?_@user+0#5/?\:/?_@user+0#6/?:";
+
+	write_par "_etc_save:1";
+	boot_page "get_users.cgi";
+END_CGI -->
+
+
+
+<!-- CGI: new_user.cgi
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=5";
+    print "
+<table id=\"maintab\" height=290 align=\"center\"><tr>
+<td align=\"center\" valign=\"top\"><br>
+<table id=\"header\" align=\"center\"><tr><td><b>Access :: New user name</b></td></tr></table>
+<br>
+<table border=\"0\" width=\"70%\" height=\"50\" align=\"center\">
+<tr><td></td><td id=\"varbox-list-name\"><b><font size=\"3\">&nbsp;Enter user name:</font></b></td><td></td><td></td></tr>
+<tr><td colspan=\"4\">
+?TABLE:group
+#-> parse_file: /etc/group
+while:/[/*/]\n
+if:/[/*/]:
+if:/[/*/]:
+if:/[/*/]:
+if:
+END_TABLE?
+<form method=\"GET\" name=\"main\" action=\"create_user.cgi\">
+<table>
+<tr><td>User:</td><td><input type=\"text\" name=\"cusrname\" size=\"20\"></td></tr>
+<tr><td>Password:</td><td><input type=\"text\" name=\"passwd\" size=\"20\"></td></tr>
+<tr><td>Group:</td><td>?@-group@?</td></tr>
+<tr><td>Shell:</td><td><input type=\"text\" name=\"shell\" size=\"20\" value=\"/bin/sh\"></td></tr>
+<tr><td>Fill empties:</td><td><input type=\"checkbox\" name=\"fill\" value=\"1\"></td></tr>
+<tr><td></td><td><input type=\"submit\" name=\"save\" value=\"Apply\"></td></tr>
+</table>
+</td></tr>
+</form>
+<tr><td></td><td></td>
+<td id=\"varbox-list-val\">
+</td><td></td></tr>
+</table>
+<table><tr>
+<td align=\"center\"><br><a href=\"get_users.cgi\">Back</a></td></tr>
+</table>
+</td></tr></table></body></html>";
+END_CGI -->
+
+<!-- CGI: create_user.cgi
+	nnot "_#cusrname:/!/B/*/<1;,:\"<>`'$*?| />/\\0"{
+	    get_file "./JavaReturn_.inc?name=Home%20Page&i=5";
+	    print "<pre> Username not exists or has unsupported characters or is empty</pre></td></tr></table><a href=\"get_users.cgi\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+	nnot "_#passwd:/!/B/*/<1;:\"<>`'$*?| />/\\0"{
+	    get_file "./JavaReturn_.inc?name=Home%20Page&i=5";
+	    print "<pre> Password not exists or has unsupported characters or is empty</pre></td></tr></table><a href=\"get_users.cgi\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+	nnot "_@group+0:/\ "{
+	    get_file "./JavaReturn_.inc?name=Home%20Page&i=5";
+	    print "<pre>False group_ID: ??_#group_0??</pre></td></tr></table><a href=\"get_users.cgi\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+	nnot "_#shell:/!/B/*/<1;:\"<>`'$*?|/>/\\0"{
+	    get_file "./JavaReturn_.inc?name=Home%20Page&i=5";
+	    print "<pre> Shell not exists or has unsupported characters or is empty</pre></td></tr></table><a href=\"get_users.cgi\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+
+	write_system ":AREApw:echo -n $(cryptpw \"??_#passwd??\" 2>/dev/null)";
+//	write_system ":AREApw:echo -n halloHALLO";
+	if "AREApw:/n0V/"{	//setup value to 0
+	    get_file "./JavaReturn_.inc?name=Home%20Page&i=5";
+	    print "<tr><td>Error: cryptpw not found!</td></tr></table><a href=\"get_users.cgi\">Back</a></table></body></html>";
+	    exit_cgi;
+	}
+	if "_#fill:1/" { //fill empty lines like 2,3,4,v,7,8	-where v = 5
+	    change_line "/etc/passwd:/?_#cusrname/?\:/*\:/*\::??_#cusrname??:??AREApw??{?/*:/*/[:?}"{
+		change_line "/etc/passwd:/<*!-9;-}/>\:/<*!-9;-}/>\:/!/B/?_value/?\:/iv+1v/\/!/*\:/*\:/*\:/*\::??_#cusrname??:??AREApw??:??_value??:??_@group+0#2??:user:/home/??_#cusrname??:??_#shell??\n{?/\?}"{
+		    shell "echo \"??_#cusrname??:??AREApw??:??_value??:??_@group+0#2??:user:/home/??_#cusrname??:??_#shell??\" >> /etc/passwd";
+		}
+	    }
+	}
+	nnot "_#fill:1/"{ //fill at the end of 2,3,4,7,8,v	-where v = 9
+	    change_alines "/etc/passwd:/*\:/*\:/*\:/*\:/*\:/*\::{?/[/*:/*:/sV/iv+1v:?}";	//get value+1
+
+	    change_line "/etc/passwd:/?_#cusrname/?\:/*\:/*\::??_#cusrname??:??AREApw??{?/*:/*/[:?}"{
+		shell "echo \"??_#cusrname??:??AREApw??:??_value??:??_@group+0#2??:user:/home/??_#cusrname??:??_#shell??\" >> /etc/passwd";
+	    }
+	}
+
+	write_par "_etc_save:1";
+	boot_page "get_users.cgi";
+END_CGI -->

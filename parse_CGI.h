@@ -11,11 +11,11 @@ char *w_strtok(char **s, char d);/*finds d in s and replaced by '\0' s move to n
 
 int DoCGI(FILE *out, char *filename, int flag);//if flag == 0 -with mime, == 1 - without mime
 
-#define	ARGS_MAX		40
 struct ARGS{
     char *name;	   /* The name of the script as given in the URL */
     char *value;  /* The function which should be called */
     unsigned long long size;	//in size is \0 - included
+    int marked;		//used in mark_arg()
     struct ARGS *next;
 };
 
@@ -24,6 +24,7 @@ extern struct ARGS *args_ptr_local;
 extern struct ARGS *args_ptr_global;
 int handle_arg(int flag, char *input);		//flag = 0 - global, 1-local
 char *get_arg(char *name, unsigned long long *size, int flag);
+void arg(char *name, int flag);
 void fill_tbl(char *parm);
 void free_arg(int flag);
 

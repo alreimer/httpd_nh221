@@ -1,5 +1,11 @@
 <!--#include file="head.inc?name=Home%20Page" 
 file="side.inc?i=6" -->
+<!--#include mfexchange="p2p-torrent_add.htm" mfexchange="p2p-upload.htm"
+mfexchange="p2p-wget.htm" mfexchange="p2p-wget_log.htm" exchange="MK_folders.cgi" -->
+<!-- TABLE:folders
+/mnt/wget_files
+/mnt/torrents
+END_TABLE -->
 
 <script language="JavaScript">
 function chk_BT(){
@@ -17,6 +23,10 @@ chk_BT();
 <tr>
 	<td align="center" valign="top"><br>
 <table id="header" align="center"><tr><td width="602">P2P<br></td></tr></table>
+<br>
+<table>
+<!-- #include table="folders_0:folders_0:folders_0::<tr><td>?$</td><td>?@@[ ! -d \"?$\" ] && echo -n \"<a href=\\\"MK_folders.cgi?folders_0=?#+\\\">mkdir</a>\" || echo -n \"exist\"@@?</td></tr>\n" -->
+</table>
 <br>
 <table id="options" align="center">
 <tr>
@@ -41,3 +51,15 @@ chk_BT();
 </table><br>
 </td></tr></table>
 </body></html>
+
+<!-- CGI: MK_folders.cgi
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=6";
+
+	nnot "_@folders:/\ "{
+	    print "<pre>False folder ID: ??_#folders_0??</pre></td></tr></table><a href=\"1-p2p-main.htm\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+
+    my_shell "mkdir -p ??_@folders??; [ $? -eq 0 ] && echo \"<tr><td><pre>Dir: ??_@folders?? is made!</pre></td></tr>\"; ";
+    print "</td></tr></table><a href=\"1-p2p-main.htm\">Back</a></table></body></html>";
+END_CGI -->

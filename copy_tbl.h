@@ -4,7 +4,10 @@ void show_tbl(char *var, FILE *out);
 void show_tbl_chck(char *var, FILE *out);
 unsigned long long show_tbl_str(char *var, char *buf, unsigned long long size);
 char *get_tbl(char *var);
+char *get_table(char *var, int flag);
+unsigned long long *get_tbl_begin(char *name);//name of table
 void change_tbl_stat(char *data);	//data="flag:name:frase(forParsing)"
+void free_table(char *name);
 
 #define TAB_LEN 10
 
@@ -19,6 +22,7 @@ struct rnd_tbl {
 
 struct tbl {
     char		*name;	//name of cgi
+    unsigned long long	begin;	//begin of window!, scrolling throw table
     struct rnd_tbl	*ptr;
     struct tbl		*next;
 };
@@ -33,6 +37,6 @@ struct tabs {
     int			num;
     struct tabs		*next;
 };
-void reg_tabs(struct tabs **t, struct rnd_tbl **p, char **name);
+void reg_tabs(struct tabs **t, struct rnd_tbl **p, char **name, unsigned long value);
 void free_tabs(struct tabs **ptr);
-void tabs(char *str, FILE *out);
+void tabs(char *str, unsigned long value, FILE *out);

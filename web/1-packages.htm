@@ -1,9 +1,17 @@
 <!-- #include file="head.inc?name=Home%20Page" 
 file="side.inc?i=8" -->
+<!--#include mfexchange="pkgs-config.htm" mfexchange="pkgs-upload.htm" mfexchange="pkgs-list.htm" exchange="MK_folders.cgi" -->
+<!-- TABLE:folders
+/mnt/packages
+END_TABLE -->
 
 <table id="maintab" height=290 align="center"><tr>
 <td align="center" valign="top"><br>
 <table id="header" align="center"><tr><td width="602">Packages</td></tr></table>
+<br>
+<table>
+<!-- #include table="folders_0:folders_0:folders_0::<tr><td>?$</td><td>?@@[ ! -d \"?$\" ] && echo -n \"<a href=\\\"MK_folders.cgi?folders_0=?#+\\\">mkdir</a>\" || echo -n \"exist\"@@?</td></tr>\n" -->
+</table>
 <br>
 <table id="options" height="100" align="center">
 <tr>
@@ -33,3 +41,15 @@ file="side.inc?i=8" -->
 </table><br>
 </td></tr><table>
 </body></html>
+
+<!-- CGI: MK_folders.cgi
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=6";
+
+	nnot "_@folders:/\ "{
+	    print "<pre>False folder ID: ??_#folders_0??</pre></td></tr></table><a href=\"1-packages.htm\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+
+    my_shell "mkdir -p ??_@folders??; [ $? -eq 0 ] && echo \"<tr><td><pre>Dir: ??_@folders?? is made!</pre></td></tr>\"; ";
+    print "</td></tr></table><a href=\"1-packages.htm\">Back</a></table></body></html>";
+END_CGI -->

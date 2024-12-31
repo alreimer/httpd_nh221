@@ -20,9 +20,6 @@ file="side.inc?i=3" -->
 <tr><td width="50%"><input type=file name=ufile size=30 maxlength=30 value=""></td></tr>
 </table><br>
 
-<table id="info" align="center">
-<tr><td><br>It will rewrite flash-memory and load it to /etc </td></tr>
-</table>
 <table border="0" width="30%" height="20" align="center">
 <tr>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="reset" value="Save"onclick="check_form()">
 &nbsp;&nbsp;<input type="button" name="reset" value="Back" onclick='history.back();'>
@@ -65,23 +62,18 @@ function warming_b(){
     get_file "./JavaReturn_.inc?name=Home%20Page&i=3";
 
     print "<tr><td><pre>";
-//	save_bfile "ufile:10000:/L/L/[config_/|/|/|/|/|/|/|/|.tgz/:/dev/mtdblock4";
+//	save_bfile "ufile:10000:/L/L/[config_/*.tgz/:/mnt/config.tgz"{
 	save_bfile "ufile:10000:firmware:file_name"{
 	    print "error</pre></td></tr></table><a href=\"admin-config.htm\">Back</a></table></body></html>";
 	    exit_cgi;
 	}
-	write_ppar "file_name:nfile:/L/L/[config_/|/|/|/|/|/|/|/|.tgz/"{
+	write_ppar "file_name:nfile:/L/L/[config_/*.tgz/"{
 	    print "Error: ??file_name?? not matches to parsestr
 </pre></td></tr></table><a href=\"admin-config.htm\">Back</a></table></body></html>";
 	    exit_cgi;
 	}
-	save_file_full "firmware:/dev/mtdblock4";
-
-	    my_system "rm -r /etc/*";
-	    my_system "/bin/dd if=/dev/mtdblock4 of=/var/etc.tgz >/dev/null 2>&1; cd /var;tar -xzf etc.tgz -C / > /dev/null 2>&1 || echo \"   *** Restore Config failed ***>>\" ";
-//	    my_system "/bin/dd if=/dev/mtdblock4 of=/var/etc.tgz >/dev/null 2>&1; cd /var;/bin/gunzip etc.tgz;tar -xf etc.tar -C / > /dev/null 2>&1 || echo \"   *** Restore Config failed ***>>\" ";
-	    init;
-    print "</pre></td></tr></table><a href=\"http://??_srv_ip??:??_srv_port??/admin-config.htm\">Back</a></table></body></html>";
+	save_file_full "firmware:/mnt/config.tgz";
+    print "</pre></td></tr></table><a href=\"admin-config.htm\">Back</a></table></body></html>";
 
 END_CGI -->
 <!-- CGI: _Get_conf.cgi
@@ -90,5 +82,6 @@ END_CGI -->
 	my_system "echo config_`date +%Y%m%d`.tgz";	//End is \n
 	print "Server: thttpd/2.25b\nExpires: 0\n\n";
 
-	get_file "/dev/mtdblock4";
+//		/dev/mtdblock4
+	get_file "./tmp/config.tgz";
 END_CGI -->

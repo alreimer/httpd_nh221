@@ -1,0 +1,59 @@
+<!--#include par="20:hostname:HOSTNAME:" par="20:ip:IP:" par="2:dhcp_enable:DHCP_ENABLE:" -->
+<!--#include par="2:swap_enable:SWAP_ENABLE:" readcfg -->
+
+
+<HTML><HEAD><TITLE>Network Shared Storage</TITLE>
+		<meta http-equiv="refresh" content="10">
+		<link rel="stylesheet" type="text/css" href="style.css">
+		</HEAD>
+		<BODY bgColor=#ffffff><P><FONT class=style9>&nbsp;&nbsp;Status Information</FONT></P>
+		<TABLE borderColor=#ccccdd cellSpacing=0 cellPadding=0 width=550 border=1>
+
+		<TBODY><TR>
+		<DIV class=longshine_9>&nbsp;&nbsp;Status</DIV></TR>
+
+		<TR><TH align=left width=200 bgColor=#eeeeee height=30><font color="#006666">&nbsp;&nbsp;Host Name</font></TH>
+		<TD width=350 height=30>&nbsp;&nbsp; ??hostname??</TD></TR>
+		<TR><TH align=left bgColor=#eeeeee height=30><font color="#006666">&nbsp;&nbsp;IP Address</font></TH>
+		<TD height=30>&nbsp;&nbsp; ??ip?? 
+<!-- if="dhcp_enable:1" -->(Dynamic IP)
+<!-- else -->(Static IP)
+<!-- /if --></TD></TR>
+    <TR><TH align=left bgColor=#eeeeee height=30><font color="#006666">&nbsp;&nbsp;HD used(%%)</font></TH>
+		<TD height=30>&nbsp;&nbsp; ?hdused</TD></TR>
+    <TR><TH align=left bgColor=#eeeeee height=30><font color="#006666">&nbsp;&nbsp;Up-Time</font></TH>
+		<TD height=30>&nbsp;&nbsp; ?uptime</TD></TR>
+
+    <TR><TH align=left bgColor=#eeeeee height=30><font color="#006666">&nbsp;&nbsp;NTX Version</font></TH>
+		<TD height=30>&nbsp;&nbsp; ??_?etc/S_ntx_version.txt|/*NTX_VERSION='/[/*/]'??</TD></TR>
+
+    <TR><TH align=left bgColor=#eeeeee height=30><font color="#006666">&nbsp;&nbsp;Samba Users</font></TH>
+		<TD height=30>&nbsp;&nbsp; ?new_smbd_num</TD></TR>
+    <TR><TH align=left bgColor=#eeeeee height=30><font color="#006666">&nbsp;&nbsp;FTP Users</font></TH>
+		<TD height=30>&nbsp;&nbsp; ?new_ftpd_num</TD></TR>
+<!--
+    strcpy(UPNP_folder,"0");
+		dir=opendir("/mnt");
+				while( (dirptr=readdir(dir)) != NULL)
+				{
+					if(!strcmp(dirptr->d_name,"upnp_soho"))
+					{
+				     strcpy(UPNP_folder,"1");
+				     break;
+					}
+			  }
+	   closedir(dir);
+
+    fprintf(out,"<TR><TH align=left bgColor=#eeeeee height=30><font color=\"#006666\">&nbsp;&nbsp;UPNP & Printer Loaded</font></TH>\n");
+    if(!strcmp(UPNP_folder,"0"))
+	fprintf(out,"<TD height=30>&nbsp;&nbsp; No</TD></TR>\n");
+    else
+	fprintf(out,"<TD height=30>&nbsp;&nbsp; Yes</TD></TR>\n");
+-->
+    <TR><TH align=left bgColor=#eeeeee height=30><font color="#006666">&nbsp;&nbsp;Unicode Loaded</font></TH>
+		<TD height=30>&nbsp;&nbsp; ?get_unicode()</TD></TR>
+    <TR><TH align=left bgColor=#eeeeee height=30><font color="#006666">&nbsp;&nbsp;Swap Enabled</font></TH>
+	<TD height=30>&nbsp;&nbsp; 
+<!-- if="swap_enable:0" -->Off<!-- else -->On
+<!-- /if --></TD></TR>
+

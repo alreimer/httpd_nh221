@@ -33,7 +33,7 @@ var g = window.open('http://??_srv_ip??:??_srv_port??/help/serv-smb_add.help', '
 <tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;SMB Password File:</font></b></td><td></td><td></td></tr>
 <tr><td colspan="4">
 <textarea name="smbpasswd" cols="80" rows="20" onkeydown="insertTab(this, event);">
-<!-- #include file="/etc/smbpasswd" -->
+<!-- #include file="etc/smbpasswd" -->
 </textarea></td></tr>
 <tr><td></td><td>Example:...</td>
 <td id="varbox-list-val"><input type="submit" name="save_smbpasswd" value="Apply">&nbsp;<input type="reset" value="Cancel"></td><td></td></tr>
@@ -50,7 +50,7 @@ here must be applet smbpasswd
 </body></html>
 <!-- CGI: smbpasswd.cgi
     remove_chars "\r::_#smbpasswd";
-    save_file "_#smbpasswd:/etc/smbpasswd";
+    save_file "_#smbpasswd:etc/smbpasswd";
     write_par "_etc_save:1";
     boot_page "serv-smb_add.htm";
 END_CGI -->
@@ -71,7 +71,7 @@ END_CGI -->
 
     print "<tr><td>User:</td><td> ??_%user_name??</td></tr>
     <tr><td>Password:</td><td> ??_%n_passwd??</td></tr><tr><td colspan=\"2\"><pre>";
-    my_shell "echo -e \"??_%n_passwd??\\n??_%n_passwd??\\n\" | smbpasswd -s -a \"??_%user_name??\"";
+    my_shell "smbpasswd -a  \"??_%user_name??\" \"??_%n_passwd??\"";
     print "</pre></td></tr></table><a href=\"serv-smb_add.htm\">Back</a></table></body></html>";
 
 

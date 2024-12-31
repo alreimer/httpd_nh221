@@ -7,7 +7,6 @@ par="20:dns_server1:DNS_SERVER1:^(([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\.){3}([0
 readcfg -->
 <!--#include file="head.inc?name=Home%20Page&body=onload%3D\"check_dhcp()\"" 
 file="side.inc?i=2" -->
-
 <table id="maintab" height=290 align="center"><tr>
 <td align="center" valign="top"><br>
 <table id="header" align="center"><tr><td><b>Networking :: Network</b></td></tr></table>
@@ -291,8 +290,8 @@ function check_dhcp(){
 	}
 	if_changed "hostname"{	//restart only network
 	    set "a=1"; //change_net = 1;
-	    change_line "/etc/hosts:/*/?hostname?/:??ip?? ??_%hostname?? #httpd\n"{
-		shell "echo \"??ip?? ??_%hostname?? #httpd\" >> /etc/hosts";
+	    change_line "./etc/hosts:/*/?hostname?/:??ip?? ??_%hostname?? #httpd\n"{
+		shell "echo \"??ip?? ??_%hostname?? #httpd\" >> ./etc/hosts";
 	    }
 	}
 	
@@ -301,8 +300,8 @@ function check_dhcp(){
 	    if_changed "ip" {	//restart all upto network
 //		set "a=1"; //change_net = 1;
 		set "b=1"; //change_all = 1;
-		change_line "/etc/hosts:/ /?ip?/:??_%ip?? ??_&hostname??  #httpd\n"{
-		    shell "echo \"??_%ip?? ??_&hostname?? #httpd\" >> /etc/hosts";
+		change_line "./etc/hosts:/ /?ip?/:??_%ip?? ??_&hostname??  #httpd\n"{
+		    shell "echo \"??_%ip?? ??_&hostname?? #httpd\" >> ./etc/hosts";
 		}
 	    }
 
@@ -314,15 +313,15 @@ function check_dhcp(){
 	    }
 
 	    if_changed "dns_server0" {	//only write in resolver.
-		change_line "/etc/resolv.conf:/ nameserver/ /?dns_server0?/:nameserver  ??_%dns_server0??\n"{
-		    shell "echo \"nameserver  ??_%dns_server0??\" >> /etc/resolv.conf";
+		change_line "./etc/resolv.conf:/ nameserver/ /?dns_server0?/:nameserver  ??_%dns_server0??\n"{
+		    shell "echo \"nameserver  ??_%dns_server0??\" >> ./etc/resolv.conf";
 		}
 		write_par "_etc_save:1";
 	    }
 
 	    if_changed "dns_server1" {	//only write in resolver.
-		change_line "/etc/resolv.conf:/ nameserver/ /?dns_server1?/:nameserver  ??_%dns_server1??\n"{
-		    shell "echo \"nameserver  ??_%dns_server1??\" >> /etc/resolv.conf";
+		change_line "./etc/resolv.conf:/ nameserver/ /?dns_server1?/:nameserver  ??_%dns_server1??\n"{
+		    shell "echo \"nameserver  ??_%dns_server1??\" >> ./etc/resolv.conf";
 		}
 		write_par "_etc_save:1";
 	    }
@@ -336,26 +335,18 @@ function check_dhcp(){
 		<tr bgcolor=\"#FFFFFF\"><td width=150>&nbsp;&nbsp;IP Address</td><td width=400>&nbsp;&nbsp;<font color=#ff0000>??_&ip??</font></td></tr>\n
 		<tr bgcolor=\"#FFFFFF\"><td>&nbsp;&nbsp;Subnet Mask</td><td>&nbsp;&nbsp;<font color=#ff0000>??_&netmask??</font></td></tr>\n
 		<tr bgcolor=\"#FFFFFF\"><td>&nbsp;&nbsp;Gateway</td><td>&nbsp;&nbsp;<font color=#ff0000>??_&gateway??</font></td></tr>\n
-		<tr bgcolor=\"#FFFFFF\"><td>&nbsp;&nbsp;DNS Server0</td><td>&nbsp;&nbsp;<font color=#ff0000>??_&dns_server0??</font></td></tr>\n
-		<tr bgcolor=\"#FFFFFF\"><td>&nbsp;&nbsp;DNS Server1</td><td>&nbsp;&nbsp;<font color=#ff0000>??_&dns_server1??</font></td></tr>\n
+		<tr bgcolor=\"#FFFFFF\"><td>&nbsp;&nbsp;DNS Server 0</td><td>&nbsp;&nbsp;<font color=#ff0000>??_&dns_server0??</font></td></tr>\n
+		<tr bgcolor=\"#FFFFFF\"><td>&nbsp;&nbsp;DNS Server 1</td><td>&nbsp;&nbsp;<font color=#ff0000>??_&dns_server1??</font></td></tr>\n
 		</table></td></tr>\n";
-	if "_&dhcp_client:0/" {
 	    print "<tr><td><font size=2>\n
 		<br>* Your browser communicates with the web server via the LAN connection,<br>and changing the IP address may temporarily disrupt this communication.\n
 		<br><BR>* If you changed NAS IP address to other network segment, you must make <br>sure that you have the gateway ip configured properly.\n
 		<form name=\"host\"><br><BR>* In <input type=\"text\" name=\"time\" value=\"40\" size=\"3\" readonly> seconds, this page will be directed to <a href=\"http://??_&ip??:??_srv_port??\\\" target=\"_top\">http://??_&ip??:??_srv_port??</a></form>
 		<br>Please wait ....\n
-		</font></td></tr>\n";
-	}
-	if "_&dhcp_client:1/" {
-	    print "<tr><td><font color=#ff0000 size=2>\n
-		<br> DHCP client is enabled. All values are undefined!
-		</font></td></tr>\n";
-	}
-	    print "</table></td></tr>\n
-		</body></html>\n";
-	if "_&dhcp_client:0/" {
-    	    print "<script language=\"javascript\">
+		</font></td></tr>\n
+		</table></td></tr>\n
+		</body></html>\n
+    	    <script language=\"javascript\">
 	    sec = document.host.time.value;
 	    settime();
 	    function settime(){
@@ -366,19 +357,20 @@ function check_dhcp(){
 	    }else{
 	    top.location.href=(\"http://??_&ip??:??_srv_port??\");}}
 	    </script>";
-	}
+
 	savecfg;
 	init;
 
-	system "/etc/init.d/rc 3\ 2 stop; /etc/init.d/rc 2\ 3 start &";
+//	my_system "/etc/init.d/rc 3\\ 2 stop";
 
+//	my_system "/etc/init.d/rc 2\\ 3 start"; //out is already closed
     }
     if_set "b == 0" {
 	savecfg;
 	if_set "a == 1" {
         init;
 
-	    system "/etc/init.d/S20network restart";
+//	    system "/etc/init.d/S20network restart";
 	}
 	boot_page "network.htm";
     }

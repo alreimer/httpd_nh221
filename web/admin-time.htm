@@ -70,7 +70,7 @@ function time_sync(){	//get time info from client and set it into form RAW
 <tr><td colspan=2><font size=2>If DHCP is enabled, and NTP or Time Server information is transmitted<br>so that information will be used</font></td></tr>
 <!-- if="dhcp_client:0/" -->
 <!-- else -->
-<tr><td colspan=2><font color=#ff0000 size=2>DHCP is enabled</font></td></tr>
+<tr><td colspan=2><font size=2>DHCP is enabled</font></td></tr>
 <!-- /if -->
 
 </table><br>
@@ -87,7 +87,51 @@ function time_sync(){	//get time info from client and set it into form RAW
     remove_chars ";\"<>`'|::_#ntp_server:_#time_server";
     fill_cfg "tz:timezone:ntp_server:time_server";
     savecfg;
-	system "/etc/init.d/S22time restart";
+//	system "/etc/init.d/S22time restart";
     boot_page "admin-time.htm";
 
+
+/*    
+    void Set_sync(FILE *out){
+
+	char command[80], LineBuf[256];
+	char *year, *month, *day, *hour, *minute, *second;
+	FILE *fp, *fop;
+	struct cfg_parse1 *p;
+
+       cfg_parseargs1(arg);
+    if(!cfg_arg_strcmp("time_mode:0")){	       //Using Local Time
+	p = cfg_arg("year");
+	year = p->new_value;
+	p = cfg_arg("month");
+	month = p->new_value;
+	p = cfg_arg("day");
+	day = p->new_value;
+	p = cfg_arg("hour");
+	hour = p->new_value;
+	p = cfg_arg("minute");
+	minute = p->new_value;
+	p = cfg_arg("second");
+	second = p->new_value;
+	p = cfg_arg("timezone");
+       sprintf(p->new_value,"%s%s%s%s%s",month,day,hour,minute,year);
+       //printf("%s%s%s%s%s\n",month,day,hour,minute,year);
+       SaveConfiguration();
+
+	p = cfg_arg("tz");
+       sprintf(command,"TZ=%s date %s%s%s%s%s",p->new_value,month,day,hour,minute,year);
+       //printf("TZ=%s date %s%s%s%s%s\n",CONFIG.TZ,month,day,hour,minute,year);
+       my_system(out, command);
+       my_system(out,"/etc/rc.d/save_config.sh");
+       my_system(out,"/etc/rc.d/network_timesync restart");
+    }else if(!cfg_arg_strcmp("time_mode:1")){   //Using Time Server
+	 SaveConfiguration();
+#ifdef NOVAC
+       JavaReturn_page( out, 80, CONFIG.IP,"sync");
+	 my_system(out,"/etc/reboot &");
+#endif
+    }
+    boot_page(out,"admin-time.htm");
+}
+*/
 END_CGI -->

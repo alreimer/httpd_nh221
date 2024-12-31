@@ -159,15 +159,16 @@ LINUX=1259770
 ROOT=915364
 RAMDISK2=1458448
 */
-	write_system ":HEADER:echo MAGICNUM=$(md5sum /dev/mtdblock7 | cut -d' ' -f1); echo -e 'PRODUCT_ID=NH231\nCUSTOMER=ALLNET\nVERSION=V2.02(03-06-2009)\n'";
+//	write_system ":HEADER:echo MAGICNUM=$(md5sum /dev/mtdblock7 | cut -d' ' -f1); echo -e 'PRODUCT_ID=NH231\nCUSTOMER=ALLNET\nVERSION=V2.02(03-06-2009)\n'";
+write_par  "HEADER:bla bla bladsnfisdnidnsdjnsdjnckjsdvndjsndsjvndsjndjknvfdjknvfjkndfjdnjkvfdnfdvndfknfdvkfdnkndfknvfdnknvnfddfvn";
 	print "?@0HEADER@?";
-	get_file "/dev/mtdblock7";
+//	get_file "/dev/mtdblock7";
 END_CGI -->
 <!-- CGI: Set_rootfs.cgi
     get_file "./JavaReturn_.inc?name=Home%20Page&i=3";
 
     print "<tr><td><pre>";
-//	save_bfile "ufile:3000000:/[/*.bin/:/mnt/rootfs.bin";
+//	save_bfile "ufile:3900000:/[/*.bin/:/mnt/rootfs.bin";
 	save_bfile "ufile:3900000:firmware:file_name"{
 	    print "error</pre></td></tr></table><a href=\"admin-firmware.htm\">Back</a></table></body></html>";
 	    exit_cgi;
@@ -211,5 +212,5 @@ END_CGI -->
 	write_system ":HEADER:echo MAGICNUM=$(md5sum /dev/mtdblock6 | cut -d' ' -f1); echo -e 'PRODUCT_ID=NH231\nCUSTOMER=ALLNET\nVERSION=V2.02(03-06-2009)\n'";
 	print "?@0HEADER@?";
 
-	get_file "/dev/mtdblock6";
+//	get_file "/dev/mtdblock6";
 END_CGI -->

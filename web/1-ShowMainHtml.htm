@@ -1,23 +1,101 @@
-<!--#include par="17:hostname:HOSTNAME:" par="20:ip:IP:" area="220:AREA-1" readcfg -->
-<!--#include file="head.inc?name=Home%20Page" 
-file="side.inc?i=1" -->
-<!--#include exchange="Clean_IP.cgi" exchange="info.cgi" -->
+<!--#include par="17:hostname:HOSTNAME:" par="20:ip:IP:" area="320:AREA-1" area="250:AREA-2" area="42:AREA-3" readcfg -->
+<!--#include exchange="info.cgi" blalab etst="halo" file="head.inc?name=Home%20Page" 
+file="side.inc?i=1&helper=1" -->
+<script language="JavaScript">
+function help_popUp() {
+var g = window.open('http://??_srv_ip??:??_srv_port??/help/serv-smb.help', 'name', 'toolbar=0,scrollbars=1,location=0,statusbar=1,menubar=0,resizable=1,width=700,height=700');
+}
+</script>
+<!--??_referer??<br>??_short_referer??-->
 
+global i:??_#i??
+<!-- if="_#j:/Ba/\ba/\/Esrt/" -->
+<div style="text-align:right;">
+    ??_#j??
+</div>
+<hr>
+<!-- /if -->
+<!-- CGI: test1.cgi
+print "<script language=\"JavaScript\">
+function popUp() {var g = window.open('', 'name', 'toolbar=0,scrollbars=1,location=0,statusbar=1,menubar=0,resizable=1,width=700,height=700');
+g.document.write(\"<html><head><title>Insert here</title></head><body>\");
+g.document.write(\"<p>body here</p><br>test line here<br><a href=\"javascript:self.close()\">Close</a> the popup.</body></html>\");
+g.document.close();}\npopUp();</script>";
+//g.document.write('<p>body here</p><br>test line here</body></html>');}\n</script><a href=\"javascript:popUp();\">Generate</a>";
+END_CGI -->
+<a href="test1.cgi" >get cgi</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="/term">term</a>&nbsp;&nbsp;&nbsp;&nbsp;
+<!-- CGI: testblabla.cgi
+print "<script language=JavaScript>";
+shell "hallo"{
+
+print "";
+}
+exit_cgi;
+END_CGI -->
+
+<a href="javascript:popUp();">cgi</a>
+<script language="JavaScript">
+function popUp() {
+var g = window.open('', 'name', 'toolbar=0,scrollbars=1,location=0,statusbar=1,menubar=0,resizable=1,width=700,height=700');
+g.document.write('<html><head><title>Insert here</title></head><body>');
+g.document.write('<p>body here</p><br>test line here1<br><a href="javascript:self.close()">Close</a> the popup.</body></html>');
+g.document.close();
+}
+</script>
+
+<!-- TABLE:table
+#-> check_folders
+/mnt
+/mnt/hd1
+/mnt/hd
+/mnt/README
+#-> end
+test
+END_TABLE -->
+
+<!-- TABLE:table1
+#-> check_files
+/mnt
+/mnt/hd1
+/mnt/hd
+/mnt/README
+#-> end
+/cart/see/mead
+test\nabc
+END_TABLE -->
+
+<!--#include tbl_select="table" tbl_select="table1:/L/L" -->
+<!-- TABLE:table
+test11
+privet
+END_TABLE -->
+
+<!--#include tbl_select="table" chtbl_stat="n:table:test" tbl_select="table" -->
 
 <!-- CGI: _test.cgi
-
-    write_system ":AREA-1:df -h";
+print "<pre>";
+my_shell "echo \"?@-_table1@?\"";
+print "</pre>";
+    write_system "_user_agent:AREA-1:md5sum /dev/stdin";
     cat_system ":AREA-1:echo PRIVET-1";
-//    write_file ":AREA-1:etc/smb.conf";
-    print "check: ??_#j?? ";
-    print "<pre>??AREA-1??</pre>" ;
+    write_par "AREA-2:123456789Hallo every ->\n??AREA-1??<-end";	//write with resolving
+//    write_ppar "AREA-2:AREA-3:/*6";
+    copy_ppar "AREA-2:AREA-3:5";
+//    save_file_full "AREA-3:/file.txt";
+//    write_file "AREA-1:etc/smb.conf";
+//    print "check: ??_#j?? ";
+    print "<pre>??AREA-1??\narea-2->??AREA-2??\n --area-3:??AREA-3??</pre>" ;
+
+    write_par "AREA-3:Hallo \t every ->\n\??AREA-1\??<-end";	//write only this string (w/o resolving)
+    print "<pre>\n\n--AREA3:??AREA-3??</pre>" ;
+
     set "a=0";
     do {
 	set "a=1";
 	print "a=1";
     }	if_set "a==1";	//stop if set!!!
 END_CGI -->
-<!--#inclu de cgi="_test.cgi" -->
+<!--#include cgi="_test.cgi" -->
 
 <table id="maintab" height=290 align="center">
 <tr>
@@ -38,7 +116,7 @@ END_CGI -->
 <tr>
 <td width="44%" bgcolor="#d6efff"><b><font size="3">Version:</font></b></td>
 <!--<td width="56%" bgcolor="#FFFFFF">/etc/version:/*VERSION='/[/*/]'</td>-->
-<td width="56%" bgcolor="#FFFFFF">??_?/etc/version|/*VERSION='/[/*/]'??</td>
+<td width="56%" bgcolor="#FFFFFF">??_?etc/version|/*VERSION='/[/*/]'??</td>
 </tr>
 <tr>
 <td width="44%" bgcolor="#d6efff"><b><font size="3">Customer:</font></b></td>
@@ -55,7 +133,7 @@ END_CGI -->
 </table><br>
 <br><br>
 <div style="text-align:right;">
-    <a href="info.cgi">info</a>&nbsp;&nbsp;<a href="Clean_IP.cgi">release ip</a><br>
+    <a href="uptime.cgi">uptime</a>&nbsp;&nbsp;<a href="info.cgi">info</a>&nbsp;&nbsp;<a href="dir.cgi">dir</a>&nbsp;&nbsp;<a href="Clean_IP.cgi">release ip</a><br>
 </div>
 <hr>
 <div style="text-align:right;">
@@ -63,7 +141,16 @@ END_CGI -->
     ??_dns_name??<br>
     ??_user_agent??
 </div>
+<!--test of comments-->
 </body></html>
+
+<!--#include area="17:i" area="5000:path" area="320:back" 
+write_par="i:1" write_par="path:/mnt" write_par="back:1-ShowMainHtml.htm" -->
+
+<!-- CGI: dir.cgi
+//    write_par "_buf:/mnt";
+    get_file "!dir.inc";
+END_CGI -->
 <!-- CGI: Clean_IP.cgi
     clean_ip;		//release ip
     print "IP: ??_ip?? is now released";
@@ -88,4 +175,20 @@ HOURS=`expr $HR % 24 2>/dev/null`
 DAYS=`expr $HR / 24 2>/dev/null`
 echo -e \"Days: $DAYS Hours: $HOURS Minutes: $MINUTES Seconds: $SECONDS\" ";
     print "</pre></td></tr></table><a href=\"1-ShowMainHtml.htm\">Back</a></table></body></html>";
+END_CGI -->
+<!-- CGI: uptime.cgi
+    print "<script language=\"JavaScript\">
+function popUp() {var g = window.open('', 'name', 'toolbar=0,scrollbars=1,location=0,statusbar=1,menubar=0,resizable=1,width=400,height=70');
+g.document.write('<html><head><title>/proc/uptime</title></head><body>');
+g.document.write('<p>Uptime:</p>'); ";
+    my_shell "TIME=`cat /proc/uptime 2>/dev/null | cut -d. -f1`
+MIN=`expr $TIME % 3600 2>/dev/null`
+MINUTES=`expr $MIN / 60 2>/dev/null`
+SECONDS=`expr $MIN % 60 2>/dev/null`
+HR=`expr $TIME / 3600 2>/dev/null`
+HOURS=`expr $HR % 24 2>/dev/null`
+DAYS=`expr $HR / 24 2>/dev/null`
+echo -e \"g.document.write('Days: $DAYS Hours: $HOURS Minutes: $MINUTES Seconds: $SECONDS');\" ";
+    print "g.document.write('<br><a href=\"javascript:self.close()\">Close</a> the popup.</body></html>');
+g.document.close();}\npopUp();location.replace('1-ShowMainHtml.htm');</script>";
 END_CGI -->

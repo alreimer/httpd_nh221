@@ -40,7 +40,7 @@ var g = window.open('http://??_srv_ip??:??_srv_port??/help/serv-smb.help', 'name
 <tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;SMB Config File:</font></b></td><td></td><td></td></tr>
 <tr><td colspan="4">
 <textarea name="smb_cfg" cols="80" rows="20" onkeydown="insertTab(this, event);">
-<!-- #include file="/etc/smb.conf" -->
+<!-- #include file="etc/smb.conf" -->
 </textarea></td></tr>
 <!--see examples from ftp-conf, ftp-passw, ftp-mod and serv-ftp-->
 <tr><td></td><td></td>
@@ -48,7 +48,7 @@ var g = window.open('http://??_srv_ip??:??_srv_port??/help/serv-smb.help', 'name
 </table></form>
 
 <!-- TABLE: smb_folders
-#-> parse_file: /etc/smb.conf
+#-> parse_file: ./etc/smb.conf
 while:/[/*/]\n
 if:/ path/ =/ /[//mnt///!/B/!/*/]/<1"\0/>/\/*.//
 END_TABLE -->
@@ -86,7 +86,6 @@ END_TABLE -->
 <table id="info" align="center">
 <tr><td><br>Syslog info <a href="syslog.cgi">here</a></td></tr>
 <tr><td>Smbpasswd <a href="serv-smb_add.htm">here</a></td></tr>
-<tr><td>Samba logs <a href="serv-smb_log.htm">here</a></td></tr>
 </table>
 
 <table><tr>
@@ -104,7 +103,7 @@ function check_form1(){
         return;
     }// else
 //        self.open('updatepop.html','OK','alwaysRaised,resizable,scrollbars,width=275,height=120');
-//        location.replace('updatepop.html');	//will be made by serever: rAW
+//        location.replace('updatepop.html');	//will be made by serever: rAW
 }
 function check_un(){
     var ok=1;
@@ -192,7 +191,7 @@ END_CGI -->
 ?@-smb_folders@?</td><td><input type=\"submit\" name=\"get_folder\" value=\"Show\">
 </form>
 </td></tr>
-<tr><td colspan=\"2\">Folder: ??_@smb_folders??</td></tr>
+<tr><td colspan=\"2\">Folder: ??_@smb_folders??:</td></tr>
 <tr><td colspan=\"2\"><pre>";
 	my_shell "ls -l \"??_@smb_folders??\"";
 	print "</pre></td></tr>
@@ -206,26 +205,21 @@ END_CGI -->
 
     if_changed "nmb_enable"{
     if "_&nmb_enable:1/" {
-	    change_line "/etc/inetd.conf:/*netbios-ssn:netbios-ssn	stream	tcp	nowait	root	/mnt/sbin/smbd smbd\n"{
-		shell "echo \"netbios-ssn	stream	tcp	nowait	root	/mnt/sbin/smbd smbd\" >> /etc/inetd.conf";
+	    change_line "./etc/inetd.conf:/*netbios-ssn:netbios-ssn	stream	tcp	nowait	root	/mnt/sbin/smbd smbd\n"{
+		shell "echo \"netbios-ssn	stream	tcp	nowait	root	/mnt/sbin/smbd smbd\" >> ./etc/inetd.conf";
 	    }
-	    change_line "/etc/inetd.conf:/*microsoft-ds:microsoft-ds	stream	tcp	nowait	root	/mnt/sbin/smbd smbd\n"{
-		shell "echo \"microsoft-ds	stream	tcp	nowait	root	/mnt/sbin/smbd smbd\" >> /etc/inetd.conf";
+	    change_line "./etc/inetd.conf:/*microsoft-ds:microsoft-ds	stream	tcp	nowait	root	/mnt/sbin/smbd smbd\n"{
+		shell "echo \"microsoft-ds	stream	tcp	nowait	root	/mnt/sbin/smbd smbd\" >> ./etc/inetd.conf";
 	    }
     }
     if "_&nmb_enable:0/" {
-	    change_line "/etc/inetd.conf:/*netbios-ssn:#netbios-ssn	stream	tcp	nowait	root	/mnt/sbin/smbd smbd\n"{
-		shell "echo \"#netbios-ssn	stream	tcp	nowait	root	/mnt/sbin/smbd smbd\" >> /etc/inetd.conf";
+	    change_line "./etc/inetd.conf:/*netbios-ssn:#netbios-ssn	stream	tcp	nowait	root	/mnt/sbin/smbd smbd\n"{
+		shell "echo \"#netbios-ssn	stream	tcp	nowait	root	/mnt/sbin/smbd smbd\" >> ./etc/inetd.conf";
 	    }
-	    change_line "/etc/inetd.conf:/*microsoft-ds:#microsoft-ds	stream	tcp	nowait	root	/mnt/sbin/smbd smbd\n"{
-		shell "echo \"#microsoft-ds	stream	tcp	nowait	root	/mnt/sbin/smbd smbd\" >> /etc/inetd.conf";
+	    change_line "./etc/inetd.conf:/*microsoft-ds:#microsoft-ds	stream	tcp	nowait	root	/mnt/sbin/smbd smbd\n"{
+		shell "echo \"#microsoft-ds	stream	tcp	nowait	root	/mnt/sbin/smbd smbd\" >> ./etc/inetd.conf";
 	    }
     }
-	system "/etc/init.d/S30inetd reload";
-	savecfg;
-	system "/etc/init.d/S32netbios restart";
-	boot_page "serv-smb.htm";
-	exit_cgi;
     }
 
     savecfg;
@@ -234,9 +228,9 @@ END_CGI -->
 
 <!-- CGI: samba1.cgi
     remove_chars "\r::_#smb_cfg";
-    save_file "_#smb_cfg:/etc/smb.conf";
+    save_file "_#smb_cfg:/smb.conf";
 //    savecfg ;
-//    write_par "_etc_save:1";
+    write_par "_etc_save:1";
     boot_page "serv-smb.htm";
 END_CGI -->
 <!-- CGI: Set_codeset.cgi

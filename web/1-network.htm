@@ -46,7 +46,7 @@ file="side.inc?i=2" -->
     print "</table><tr>ifconfig -a :</tr><tr><pre>";
     my_system "ifconfig -a";
     print "</pre></tr><tr>route :</tr><tr><pre>";
-    my_system "route -e";
+    my_system "route -v";
     print "</pre></tr><tr><a href=\"1-network.htm\">Back</a></tr></table></body></html>";
 
 END_CGI -->

@@ -1,6 +1,6 @@
 /* copy_tbl.c:
  *
- * Copyright (C) 2013-2020  Alexander Reimer <alex_raw@rambler.ru>
+ * Copyright (C) 2013-2021  Alexander Reimer <alex_raw@rambler.ru>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ void parse_tbl(char *data, char clean){
 
     char *tmp, *tmp2, *err = "ERR: allocate memory %d\n";
     struct tbl **ptr;
-    struct rnd_tbl **rnd_ptr, *rnd_p;
+    struct rnd_tbl **rnd_ptr, *rnd_p, *p;
     struct parsestr prsstr;
 //    long int rnd;
     int flag = 1;//used 
@@ -70,6 +70,7 @@ void parse_tbl(char *data, char clean){
 	strcpy(tmp2, tmp);
 
 	(*ptr)->name = tmp2;
+	(*ptr)->begin = 0;
 	(*ptr)->ptr = NULL;
 	(*ptr)->next = NULL;
     } else if(clean) free_rnd_tbl(&((*ptr)->ptr));
@@ -91,14 +92,14 @@ printf("script %s\n", (*ptr)->name);
 //#-> check_Nfolders
 //fold_name
 //#-> end
-		if(parsestr1(tmp+3,"/n0n/ check_/Bfolders/ /n1n/\\" //flag = 1
+		if(parsestr(tmp+3,"/n0N/ check_/Bfolders/ /n1n/\\" //flag = 1
 					"Nfolders/ /n2n/\\" //flag = 2
 					"files/ /n3n/E/" //flag = 3
 					)){
 		    flag = number;
 
 		    while(tmp = w_strtok(&data, '\n')){
-			tmp2 = parsestr1(tmp, "#->/ end/ /");//thing about it!
+			tmp2 = parsestr(tmp, "#->/ end/ /");//thing about it!
 			if(tmp2){
 			    //data = tmp2;
 			    break;
@@ -155,27 +156,32 @@ printf("Exist folder: %s %s\n", rnd_p->rnd_entry, rnd_p->entry);
 		    continue;
 		}
 //*****************
-		tmp2 = parsestr1(tmp+3, "/n0n/ get_/Bfolder:/n1n/ /\\" //flag = 1
-					"files:/n2n/ /\\" //flag = 2
-					"ofiles:/n3n/ /\\" //flag = 3
-					"ofolder:/n4n/ " //flag = 4
+		tmp2 = parsestr(tmp+3, "/n0N/ get_/Bfolder:/n1n/t/\\" //flag = 1
+					"files:/n2n/t/\\" //flag = 2
+					"ofiles:/n3n/t/\\" //flag = 3
+					"ofolder:/n4n/t" //flag = 4
 					);	//#-> get_folder:  /mnt
 		flag = number;
 		if(tmp2 && flag){
 //here can be added strncpy_ for /path/??par??
 		    char *tmp5, *check_ = NULL;
 		    unsigned long long size;
-		    check_ = parsestr1(data, "/ check:/[/*/]\n");
-		    if(check_){
+		    check_ = parsestr(data, "/ check:/[/!/B/!/*/]\n/\\/*/{*/////}//]/r/m+TBL_folder_files:check has //]\\n\\0");
+		    if(point[1]){
 			data = point[1];
-			if(parsestr1(check_, "/*/{*/////}//]")){
-			    check_ = "/!";//nothing show at all!!
-			    printf("Warning: check is with /]\n");
-			}
+			if(check_ == NULL) check_ = "/!";//nothing show at all!!
 		    }
+//		    check_ = parsestr(data, "/ check:/[/*/]\n");
+//		    if(check_){
+//			data = point[1];
+//			if(parsestr(check_, "/*/{*/////}//]")){
+//			    check_ = "/!";//nothing show at all!!
+//			    printf("Warning: check is with /]\n");
+//			}
+//		    }
 
-		    size = strncpy_(NULL, tmp2, 0)+1;	//this is max. size of tmp2-string
-		    if(size > 1 && (tmp5 = malloc(size))){
+		    size = strncpy_(NULL, tmp2, 0);	//this is max. size of tmp2-string
+		    if(size && (tmp5 = malloc(size+1))){
 			strncpy_(tmp5, tmp2, size);
 			if((dir = opendir(tmp5))== 0){
 				printf("Unable to open directory %s, %d\n", tmp5, errno);
@@ -201,7 +207,7 @@ printf("file:%s, %d\n", tmp, dirent->d_type);
 			    if(dirent->d_type != DT_REG && dirent->d_type != 0) continue;
 			    //i dont know, but file_type on NAS is 0
 			}
-			if(check_ && (parsestr1(tmp, check_) == NULL)) continue;//if check not found -> skip parseing  //new
+			if(check_ && (parsestr(tmp, check_) == NULL)) continue;//if check not found -> skip parseing  //new
 
 			*rnd_ptr = (struct rnd_tbl *)malloc(sizeof(struct rnd_tbl));
 			if(*rnd_ptr == NULL){
@@ -247,21 +253,23 @@ printf("Special: %s %s %d\n", rnd_p->rnd_entry, rnd_p->entry, dirent->d_type);
 		//    system("/bin/ls -F -w 1 /mnt | grep -v spool> /var/run/mnt_dir");
 		}
 //********************
-		tmp2 = parsestr1(tmp+3, "/n0n/ parse_/Bfile:/n1n/ /\\"	//flag = 1	#-> parse_file:  /etc/fstab
-					"area:/n2n/ "	//flag = 2	#-> parse_area:  AREA-1
+		tmp2 = parsestr(tmp+3, "/n0N/ parse_/Bfile:/n1n/t/\\"	//flag = 1	#-> parse_file:  /etc/fstab
+					"area:/n2n/t"	//flag = 2	#-> parse_area:  AREA-1
 					);	//#-> get_folder:  /mnt
 		flag = number;
 		if(tmp2 && flag){
 		    char *dat, *tmp3, *tmp4[TAB_LEN], *tmp5, *tmp6, *check = NULL, *mixed = NULL;
 		    int i = 0;
 		    unsigned long long size;
-			tmp3 = parsestr1(data, "/ while:/[/*/]\n");
+			tmp3 = parsestr(data, "/ while:/[/*/]\n");
 			if(tmp3){ 
-			    mixed = parsestr1(point[1], "/ mixed\n");
-			    //data = point[1];
-			    check = parsestr1(point[1], "/ check:/[/*/]\n");
 			    data = point[1];
-			    while(tmp5 = parsestr1(data, "/ if:/[/*/]\n")){
+			    mixed = parsestr(data, "/ mixed\n");
+			    if(point[1]) data = point[1];
+			    check = parsestr(data, "/ check:/[/!/B/!/*/]\n/\\/*/{*/////}//]/r/m+TBL:check has //]\\n\\0");
+//			    check = parsestr(data, "/ check:/[/*/]\n");
+			    if(point[1]) data = point[1];
+			    while(tmp5 = parsestr(data, "/ if:/[/*/]\n")){
 				data = point[1];
 				if(i < TAB_LEN){		//upto 10 "if:" entries will be recorded
 				    tmp4[i] = tmp5;
@@ -274,8 +282,8 @@ printf("Special: %s %s %d\n", rnd_p->rnd_entry, rnd_p->entry, dirent->d_type);
 		    //file open from tmp2
 
 		    if(flag == 1){
-			size = strncpy_(NULL, tmp2, 0)+1;	//this is max. size of tmp2-string
-			if(size > 1 && (tmp5 = malloc(size))){
+			size = strncpy_(NULL, tmp2, 0);	//this is max. size of tmp2-string
+			if(size && (tmp5 = malloc(size+1))){
 			    strncpy_(tmp5, tmp2, size);
 
 			    if(stat(tmp5, &stbuf) || /*(stbuf.st_size>1024*64) ||*/ !(f = fopen(tmp5,"r"))) {
@@ -303,12 +311,12 @@ printf("Special: %s %s %d\n", rnd_p->rnd_entry, rnd_p->entry, dirent->d_type);
 		    }
 
 		    tmp5 = dat;
-		    while(tmp = parsestr1(tmp5, tmp3)){
+		    while(tmp = parsestr(tmp5, tmp3)){
 			if((unsigned char *)tmp5 == point[1]) break;	//changed 1.05.2019
 			tmp5 = point[1];
 			if(! *tmp) continue;//empty string
-			if(check && (parsestr1(tmp, check) == NULL)) continue;//if check not found -> skip parseing  //new
-			if((tmp6 = parsestr2(&prsstr, tmp, tmp4[0])) == NULL)//think about!!	//was parsestr1
+			if(check && (parsestr(tmp, check) == NULL)) continue;//if check not found -> skip parseing  //new
+			if((tmp6 = parsestr2(&prsstr, NULL, tmp, tmp4[0])) == NULL)//think about!!	//was parsestr1
 			    continue;
 
 			*rnd_ptr = (struct rnd_tbl *)malloc(sizeof(struct rnd_tbl));
@@ -358,32 +366,79 @@ printf("Special: %s %s %d\n", rnd_p->rnd_entry, rnd_p->entry, dirent->d_type);
 //		    tmp = point[1];
 		    if(mixed == NULL) tmp = restore_str(&prsstr);
 		    else restore_str(&prsstr);
-		    tmp6 = parsestr2(&prsstr, tmp, tmp4[flag+1]);//think about!//was parsestr1
+		    tmp6 = parsestr2(&prsstr, NULL, tmp, tmp4[flag+1]);//think about!//was parsestr1
 		} else tmp6 = NULL;
 	    } else {
 		rnd_p->entries[flag] = NULL;
 		if(flag+1 < i){
-		    tmp6 = parsestr2(&prsstr, tmp, tmp4[flag+1]);
+		    if(prsstr.end) tmp = prsstr.end;
+		    tmp6 = parsestr2(&prsstr, NULL, tmp, tmp4[flag+1]);
 		}
 	    }
 	flag ++;
-	}
+	}//while(1)
 			rnd_p->p_flag = 0;
 			rnd_p->flag = 0;
 			rnd_p->next = NULL;
+
 #ifdef DEBUG
 printf("Special: %s %s\n", rnd_p->rnd_entry, rnd_p->entry);
 #endif
 
-			rnd_ptr = &(rnd_p->next);
+//no double entries
+			p = (*ptr)->ptr;
+			while(p){
+			    if(i == 1){
+				if(rnd_p->entry && p->entry && (rnd_p->entry != p->entry)
+						 && !strcmp(rnd_p->entry, p->entry)){
+printf("free double: %s\n", rnd_p->entry);
+				free(rnd_p->entry);
+				free(*rnd_ptr);
+				*rnd_ptr = NULL;
+				break;
+				}
+			    } else {
+				flag = 0;
+				while(flag < TAB_LEN && flag < i){
+					if(rnd_p->entries[flag] == NULL && p->entries[flag] == NULL){flag++; continue;}
+					if(rnd_p->entries[flag] == NULL || p->entries[flag] == NULL ||
+					(rnd_p->entries[flag] == p->entries[flag]) ||
+					strcmp(rnd_p->entries[flag], p->entries[flag])) break;
+				flag++;
+				}
+				if(flag == i){//matched compliete
+printf("free double i=%d entries[0]: %s\n", i, rnd_p->entries[0]);
+					flag--;
+					while(flag >= 0){
+					    if(rnd_p->entries[flag] != NULL) free(rnd_p->entries[flag]);
+					    flag--;
+					}
+					free(*rnd_ptr);
+					*rnd_ptr = NULL;
+					break;
+				}
+			    }
+			    p = p->next;
+			}
+//end of double entries
+			if(p == NULL) rnd_ptr = &(rnd_p->next);
 
 		    }
 		    free(dat);
 		    continue;
 		    
 		}
+//***********************
+		if(tmp2 = parsestr(tmp+3, "/tbegin:/t")){//#->begin: _par
+		    if(tmp2 = get_var(NULL, tmp2)){
+			(*ptr)->begin = atoll(tmp2);				//in term_tbl.c it is atoi !!!!!
+		    }
+		    continue;
+		}
 	    }
 //end of if(#->)
+
+
 	    *rnd_ptr = (struct rnd_tbl *)malloc(sizeof(struct rnd_tbl));
 	    if(*rnd_ptr == NULL){
 		printf(err, 8);
@@ -418,14 +473,181 @@ printf("%s %s\n", rnd_p->rnd_entry, rnd_p->entry);
     }
 }
 
-char *get_tbl(char *par){
-    char *tmp, *var;
-    unsigned int part = 0;
+unsigned long long *get_tbl_begin(char *name){
+    struct tbl *ptr = tbl_name;
+    char *tmp1;
+
+    while(ptr){
+	if(!strcmp(ptr->name, name)){
+	    return &(ptr->begin);
+	}
+    ptr = ptr->next;
+    }
+    return NULL;
+}
+
+
+char *get_tbl(char *parm){
+    char *tmp, *tmp1, *par, *par1 = NULL, *par2 = NULL, *var, *rvar, ch = '\0', ch_dctn = '\0';
+    unsigned int part = 0, rpart = 0;
     struct tbl *ptr = tbl_name;
     struct rnd_tbl *rnd_ptr;
+    struct parsestr p_ptr;
+/*
+    var = w_strtok(&par, '_');//par="table_name_0#1"  -> get table_name_0 and use 1 entry of that
+    if(var == NULL) return NULL;//var = table_name
+    rvar = w_strtok(&par, '#');//rvar="_0" and par = "#1"
 
-    var = w_strtok(&par, '#');//par="table_name#1"
+    if(!rvar || !*rvar) rpart = 0;
+    else{
+	rpart = atoi(rvar);
+	if(rpart >= TAB_LEN){return NULL;}//out of range
+    }
+    if(!*par) part = rpart;
+    else{
+	part = atoi(par);
+	if(part >= TAB_LEN){return NULL;}//out of range
+    }
+*/
+    switch(*parm){
+	case '#':
+	case '$': ch = *parm; parm++; break;
+    }
+
+    tmp1 = parsestr2_s(&p_ptr, NULL, parm, "/[/*/]/t|/t");
+    if(tmp1) {par = tmp1; par1 = p_ptr.end;//par1 = point[1];
+	if(par1 && *par1){ 
+	    par2 = parsestr2_s(&p_ptr, NULL, par1, "/<1<>/>?if?/[/!/B/!/*/]?fi?/t|/t/\\/*/{*/////}//]/r");
+//	    par2 = parsestr2(&p_ptr, NULL, par1, "/<1<>/>?if?/[/*/]?fi?/t|/t");
+	    if(par2){
+		char *par3 = p_ptr.end;//point[1];
+//		if(parsestr(par2, "/*/{*/////}//]")){//par2 has /]
+//		    par2 = 0;
+//		    restore_str(&p_ptr);
+//		}else{
+		    ch_dctn = *par1; //Can be < or >
+		    par1 = par3;
+//		}
+	    }//else restore_str(&p_ptr);//think about!!
+	}
+    } else par = parm;
+
+    rvar = w_strtok(&par, '#');//par="table_name#1" - the same as table_name+0#1
+    if(rvar == NULL) return NULL;//par="table_name+0#1"  -> get table_name+0 and use 1 entry of that
+    var = w_strtok(&rvar, '+');	//par="table_name+5#1" var=table_name rvar=5 par=1
     if(var == NULL) return NULL;
+
+    if(!*rvar) rpart = 0;
+    else{
+	rpart = atoi(rvar);
+	if(rpart >= TAB_LEN){return NULL;}//out of range
+    }
+    if(!*par) part = rpart;
+    else{
+	part = atoi(par);
+	if(part >= TAB_LEN){return NULL;}//out of range
+    }
+
+
+    while(ptr){
+	if(!strcmp(ptr->name, var)){
+	    if(tmp1 == NULL){
+		if((par = malloc(strlen(var) + 16)) == NULL) return NULL;
+		sprintf(par, "%s_%d", var, rpart);//arg is "tabname_0"
+		tmp = get_arg(par, NULL, 0);//NULL - only readable!!
+		free(par);// ??_@tab+0#4?? the same as: ??_@tab#4 | _#tab_0??
+	    } else {
+		if(par1 && *par1) tmp = get_var(NULL, par1);
+		else return NULL;
+	    }
+
+	    if(tmp){
+		rnd_ptr = ptr->ptr;
+		while(rnd_ptr){
+		    if(rnd_ptr->entry){
+			var = rnd_ptr->entry;	//tab#3
+			rvar = var;		//tab+2
+		    } else {
+			var = rnd_ptr->entries[part];	//tab#3
+			rvar = rnd_ptr->entries[rpart];	//tab+2
+		    }
+
+		    if(ch == '\0'){
+			if(!strcmp(rnd_ptr->rnd_entry, tmp)) return var;
+		    } else {
+
+		if(var){//not zero!, rvar can be everything (as NULL as)
+		    if(par2){
+			if(ch_dctn == '<'){//  var | <?if? compare string == par2 ?fi? | tmp
+			    bucks = tmp;
+			    if(parsestr2_s(NULL, NULL, var, par2)){
+				if(ch != '#') return rvar;
+				else return rnd_ptr->rnd_entry;
+			    }
+			} else if(ch_dctn == '>'){//  var | >?if? compare string == par2 ?fi? | tmp
+			    bucks = var;
+			    if(parsestr2_s(NULL, NULL, tmp, par2)){
+				if(ch != '#') return rvar;
+				else return rnd_ptr->rnd_entry;
+			    }
+			}
+			bucks = NULL;
+		    } else {	//if not exist:  <> ?if? ... ?fi? |
+				//simple compare
+			if(!strcmp(var, tmp)){
+			    if(ch != '#') return rvar;
+			    else return rnd_ptr->rnd_entry;
+			}
+		    }
+		}
+		    
+		    }
+		rnd_ptr = rnd_ptr->next;
+		}
+	    }
+	return NULL;
+	}
+    ptr = ptr->next;
+    }
+    return NULL;
+}
+
+// ??_**$tabl+10?? - show rnd_entry of begin+10 element or ??_*$tab+10#2?? - show entry[2] of begin+10 element
+char *get_table(char *par, int flag){
+    char *var, *rvar, ch = 0;
+    unsigned int part = 0, rpart = 0;
+    unsigned long long b = 0;
+    struct tbl *ptr = tbl_name;
+    struct rnd_tbl *rnd_ptr;
+/*
+    var = w_strtok(&par, '_');//par="table_name_0#1"  -> get table_name_0 and use 1 entry of that
+    if(var == NULL) return NULL;//var = table_name
+    rvar = w_strtok(&par, '#');//rvar="_0" and par = "#1"
+
+    if(!rvar || !*rvar) rpart = 0;
+    else{
+	rpart = atoi(rvar);
+	if(rpart >= TAB_LEN){return NULL;}//out of range
+    }
+    if(!*par) part = rpart;
+    else{
+	part = atoi(par);
+	if(part >= TAB_LEN){return NULL;}//out of range
+    }
+*/
+    if(*par == '$'){ ch = '$'; par++;}
+
+
+    rvar = w_strtok(&par, '#');//par="_**table_name+0" or par="_*table_name+0#1"
+    if(rvar == NULL) return NULL;//par="table_name+0#1"  -> get table_name+0 and use 1 entry of that
+    var = w_strtok(&rvar, '+');	//par="table_name+5#1" var=table_name rvar=5 par=1
+    if(var == NULL) return NULL;
+
+    if(!*rvar) rpart = 0;//must be 1 for 0
+    else{
+	rpart = atoi(rvar);
+//	if(rpart >= TAB_LEN){return NULL;}//out of range
+    }
     if(!*par) part = 0;
     else{
 	part = atoi(par);
@@ -434,19 +656,26 @@ char *get_tbl(char *par){
 
     while(ptr){
 	if(!strcmp(ptr->name, var)){
-	    if((par = malloc(strlen(var) + 16)) == NULL) return NULL;
-	    sprintf(par, "%s_%d", var, part);//arg is "tabname_0"
-	    tmp = get_arg(par, NULL, 0);//NULL - only readable!!
-	    free(par);
-	    if(tmp){
-		rnd_ptr = ptr->ptr;
+	    rnd_ptr = ptr->ptr;
+	    if(ch == '$'){
+		b = ptr->begin;
 		while(rnd_ptr){
-		    if(!strcmp(rnd_ptr->rnd_entry, tmp)){
-			if(rnd_ptr->entry) return rnd_ptr->entry;
-			return rnd_ptr->entries[part];
-		    }
-		rnd_ptr = rnd_ptr->next;
+		    if (b == 0) break;
+		    b--;
+		    rnd_ptr = rnd_ptr->next;
 		}
+	    }
+	    while(rnd_ptr){
+		if(rpart == 0){
+		    if(flag == 0){
+			if(rnd_ptr->entry) return rnd_ptr->entry;	//flag == 0	(_*tab+0#4)
+			return rnd_ptr->entries[part];
+		    }else{
+			return rnd_ptr->rnd_entry;			//flag == 1	(_**tab+0)
+		    }
+		}else rpart--;
+		
+	    rnd_ptr = rnd_ptr->next;
 	    }
 	return NULL;
 	}
@@ -568,7 +797,7 @@ void show_tbl(char *name, FILE *out){
 
 		    if(entry){
 		      if(rnd_ptr->flag == 0){ 
-			if(tmp = parsestr2(&strct, entry, name)){//bind at 'name'
+			if(tmp = parsestr2(&strct, NULL, entry, name)){//bind at 'name'
 			    fprintf(out, "<option value=\"%s\" >", rnd_ptr->rnd_entry);
 			    //p_flag==0 -> only print, ==1 ->print with conclusions
 			    if(rnd_ptr->p_flag == 0) fprintf(out, "%s", tmp);
@@ -645,7 +874,7 @@ void show_tbl_chck(char *name, FILE *out){
 
 		  if(entry){
 		    if(rnd_ptr->flag == 0){ 
-			if(tmp = parsestr2(&strct, entry, name)){//bind at 'name'
+			if(tmp = parsestr2(&strct, NULL, entry, name)){//bind at 'name'
 			    fprintf(out, "<input type=\"checkbox\" name=\"%s_%d\" value=\"%s\">",
 				tmp1, part, rnd_ptr->rnd_entry);
 			    //p_flag==0 -> only print, ==1 ->print with conclusions
@@ -697,8 +926,8 @@ void change_tbl_stat(char *data){
 
 		    if(entry){
 			    if(rnd_ptr->p_flag == 1){
-				size = strncpy_(NULL, entry, 0)+1;	//this is max. size of cmd-string
-				if(var = malloc(size)){
+				size = strncpy_(NULL, entry, 0);	//this is max. size of cmd-string
+				if(var = malloc(size+1)){
 					strncpy_(var, entry, size);
 					entry = var;
 				}else{
@@ -741,27 +970,39 @@ next:
 }
 
 //t cannot be NULL!!!
-void reg_tabs(struct tabs **t, struct rnd_tbl **p, char **name){
+//**p is main row of table (it is or first or with "!" marked)
+void reg_tabs(struct tabs **t, struct rnd_tbl **p, char **name, unsigned long value){
 	char *tmp, *tmp1, *n = *name;
+	unsigned long long counter;
 	struct parsestr strct;
 	struct tabs *T;
 	struct tbl *ptr;
+	struct rnd_tbl *p_rnd;
 
 	*p = NULL;
 	while(tmp = w_strtok(&n, ':')){
 	    if(*tmp == '\0') {*tmp = ':'; *name = n; return;}	//it means '::n'
-	    tmp1 = parsestr2(&strct, tmp, "/n0n/,!,/[/*/]/B\\01/\\_/sv/n2n");
+	    tmp1 = parsestr2(&strct, NULL, tmp, "/n0N/,!,/[/*/]/B\\01/\\_/sV/n2n");
 	    //number = 1 if "table\0" or number = 2 if "table_(value number)"
 	    ptr = tbl_name;
 	    while(ptr){
 		if(!strcmp(ptr->name, tmp1)){
-		    if((tmp == *name) || (*tmp == '!')) *p = ptr->ptr;
+		    p_rnd = ptr->ptr;
+		    if(value){		//if value is exist then skip line to counter of begin_value
+			counter = ptr->begin;
+			while(p_rnd){
+			    if(!counter) break;
+			    else counter--;
+			    p_rnd = p_rnd->next;
+			}
+		    }
+		    if((tmp == *name) || (*tmp == '!')) *p = p_rnd;
 		    //if == ! then begin is this entry (tab_1:tab_2:!tab_3)->tab_3
 		    // or if not exist begin is begin of list (tab_1:tab_2:tab_3)->tab_1
 		    T = (struct tabs *)malloc(sizeof(struct tabs));
 		    if(T){
 			while(*t) t = &((*t)->next);
-			*t = T; T->n = ptr->ptr; T->flag = strct.num;
+			*t = T; T->n = p_rnd; T->flag = strct.num;
 			if(strct.num == 2) T->num = value_;
 			else T->num = 0;
 			T->next = NULL;
@@ -819,7 +1060,7 @@ unsigned long long tabs_strncpy_(char *tmp, char *tmp1, long long size, struct t
 		case 't':	ch = '\t';break;
 		default :	tmp1--;
 	    }
-	} else if(tmp2 = parsestr2(&strct, tmp1, "?@/[/N@N/*/]@?")){		//?@variable@?
+	} else if(tmp2 = parsestr2(&strct, NULL, tmp1, "?@/[/N@N/*/]@?")){		//?@variable@?
 		if(*tmp2 == '-')		//?@-_Table@?	- list
 						//?@-Table@?	- <select>
 			s += show_tbl_str(tmp2+1, tmp ? (tmp+s) : NULL, size-s);
@@ -836,7 +1077,7 @@ unsigned long long tabs_strncpy_(char *tmp, char *tmp1, long long size, struct t
 		}
 */		tmp1 = restore_str(&strct);
 		continue;
-	} else if(tmp2 = parsestr2(&strct, tmp1, "??/[/N?N/*/]??")){		//??variable??
+	} else if(tmp2 = parsestr2(&strct, NULL, tmp1, "??/[/N?N/*/]??")){		//??variable??
 		tmp2 = get_var(NULL, tmp2);		//get_var and get_variable
 		if(tmp2) s += tabs_strncpy_(tmp ? (tmp+s) : NULL, tmp2, size-s, &t);
 		tmp1 = restore_str(&strct);
@@ -857,11 +1098,28 @@ unsigned long long tabs_strncpy_(char *tmp, char *tmp1, long long size, struct t
 			t = t->next;//next by line
 		    }
 		    continue;
+		    }else if(*(tmp1+1) == '#'){//if ?# or ?#+
+		    
+		    tmp1 = tmp1 + 2;
+		    if(*tmp1 == '+'){
+			    ch = *tmp1;
+			    tmp1++;
 		    }
-	}/* else if(c = ticket_find(&tmp1)){	//in c - ticket //not checked, please check it!!  - maybe not usefull here
+		    if(t){
+			if(t->n) {
+			    c = t->n->rnd_entry;
+			} else c = "";
+			if(tmp == NULL) s += strlen(c); else s += sprintf(tmp+s, "%s", c);
+			if(ch == '+'){ if(tmp && t->n) t->n = t->n->next;//if ?#+ -> jump to next column
+			    t = t->next;
+			}
+		    }
+		    continue;
+		    }
+	}else if(c = ticket_find(&tmp1)){	//in c - ticket //not checked, please check it!!  - maybe not usefull here
 		if(tmp == NULL) s += strlen(c); else s += sprintf(tmp+s, "%s", c);//fprintf()
 		continue;
-	}*/
+	}
 
 	if(tmp) tmp[s] = ch;
 	s++; tmp1++;
@@ -876,15 +1134,22 @@ end:
 }
 
 
+//str = 100:tab_1:tab_4::string
+//or
+//str = 0:tab_1:!tab_2:tab_4::string
+//:the same as:
 //str = tab_1:!tab_2:tab_4::string ?? <td>??</td>
-void tabs(char *str, FILE *out){
+void tabs(char *str, unsigned long value, FILE *out){
 	struct tabs *tabs = NULL, *t, *t_tmp;
 	struct rnd_tbl *p;
 	struct parsestr strct;
-	char ch, *c, *s;
+	char ch, *c, *s, *tmp, *tmp1, *tmp2, *var, *var1, *argm;
+	unsigned long counter = value;
+	unsigned long long size = 0;
 
-	reg_tabs(&tabs, &p, &str);
+	reg_tabs(&tabs, &p, &str, value);
 	while(p){
+	    if(value && !counter) break;
 	    t = tabs;
 	    s = str;
 	    while(*s){
@@ -920,31 +1185,32 @@ void tabs(char *str, FILE *out){
 			}
 		    }
 		    continue;
-		    }else if(c = parsestr2(&strct, s, "?@@/[/*/]@@?")){		//?@@ls -l ?$ @@?
+		    }else if(c = parsestr2(&strct, NULL, s, "?@@/[/*/]@@?")){		//?@@ls -l ?$ @@?
 
 			if(t){
 			t_tmp = t;
 
-			unsigned long long size = tabs_strncpy_(NULL, c, 0, &t_tmp)+1;	//this is max. size of arg-string
-			char *arg;
+			size = tabs_strncpy_(NULL, c, 0, &t_tmp);	//this is max. size of arg-string
 
-			    if(arg = malloc(size)){
+			    argm = malloc(size+1);
+			    if(argm){
 				t_tmp = t;
-				tabs_strncpy_(arg, c, size, &t_tmp);
-				my_system(out, arg);
-				free(arg);
+				tabs_strncpy_(argm, c, size, &t_tmp);
+				my_system(out, argm);
+				free(argm);
 			    }
+			    argm = NULL;
 			    t = t_tmp;
 			}
 
 			s = restore_str(&strct);
 			continue;		//it's or tmp=tmp+2 or tmp=tmp2+2
-		    }else if(c = parsestr2(&strct, s, "??/[/N?N/*/]??")){		//??variable??
+		    }else if(c = parsestr2(&strct, NULL, s, "??/[/N?N/*/]??")){		//??variable??
 			c = get_var(NULL, c);		//get_var and get_variable
 			if(c) print(out, c); /*fprintf(out, "%s", tmp3);*/
 			s = restore_str(&strct);
 			continue;		//it's or tmp=tmp+2 or tmp=tmp2+2
-		    }else if(c = parsestr2(&strct, s, "?@/[/N@N/*/]@?")){		//?@variable@?
+		    }else if(c = parsestr2(&strct, NULL, s, "?@/[/N@N/*/]@?")){		//?@variable@?
 			if(*c == '-')		//?@-_Table@?	- list
 							//?@-Table@?	- <select>
 				show_tbl(c+1, out);
@@ -953,6 +1219,103 @@ void tabs(char *str, FILE *out){
 				show_tbl_chck(c+1, out);
 			s = restore_str(&strct);
 			continue;		//it's or tmp=tmp+2 or tmp=tmp2+2
+		    }else if(tmp = parsestr2(&strct, NULL, s, "?if?/[/*:/{*/B\\\\\\\\/\\/////\\//\\\\/\\\\\\:/\\/////\\//:/\\/|/E/}:"
+						"/{*/B\\\\\\\\/\\\\\\?/\\??/{*/B\\\\\\\\/\\/////\\//\\\\/\\\\\\?/\\/|/E/}??/\\/|/E/}/]?fi?")){
+			var = NULL;//?if?tmp:tmp2:tmp1?fi?		was only:	?if?:....:....?fi?
+			var1 = NULL;
+			tmp1 = tmp;//variable
+			while(*tmp1){
+/*			    if(*tmp1 == '\\' && *(tmp1+1) == '\\') tmp1++;
+			    else if(*tmp1 == '\\' && *(tmp1+1) == ':') tmp1++;
+			    else if(*tmp1 == '/' && *(tmp1+1) == '/') tmp1++;
+			    else if(*tmp1 == '/' && *(tmp1+1) == '\\') tmp1++;
+			    else if(*tmp1 == '/' && *(tmp1+1) == ':') tmp1++;
+			    else */ if(*tmp1 == ':'){ break;}
+			    tmp1++;
+			}
+			if(*tmp1 == ':'){
+			    *tmp1 = '\0';
+			    if(*tmp) var = get_var(NULL, tmp);
+			    *tmp1 = ':';
+			    tmp1++;
+			}
+			tmp2 = tmp1;//comparestring
+			while(*tmp1){
+			    if(*tmp1 == '\\' && *(tmp1+1) == '\\') tmp1++;
+			    else if(*tmp1 == '\\' && *(tmp1+1) == ':') tmp1++;
+			    else if(*tmp1 == '/' && *(tmp1+1) == '/') tmp1++;
+			    else if(*tmp1 == '/' && *(tmp1+1) == '\\') tmp1++;
+			    else if(*tmp1 == '/' && *(tmp1+1) == ':') tmp1++;
+			    else if(*tmp1 == ':'){ break;}
+			    tmp1++;
+			}
+
+			if(*tmp1  == ':'){//print string
+			    *tmp1 = '\0';
+			//in tmp -strcmp and in tmp1+1 -print
+			    if(t){
+				c = NULL;
+				if(t->n) {
+				    c = t->n->entry;
+				    if(c == NULL && t->num < TAB_LEN) c = t->n->entries[t->num];
+				}
+				if(c == NULL) c = "";
+				if(t->n->p_flag == 1){
+				    size = strncpy_(NULL, var ? var : c, 0);	//this is max. size of cmd-string
+				    if(var1 = malloc(size+1)){
+					strncpy_(var1, var ? var : c, size);
+					if(var) var = var1;
+					else c = var1;
+				    }
+				}
+				if(t->n) t->n = t->n->next;	//if (?if?) then "++" one time
+				t = t->next;
+
+				if(t){
+				//if next column exist then run this. depends on next columns
+				    t_tmp = t;
+				    size = tabs_strncpy_(NULL, tmp1+1, 0, &t_tmp);	//this is max. size of arg-string
+
+				    argm = malloc(size+1);
+				    if(argm){
+					t_tmp = t;
+					tabs_strncpy_(argm, tmp1+1, size, &t_tmp);
+
+					if(var){
+					    bucks = c;	//get variable from outside with /$
+					    if(parsestr(var, tmp2)) fprintf(out, "%s", argm);
+					    bucks = NULL;
+					} else{
+					    if(parsestr(c, tmp2))
+//				if(t->n->p_flag == 0) fprintf(out, "%s", c);
+//				else print(out, c);
+					    fprintf(out, "%s", argm);
+					}
+
+					free(argm);
+					
+				    }//arg = malloc()
+				    t = t_tmp;
+				} else {//if(t)
+				//there is no next column - just put out string tmp1+1
+				    if(var){
+					bucks = c;	//get variable from outside with /$
+					if(parsestr(var, tmp2)) print(out, tmp1+1);
+					bucks = NULL;
+				    } else{
+					if(parsestr(c, tmp2))
+//				if(t->n->p_flag == 0) fprintf(out, "%s", c);
+//				else print(out, c);
+					    print(out, tmp1+1);
+				    }
+
+				}//if(t)
+				if(var1) free(var1);
+			    }
+			    *tmp1 = ':';
+			}
+			s = restore_str(&strct);
+			continue;
 		    }
 		} //end of if(*s == '?')
 
@@ -976,6 +1339,7 @@ void tabs(char *str, FILE *out){
 		putc(ch, out);
 		s++;
 	    }
+	    if(value) counter--;
 	    p = p->next;
 	}
 	free_tabs(&tabs);
@@ -1032,6 +1396,27 @@ void free_tbl_1(struct tbl **ptr){
 void free_tbl(void){
     free_tbl_1(&tbl_name);
 //    tbl_name = NULL;
+}
+
+void free_table(char *name){
+	struct tbl *p, **ptr;
+	char *tmp;
+
+    while(tmp = w_strtok(&name, ':')){
+	ptr = &tbl_name;
+	while(ptr && *ptr){
+		p = *ptr;
+		if(!strcmp(p->name, tmp)){
+			free_rnd_tbl(&(p->ptr));
+			free(p->name);
+			p = p->next;
+			free(*ptr);
+			*ptr = p;
+			break;
+		}
+		ptr = &(p->next);
+	}
+    }
 }
 
 

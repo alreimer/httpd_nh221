@@ -136,3 +136,7 @@ file="side.inc?i=7" -->
 <MAP name=Map><AREA shape=RECT coords=10,1,109,23 href="Show_USB_Detail.cgi">
 <AREA shape=RECT coords=110,1,209,23 href="Show_USB_Disk.cgi"><AREA shape=RECT coords=210,1,318,23 href="Set_printer.cgi">
 <AREA shape=RECT coords=321,1,512,23 href="Set_usbque.cgi"></MAP></BODY></HTML>
+
+<!--
+"kill -SIGHUP `pidof smbd`" 
+"/mnt/lprm `/mnt/lpq | grep -v active | sed -n '/root/s/.*+\\([0-9]\\+\\).*/\\1/pg'`" -->

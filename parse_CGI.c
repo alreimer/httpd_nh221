@@ -47,7 +47,7 @@ char *get_arg(char *name, unsigned long long *size, int flag){
     if(!flag) ptr = args_ptr_global;
     else ptr = args_ptr_local;	//must be preseted befor execution of this function.
     while(ptr && ptr->name && ptr->value){
-	if(strcmp(name, ptr->name) == 0){
+	if((ptr->marked == 0) && (strcmp(name, ptr->name) == 0)){
 	    if(size) *size = ptr->size;
 #ifdef DEBUG
 printf("string: %s :: %s\n", name, ptr->value);
@@ -59,10 +59,30 @@ printf("string: %s :: %s\n", name, ptr->value);
     return NULL;
 }
 
+void mark_arg(char *name, int flag){
+//if flag = 0 -> global args are parsed, if 1 -> local args_ptr are parsed.
+    struct ARGS *ptr;
+
+    if(!name) return;
+    if(!flag) ptr = args_ptr_global;
+    else ptr = args_ptr_local;	//must be preseted befor execution of this function.
+    while(ptr && ptr->name && ptr->value){
+	if((ptr->marked == 0) && (strcmp(name, ptr->name) == 0)){
+#ifdef DEBUG
+printf("mark: %s :: %s\n", name, ptr->value);
+#endif
+	    ptr->marked = 1;//mark this argument
+	    return;
+	}
+	ptr = ptr->next;
+    }
+    return;
+}
+
 int handle_arg(int flag, char *input)
 {
     struct ARGS **ptr;
-    char *tmp;
+    char *name, *tmp;
     long long size;
 
     if(!input) return 0;	//nothing to parse
@@ -71,21 +91,22 @@ int handle_arg(int flag, char *input)
     while(*ptr) ptr=&((*ptr)->next);
 
     while (1){	//parse only booth '=' and '&' chars.
+	if(((name = w_strtok(&input, '=')) == NULL) || ((tmp = w_strtok(&input, '&')) == NULL )){
+	    break;
+	}
 	if(! *ptr) *ptr = (struct ARGS *)malloc(sizeof(struct ARGS));
 	if(*ptr == NULL){
 	    printf("ERR: Allocate memory\n");
 	    return 0;
 	}
 	(*ptr)->next = NULL;
-
-	if((((*ptr)->name = w_strtok(&input, '=')) == NULL) || (((*ptr)->value = w_strtok(&input, '&')) == NULL )){
-	    free(*ptr);
-	    *ptr = NULL;
-	    break;
-	}
-	tmp = (*ptr)->value;
-	(*ptr)->size = input - tmp; //size is included \0 char!!
-	httpd_decode(tmp);
+	(*ptr)->value = tmp;
+	(*ptr)->marked = 0;	//default value for mark_arg
+	(*ptr)->name = name;
+//	(*ptr)->size = input - tmp; //size is included \0 char!!
+//	httpd_decode(tmp);
+	(*ptr)->size = httpd_decode(tmp) - tmp + 1; //size is included \0 char!!
+	
 //**********
 	tmp = parsestr1_(tmp, "??/[/*/]??/");	//if (args+i)->value == "file.inc?par=??_#par1??"
 	if(tmp){						//if not find - erease par=??_#par1?? complete
@@ -177,41 +198,6 @@ void fill_tbl(char *parm){
     }
 }
 
-/*
-int parseargs(ARGUMENT *arg)
-{
-    int i, value_len, ret = 0;
-
-    while (i < ARGS_MAX && args[i].name && args[i].value){
-
-	while (arg->name != NULL){
-	    if (strcmp(args[i].name, arg->name) == 0){
-		ret = 1;	// something is matched
-#ifdef DEBUG
-    printf("p_arg->name: %s\n",arg->name);
-    printf("p_arg->var(before): %s, length=%d\n",arg->var,strlen(arg->var));
-#endif
-
-		if (args[i].value == NULL) *arg->var = '\0';
-		//else strncpy(arg->var, value, arg->len);
-		else{
-			value_len = strlen(args[i].value) + 1;
-			strncpy(arg->var, args[i].value, MIN(value_len, (arg->len)-1));	//it seems to be OK, but is always p_arg->var[(p_arg->len)-1] == '\0'
-		}
-
-#ifdef DEBUG
-    printf("p_arg->var(after): %s, length=%d\n",arg->var,strlen(arg->var));
-#endif
-		break;
-	    }
-	    arg++;
-	}
-	i++;
-    }
-    return ret;
-return 0;
-}
-*/
 /* Given a www-form encoded string, restore the original: */
 char *httpd_decode(char *string)		/*had name unescape*/
 {

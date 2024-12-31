@@ -1,4 +1,4 @@
-<!--#include area="90000:AREA-1" par="256:backup_path:BACKUP_PATH:" readcfg -->
+<!--#include area="25345:AREA-1" par="256:backup_path:BACKUP_PATH:" readcfg -->
 <!--#include file="head.inc?name=Home%20Page" 
 file="side.inc?i=7" -->
 <script src="/js/tools.js"></script>
@@ -7,6 +7,28 @@ file="side.inc?i=7" -->
 <td align="center" valign="top"><br>
 <table id="header" align="center"><tr><td><b>USB :: Storage manager</b></td></tr></table>
 <br>
+<!--<table border="0" width="70%" height="40" align="center">
+
+<tr><td width=2% valign=top></td>
+<td width=80% align=left><font color="#FFFFFF" size=2 face="Arial, Helvetica, sans-serif"><b>Please provide .</b></font></td></tr></table>-->
+
+<!-- need make: show only hard disk info!!-->
+<!-- CGI: _test.cgi
+    write_file "AREA-1:/proc/bus/usb/devices";
+    bind_par "AREA-1";
+    print "<table><tr bgcolor=\"#ff0000\"><td width=140 align=center class=style2>USB 2.0/1.1</td><td width=135 align=center class=style2>Vendor:ProdID</td><td width=135 align=center class=style2>Manufacturer</td><td width=140 align=center class=style2>Device Name</td><td width=140 align=center class=style2>Serial number</td></tr>\n" ;
+    do {
+	set "a = 0";
+	buf_parse_area "/[/*/]\nT:  " {
+	    set "a = 1";
+	}
+	    print "[?/*Cls=08(stor.)?]<tr><td>USB {?/*D:  Ver= /[/*/] ?}</td><td>{?/*P:  Vendor=/[/*/] ?}:{?ProdID=/[/*/] ?}</td><td>{?/*S:  Manufacturer=/[/*/]\n?}</td><td>{?/*S:  Product=/[/*/]\n?}</td><td>{?/*S:  SerialNumber=/[/*/]\n?}</td></tr>\n";
+
+    }	if_set "a == 0";	//stop if set!!!
+    print "</table>";
+END_CGI -->
+<!--#in clude cgi="_test.cgi" -->
+
 <!--#include wr_shell=":AREA-1:cat /proc/bus/usb/devices" -->
 <!-- TABLE:usb_info
 #-> parse_area: AREA-1
@@ -28,7 +50,7 @@ END_TABLE -->
 <tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;known_usb File:</font></b></td><td></td><td></td></tr>
 <tr><td colspan="4">
 <textarea name="known_usb" cols="80" rows="20" onkeydown="insertTab(this, event);">
-<!-- #include file="/etc/known_usb" -->
+<!-- #include file="etc/known_usb" -->
 </textarea></td></tr>
 <!--see examples from ftp-conf, ftp-passw, ftp-mod and serv-ftp-->
 <tr><td></td><td>Example...</td>
@@ -44,14 +66,14 @@ END_TABLE -->
 <!-- TABLE:mnt_point
 ??backup_path??
 #-> get_folder: ??backup_path??
-#-> parse_file: /etc/known_usb
+#-> parse_file: etc/known_usb
 while:/[/*/]\n
 if:/ /N#N/*:/[//mnt///!/B/!/*/]/<1:\0/>/\/*.///\/*/<1;"/>
 END_TABLE -->
 <!-- TABLE:mnt_point1
 ??backup_path??
 #-> get_folder: ??backup_path??
-#-> parse_file: /etc/known_usb
+#-> parse_file: etc/known_usb
 while:/[/*/]\n
 if:/ /N#N/*:/[//mnt///!/B/!/*/]/<1:\0/>/\/*.///\/*/<1;"/>
 END_TABLE -->
@@ -83,7 +105,7 @@ END_TABLE -->
 </body></html>
 <!-- CGI: known_usb_stick.cgi
 	remove_chars "\r::_#known_usb";
-	save_file "_#known_usb:/etc/known_usb";
+	save_file "_#known_usb:etc/known_usb";
 	write_par "_etc_save:1";
 	boot_page "usb-storage.htm";
 END_CGI -->

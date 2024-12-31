@@ -44,18 +44,17 @@ var g = window.open('http://??_srv_ip??:??_srv_port??/help/p2p-wget.help', 'name
     <tr><td>User:</td><td> ??_#user_name??</td></tr>
     <tr><td>Password:</td><td> ??_#n_passwd??</td></tr><tr><td colspan=\"2\"><pre>";
     my_shell "
-    	    i=0
+	    i=0
 	    while [ \"$i\" -ne 10 ]; do
-    ps | grep wget_$i.log >/dev/null 2>&1
-    if [ $? -ne 0 ]; then
-	wget -P /mnt/wget_files \"??_#url_name??\" 2>&1 | httpd_tty /var/wget_$i.log >/dev/null 2>&1 &
-	#--user=\"??_#user_name??\" --password=\"??_#n_passwd??\" 
+    ps -fC wget_$i.log >/dev/null 2>&1
+    if [ $? -ne \"0\" ]; then
+	wget -P mnt/wget_files --user=\"??_#user_name??\" --password=\"??_#n_passwd??\" \"??_#url_name??\" 2>&1 | /httpd_nh221/httpd_tty /var/wget_$i.log >/dev/null 2>&1 &
 	echo \"Your log is: wget_$i.log\"
 	break;
     fi
-	    i=$(($i+1))
-	    done
-	    ";
+    i=$(($i+1))
+    done
+    ";
     print "</pre></td></tr></table><a href=\"p2p-wget.htm\">Back</a>&nbsp;&nbsp;<a href=\"p2p-wget_log.htm\">logs</a></table></body></html>";
 
     }

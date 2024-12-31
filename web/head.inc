@@ -11,7 +11,6 @@
   <meta name="ProgId" content="Word.Document">
   <meta name="Generator" content="Microsoft Word 9">
   <meta name="Originator" content="Microsoft Word 9">
-  <!--<base href="/images/" target="_blank">-->
   ??_##header??
   <style>
 <!--
@@ -29,7 +28,8 @@
 <body ??_##body??
  nof="(MB=(Werkstoffe, 103, 18, 160, 0), L=(Nicht benannt Layout, 594, 1218))"
  topmargin="0" leftmargin="0"
- style="color: rgb(0, 0, 51); background-color: rgb(255, 255, 255); background-image: url(!impressum_files/4_back2.gif);"
+<!-- style="color: rgb(0, 0, 51); background-color: rgb(255, 255, 255); background-image: url(!impressum_files/4_back2.gif);" -->
+ style="color: rgb(0, 0, 51); background-color: rgb(255, 255, 255);"
  lang="DE" link="#000033" marginheight="0" marginwidth="0"
  vlink="#000066">
 <table

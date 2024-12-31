@@ -5,7 +5,7 @@ void parse_cgi_script(char *data);
 /*for x_open_file */
 
 struct cgi {
-    char	name[30];	//name of cgi
+    char	name[320];	//name of cgi
     int		cmd[GET_CGI_MAX];
 //    char	arg[GET_CGI_MAX][GET_CGI_LEN];
     char	*arg[GET_CGI_MAX];

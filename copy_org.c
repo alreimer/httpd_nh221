@@ -68,37 +68,9 @@ struct cfg_parse1 **cfg_p = &cfg1;
     return NULL;
 }*/
 
-unsigned char *point[2] = {NULL, NULL};		//0 - place where is ch_zero by /]; 1 - end of string
-unsigned char ch_zero = '\0';
-
-unsigned long number = 0;
-unsigned long value_ = 0;
-unsigned long stack_ = 0;
-
-unsigned long exec_ = 0;	//if == 0 -> no /c
-//unsigned char *begin_ = NULL;
-//unsigned char *end_ = NULL;
-struct strctexec *point_exec = NULL;//if NULL -> no /e
-unsigned char *bucks = NULL;
-exec_fnctn *fn_exec = NULL;	//if NULL -> no /e (or /c)->no_more because of /W
-
-void print_pstr(FILE *out, unsigned char *tmp){
-	unsigned char *tmp1, *tmp2, *tmp3, *tmp4, *tmp5, ch, ch1;
-	unsigned long digi, val, stc, exc;
+void print_pstr(FILE *out, char *tmp){
+	char ch, *tmp1, *tmp2;
 	unsigned int i;
-	struct strctexec *pexec = point_exec;
-
-	tmp5 = bucks;
-	tmp3 = point[0];
-	tmp4 = point[1];
-	ch1 = ch_zero;
-	digi = number;
-	val = value_;
-	stc = stack_;
-	exc = exec_;
-
-	exec_fnctn *fnexec = fn_exec;
-	point_exec = NULL;//for new beginning
 
 	while(*tmp){
 	    ch = *tmp;
@@ -126,8 +98,8 @@ void print_pstr(FILE *out, unsigned char *tmp){
 			    tmp1++;
 			}
 			if(tmp2 && *tmp2){
-				    unsigned long long size = strncpy_(NULL, tmp2, 0);	//this is max. size of tmp2-string
-				    if(size && (m = malloc(size+1))){
+				    unsigned long long size = strncpy_(NULL, tmp2, 0)+1;	//this is max. size of tmp2-string
+				    if(size > 1 && (m = malloc(size))){
 				    strncpy_(m, tmp2, size);
 				    fprintf(out, "%s", m);
 				    free(m);
@@ -136,249 +108,34 @@ void print_pstr(FILE *out, unsigned char *tmp){
 			continue;
 		} else if(*tmp != '/') tmp--;
 	    } else
-	    if(tmp2 = ticket_find((char **)&tmp)){	//in tmp2 - ticket
-			fprintf(out, "%s", tmp2);
-			continue;
-	    } else
 	    if(*tmp == '\\'){
 		tmp++;
 		switch(*tmp){
 		    case 't':	ch = '\t'; break;
 		    case 'n':	ch = '\n'; break;
-		    case ':':
 		    case '\"':
-		    case '?':
 		    case '\\': ch = *tmp; break;
-		    case '0': goto print_pstr_end;
+		    case '0': return;
 		}
 	    }
 	    putc(ch, out);
 	    tmp++;
 	}
-print_pstr_end:
-	exec_ = exc;
-	stack_ = stc;
-	value_ = val;
-	number = digi;
-	ch_zero = ch1;
-	point[1] = tmp4;
-	point[0] = tmp3;
-	bucks = tmp5;
-
-	free_strctexec();//free this new beginning
-	fn_exec = fnexec;
-	point_exec = pexec;
-
 }
 
+unsigned char *point[2] = {NULL, NULL};		//0 - place where is ch_zero by /]; 1 - end of string
+unsigned char ch_zero = '\0';
 
-//rd can be NULL, wr can be also NULL
-unsigned long long print_sstr(char *wr, char *rd, unsigned char *tmp, unsigned long long size){
-	unsigned long long s = 0;
+unsigned long number = 0;
+unsigned long value_ = 0;
+unsigned long stack_ = 0;
 
-	unsigned char *tmp1, *tmp2, *tmp3, *tmp4, *tmp5, ch, ch1;
-	unsigned long digi, val, stc, exc;
-	unsigned int i;
-	struct strctexec *pexec = point_exec;
-
-	tmp5 = bucks;
-	tmp3 = point[0];
-	tmp4 = point[1];
-	ch1 = ch_zero;
-	digi = number;
-	val = value_;
-	stc = stack_;
-	exc = exec_;
-
-	exec_fnctn *fnexec = fn_exec;
-	point_exec = NULL;//for new beginning
-
-    size--; // \0 excluded
-
-    while((!wr || s < size) && *tmp){
-	    ch = *tmp;
-	    if(*tmp == '?'){
-		if(*(tmp+1) == '$'){
-		    tmp = tmp + 2;
-		    if(rd){
-			while(*rd && s < size){
-			    if(wr) wr[s] = *rd;
-			    rd++;
-			    s++;
-			}
-		    }
-		    continue;
-		}
-	    } else if(*tmp == '/'){
-		tmp++;
-		if(*tmp == '?'){
-			tmp++;
-			char *m;
-			tmp1 = tmp;
-			tmp2 = NULL;
-			while(*tmp1){	//   /?var/?
-			    if(*tmp1 == '/' && *(tmp1+1) == '?'){
-				i = tmp1 - tmp + 1;
-				if((i > 1) && (i < 33)){
-				m = malloc(i);
-				if(m){
-				    strmycpy(m, tmp, i);
-				    tmp2 = get_var(NULL, m);		//get_var and get_variable
-				    free(m);
-				}
-				}
-				tmp=tmp1+2;
-				break;
-			    }
-			    tmp1++;
-			}
-			if(tmp2 && *tmp2){
-			    s += strncpy_(wr ? (wr+s) : NULL, tmp2, size-s);
-			}
-			continue;
-		} else if(*tmp != '/') tmp--;
-	    } else if(*tmp == '\\'){
-		tmp++;
-		switch(*tmp){
-		    case 't':	ch = '\t'; break;
-		    case 'n':	ch = '\n'; break;
-		    case ':':
-		    case '\"':
-		    case '?':
-		    case '\\': ch = *tmp; break;
-		    case '0': goto print_sstr_end;
-		}
-	    }
-
-	if(wr) wr[s] = ch;
-	tmp++;
-	s++;
-    }
-
-print_sstr_end:
-    if(wr) wr[s] = '\0';
-
-	exec_ = exc;
-	stack_ = stc;
-	value_ = val;
-	number = digi;
-	ch_zero = ch1;
-	point[1] = tmp4;
-	point[0] = tmp3;
-	bucks = tmp5;
-
-	free_strctexec();//free this new beginning
-	fn_exec = fnexec;
-	point_exec = pexec;
-
-    return s;
-}
-
-
-void write_tpar(char *begin, char *end, char ch){
-//if ch == ! ->remove entry after use
-    unsigned long long size, s;
-    unsigned int i;
-    unsigned long digi;
-    char *arg, *m;
-    struct strctexec *p_exec = NULL, **p;
-    struct parsestr ptr;
-
-//	unsigned char *tmp3, *tmp4, *tmp5, ch1;
-//	unsigned long dig, val, stc, exc;
-
-
-	while(*begin == ' ') begin++;
-//	while(*(end-1) == ' ' && end != begin) end--;
-
-	size = end - begin + 1;
-	m = malloc(size);
-	if(m){
-	    arg = m;
-	    strmycpy(arg, begin, size);
-
-/*new 20210905
-	tmp5 = bucks;
-	tmp3 = point[0];
-	tmp4 = point[1];
-	ch1 = ch_zero;
-	dig = number;
-	val = value_;
-	stc = stack_;
-	exc = exec_;
-*/
-	begin = parsestr2_s(&ptr, NULL, arg, "/t/sV/t||/t/[/*/]/t||");//arg must be /W(!)"digit || variable ||pattern"\0
-/*new 20210905
-	exec_ = exc;
-	stack_ = stc;
-	value_ = val;
-	number = dig;
-	ch_zero = ch1;
-	point[1] = tmp4;
-	point[0] = tmp3;
-	bucks = tmp5;
-*/
-	if(begin && *begin){
-	    digi = ptr.val;
-
-//for "char *get_tbl(char *parm);"
-//	    struct strctexec *pexec = point_exec;
-//	    exec_fnctn *fnexec = fn_exec;
-//	    point_exec = NULL;//for new beginning
-//end of "char *get_tbl(char *parm);"
-
-	    begin = get_var(&size, begin);		//get_var and get_variable
-
-//for "char *get_tbl(char *parm);"
-//	    exec_ = exc;
-//	    stack_ = stc;
-//	    value_ = val;
-//	    number = dig;
-//	    ch_zero = ch1;
-//	    point[1] = tmp4;
-//	    point[0] = tmp3;
-//	    bucks = tmp5;
-
-//	    free_strctexec();//free this new beginning
-//	    fn_exec = fnexec;
-//	    point_exec = pexec;
-//end of "char *get_tbl(char *parm);"
-
-	    if(begin){
-		if(size){
-		s = 0;//s = strlen(begin);//for cat
-		p = &point_exec;
-		while(*p){
-		    p_exec = *p;
-		    if((size - s) == 0) break; //end of variable
-		    if(p_exec->exec == digi){
-			s+=print_sstr(begin+s, p_exec->begin, ptr.end, size-s);
-//			s+=print_sstr(begin+s, p_exec->begin, end, size-s);
-			//string to write, from read, string pattern, size of writeToString
-			if(ch == '!'){
-			    if(p_exec->end && *(p_exec->end) == '\0') *(p_exec->end) = p_exec->ch;
-			    *p = p_exec->next;	//cross connection
-			    if(p_exec) free(p_exec);		//free mem for this entry
-			    continue;
-			}
-		    }
-		p = &(p_exec->next);
-		}
-		}
-	    }
-
-	    restore_str(&ptr);
-	} else fprintf(stderr, "in write_tpar string must be: \"digit | parname ||pattern\"\nnow it's: \"%s\"\n", arg);
-
-	
-	free(m);
-	}else{
-	    printf("Error allocate write_tpar()\n");
-	}
-}
-
-
-
+unsigned long exec_ = 0;	//if == 0 -> no /c
+//unsigned char *begin_ = NULL;
+//unsigned char *end_ = NULL;
+struct strctexec *point_exec = NULL;//if NULL -> no /e
+unsigned char *bucks = NULL;
+exec_fnctn *fn_exec = NULL;	//if NULL -> no /e or /c
 
 unsigned char *parsestr1(unsigned char *d, unsigned char *c)	//try identic strings!, "xxx*NULL" combination
 {
@@ -804,7 +561,7 @@ unsigned char *parsestr1(unsigned char *d, unsigned char *c)	//try identic strin
 			while(*c == ' ') c++;
 			tmp = c;
 			tmp2 = NULL;
-/*new 20210905
+
 			tmp5 = bucks;
 			tmp3 = point[0];
 			tmp4 = point[1];
@@ -813,7 +570,7 @@ unsigned char *parsestr1(unsigned char *d, unsigned char *c)	//try identic strin
 			val = value_;
 			stc = stack_;
 			exc = exec_;
-*/
+
 			if(ch == 'Q'){
 			i = 0;
 
@@ -861,7 +618,7 @@ unsigned char *parsestr1(unsigned char *d, unsigned char *c)	//try identic strin
 			    tmp++;
 			}
 			}
-/*new 20210905
+
 			exec_ = exc;
 			stack_ = stc;
 			value_ = val;
@@ -870,7 +627,7 @@ unsigned char *parsestr1(unsigned char *d, unsigned char *c)	//try identic strin
 			point[1] = tmp4;
 			point[0] = tmp3;
 			bucks = tmp5;
-*/
+
 			if(tmp2 /*&& *tmp2*/){//this is comment for access_folders.htm
 			    if(ch2 != '$'){
 				i = strlen(tmp2);
@@ -880,11 +637,29 @@ unsigned char *parsestr1(unsigned char *d, unsigned char *c)	//try identic strin
 				static int time = 0;
 				time++;
 				if(time < 10){
-
-				    unsigned long long size = strncpy_(NULL, tmp2, 0);	//this is max. size of tmp2-string
-				    if(size && (m = malloc(size+1))){
+/*				    tmp3 = point[0];
+				    tmp4 = point[1];
+				    ch1 = ch_zero;
+				    digi = number;
+				    val = value_;
+				    stc = stack_;
+				    exc = exec_;
+*/
+				    unsigned long long size = strncpy_(NULL, tmp2, 0)+1;	//this is max. size of tmp2-string
+				    if(size > 1 && (m = malloc(size))){
 				    strncpy_(m, tmp2, size);
-/*new 20210905
+
+				    exec_ = exc;
+				    stack_ = stc;
+				    value_ = val;
+				    number = digi;
+				    ch_zero = ch1;
+				    point[1] = tmp4;
+				    point[0] = tmp3;
+				    bucks = tmp5;
+
+				    tmp = parsestr1(d, m);
+/* maybe is needed?
 				    exec_ = exc;
 				    stack_ = stc;
 				    value_ = val;
@@ -894,8 +669,6 @@ unsigned char *parsestr1(unsigned char *d, unsigned char *c)	//try identic strin
 				    point[0] = tmp3;
 				    bucks = tmp5;
 */
-				    tmp = parsestr1(d, m);
-
 				    free(m);
 				    if(!tmp){time--; return NULL;}
 				    d = tmp;//maybe d = point[1]
@@ -915,9 +688,7 @@ unsigned char *parsestr1(unsigned char *d, unsigned char *c)	//try identic strin
 
 		    case 'm': c++; ch = *c; c++; tmp2 = c;// /m-WARN: not matched!\0 -thisIsNotMatched!
 			while(*tmp2){
-			    if(*tmp2 == '/' && *(tmp2+1) == '/') tmp2++;	//tmp2 = tmp2 + 2
-			    else if(*tmp2 == '/' && *(tmp2+1) == '\\') tmp2++;	//tmp2 = tmp2 + 2
-			    else if(*tmp2 == '\\' && *(tmp2+1) == '\\') tmp2++;	//tmp2 = tmp2 + 2
+			    if(*tmp2 == '\\' && *(tmp2+1) == '\\') tmp2++;	//tmp2 = tmp2 + 2
 			    else if(*tmp2 == '\\' && *(tmp2+1) == '0'){ tmp2 = tmp2 + 2; break;}	//string must have \\0 at the end
 			    tmp2++;						//and don't have /\\ or /}, /), /E, /:
 			}
@@ -941,7 +712,7 @@ unsigned char *parsestr1(unsigned char *d, unsigned char *c)	//try identic strin
 			    c++; i++;
 			}
 			if(*c == '\0') c--;//shorter parameter
-//remove it because of /W			if(/*exec_ == 0 ||*/ fn_exec == NULL){c++; continue;}
+			if(/*exec_ == 0 ||*/ fn_exec == NULL){c++; continue;}
 //			exec_ = 0;	//switch off  /c/c combination
 			struct strctexec **p_exec, *pexc;
 			p_exec = &(point_exec);
@@ -953,10 +724,8 @@ unsigned char *parsestr1(unsigned char *d, unsigned char *c)	//try identic strin
 
 					//those parameters must be befor /c
 			if(ch & 1) pexc->exec = exec_;	//   /cEc
-			    else pexc->exec = 0;//new here, for definition
 			pexc->begin = d;//begin_;
 			if(ch & 2) pexc->value = value_;	//   /cVc
-			    else pexc->value = 0;//new here, for definition
 			pexc->next = NULL;
 
 			if(tmp = parsestr1(d, c+1)){//      /e .... /n10E .. /sV.... /cEVc/*/]....
@@ -980,7 +749,6 @@ unsigned char *parsestr1(unsigned char *d, unsigned char *c)	//try identic strin
 			    if(point_exec){
 				if(fn_exec){
 
-				tmp5 = bucks;
 				tmp2 = point[0];
 				tmp3 = point[1];
 				ch = ch_zero;
@@ -1008,72 +776,11 @@ unsigned char *parsestr1(unsigned char *d, unsigned char *c)	//try identic strin
 				ch_zero = ch;
 				point[1] = tmp3;
 				point[0] = tmp2;
-				bucks = tmp5;
 				}
 //				free_strctexec();	//and destroy it
 			    }
 			}
 			free_strctexec();	//and destroy it
-			return tmp;
-		    case 'F':
-		    case 'f':
-			ch = *c; c++;
-			tmp2 = c;
-			while(*c){
-			    if(*c == '/' && *(c+1) == '/') c++;	//c = c + 2
-			    else if(*c == '/' && *(c+1) == '\\') c++;	//c = c + 2
-			    else if(*c == '\\' && *(c+1) == '\\') c++;	//c = c + 2
-			    else if(*c == '\\' && *(c+1) == '0'){c = c + 2; break;}	//string must have \\0 at the end
-			    c++;						//and don't have /\\ or /}, /), /E, /:
-										//except //\\, //}, //), //E //:
-			}
-			unsigned long long s = print_sstr(NULL, NULL, tmp2, 0);
-			tmp = malloc(s+1);
-			if(tmp){
-			print_sstr(tmp, NULL, tmp2, s);
-			//get file descript, parse this file
-			free(tmp);
-			}
-			continue;
-		    case 'W'://write to parameter
-			c++; ch = '\0';
-			if(*c == '!'){ch = '!'; c++;}
-			tmp2 = c;
-			while(*tmp2){
-			    if(*tmp2 == '/' && *(tmp2+1) == '/') tmp2++;	//tmp2 = tmp2 + 2
-			    else if(*tmp2 == '/' && *(tmp2+1) == '\\') tmp2++;	//tmp2 = tmp2 + 2
-			    else if(*tmp2 == '\\' && *(tmp2+1) == '\\') tmp2++;	//tmp2 = tmp2 + 2
-			    else if(*tmp2 == '\\' && *(tmp2+1) == '0'){break;}	//string must have \\0 at the end
-			    tmp2++;						//and don't have /\\ or /}, /), /E, /:
-										//except //\\, //}, //), //E //:
-			}
-			
-			tmp = parsestr1(d, (*tmp2) ? tmp2+2 : tmp2);
-			if(tmp){
-/*
-			tmp5 = bucks;
-			tmp3 = point[0];
-			tmp4 = point[1];
-			ch1 = ch_zero;
-			digi = number;
-			val = value_;
-			stc = stack_;
-			exc = exec_;
-*/
-			    write_tpar(c, tmp2, ch);
-/*
-			exec_ = exc;
-			stack_ = stc;
-			value_ = val;
-			number = digi;
-			ch_zero = ch1;
-			point[1] = tmp4;
-			point[0] = tmp3;
-			bucks = tmp5;
-*/
-			}
-//			c = (*tmp2) ? tmp2+2 : tmp2;
-
 			return tmp;
 
 		    default: c--;
@@ -1178,7 +885,6 @@ char *parsestr2( struct parsestr *ptr, exec_fnctn *fn, char *d, char *c){		//use
     if(tmp = parsestr1(d, c) /*&& (ptr != NULL)*/){
 	ptr->ch = ch_zero;
 	ptr->num = number;
-	ptr->val = value_;
 	ptr->zero = point[0];	//if NULL -> restore_str is not made
 //	ptr->end = point[1];
     } else {
@@ -1201,55 +907,6 @@ char *restore_str( struct parsestr *ptr){	//note: in parsestring MUST BE-> "/]"
 	ptr->zero = NULL;
     }
     return ptr->end;
-}
-
-//if ptr == NULL -> just parse without writting to ptr
-char *parsestr2_s( struct parsestr *ptr, exec_fnctn *fn, char *d, char *c){		//use the pointers in struct
-	char *tmp;
-	unsigned char *tmp2, *tmp3,/* *tmp5,*/ ch;
-	unsigned long digi, val, stc, exc;
-
-
-//	tmp5 = bucks;
-	tmp2 = point[0];
-	tmp3 = point[1];
-	ch = ch_zero;
-	digi = number;
-	val = value_;
-	stc = stack_;
-	exc = exec_;
-//	unsigned char *beg = begin_;
-//	unsigned char *en = end_;
-
-
-	if(ptr){
-		tmp = parsestr2(ptr, fn, d, c);
-	} else {
-		struct strctexec *pexec = point_exec;
-		exec_fnctn *fnexec = fn_exec;
-		fn_exec = fn;	//the /e and /c functions
-		point_exec = NULL;//for new beginning
-
-		tmp = parsestr(d, c);
-
-		free_strctexec();//free this new beginning
-		fn_exec = fnexec;
-		point_exec = pexec;
-
-	}
-
-//	end_ = en;
-//	begin_ = beg;
-	exec_ = exc;
-	stack_ = stc;
-	value_ = val;
-	number = digi;
-	ch_zero = ch;
-	point[1] = tmp3;
-	point[0] = tmp2;
-//	bucks = tmp5;
-
-    return tmp;
 }
 
 int copy(FILE *read_f, FILE *write_f)	//used by rename_ aswell
@@ -1519,7 +1176,7 @@ char *get_var1(unsigned long long *size_ptr, char *var_index){
 		printf("No file: %s\n", ptr1);
 	    else{
 	    while(fgets(copybuf,sizeof(copybuf),fip) != NULL){
-		if((ptr1 = parsestr2_s(NULL, NULL, copybuf,var_index)) != NULL){
+		if((ptr1 = parsestr1_(copybuf,var_index)) != NULL){
 		    ptr = ptr1;
 		    break;
 		}
@@ -2035,12 +1692,12 @@ void reg_ticket(char *name, int type){
     char *str;
 //    if(type == 0){
     unsigned long long size;
-    if(/*type == 0*/ type != 1) size = strncpy_(NULL, name, 0);
-    else size = strlen(name);
+    if(/*type == 0*/ type != 1) size = strncpy_(NULL, name, 0)+1;
+    else size = strlen(name)+1;
 
-    if(size && (str = malloc(size+1))){
+    if(size > 1 && (str = malloc(size))){
 	if(/*type == 0*/ type != 1) strncpy_(str, name, size);
-	else { sprintf(str, "%s", name); str[size] = '\0';}
+	else sprintf(str, "%s", name);
     } else {
 	printf("ERR: len_size of argument <= 1 or unable allocate memory for ticket\n");
 	return;

@@ -1,0 +1,65 @@
+<html><head><TITLE>Gigabit SOHO NAS</TITLE>
+<link rel="stylesheet" type="text/css" href="styles/default.css">
+</head>
+
+<BODY text=#000000 bgColor=#ffffff>
+<P><FONT class=style9>&nbsp;&nbsp;USB Setup</FONT></P>
+
+<table width="550" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td width="100%%" bgcolor="#FFFFFF" height="31">
+<div align="left">&nbsp;&nbsp;<img src="images/usb_detail.gif" usemap="#Map" border="0"></div></td></tr>
+<tr height="5"><td></td></tr>
+</table><br>
+
+<table width="550" border="1" bordercolor="#FFFFFF" cellpadding="0" cellspacing="0">
+<!--		<tr bgcolor="#get_overall_bg">-->
+<td width=135 align=center class=style2>USB Class</td>
+<td width=135 align=center class=style2>Manufacturer</td>
+<td width=140 align=center class=style2>Device Name</td>
+<td width=140 align=center class=style2>USB 2.0/1.1</td></tr>
+<!--<td colspan=4 align=center class=style6><font color=\"#006666\">No USB Device Connected</font></td></tr>-->
+<!--	for(i=0;i<count;i++){
+		    for(j=0;j<USB_DATA[i].num_interface;j++){
+			color_count++;
+			if(color_count%2 == 1){
+			    strcpy(color,"#FFFFFF");
+			}
+			else{
+			    #if defined(NH230)
+				strcpy(color,"#AAE0FA");
+			#elif defined(LONGSHINE)
+						strcpy(color,"#FF0000");
+			#elif defined(MICRONET)
+						strcpy(color,"#EEFFFF");
+			#elif defined(NH221)
+				strcpy(color,"#6266AF");
+			#endif
+			}
+
+			if(!strcmp(USB_DATA[i].usbclass[j],"stor."))
+			    fprintf(out,"<tr bgcolor=%s><td width=135 align=center class=style6><font color=\"#006666\"><B>Storage</B></font></td>",color);
+			else if(!strcmp(USB_DATA[i].usbclass[j],"print"))
+			    fprintf(out,"<tr bgcolor=%s><td width=135 align=center class=style6><font color=\"#006666\"><B>Printer</B></font></td>",color);
+			else if(!strcmp(USB_DATA[i].usbclass[j],"vend."))
+			    fprintf(out,"<tr bgcolor=%s><td width=135 align=center class=style6><font color=\"#006666\"><B>Other</B></font></td>",color);
+-->			<td width=135 align=center class=style6><font color="#006666"><B>??_?/proc/bus/usb/devices|S:  Manufacturer=??</B></font></td>
+			<td width=140 align=center class=style6><font color="#006666"><B>??_?/proc/bus/usb/devices|S:  Product=??</B></font></td>
+			<td width=140 align=center class=style6><font color="#006666"><B>USB ??_?/proc/bus/usb/devices|D:  Ver= /[/*/] ??</B></font></td></tr>
+
+			<td width=135 align=center class=style6><font color="#006666"><B>??_?/proc/bus/usb/devices|S:  Manufacturer=/*S:  Manufacturer=??</B></font></td>
+			<td width=140 align=center class=style6><font color="#006666"><B>??_?/proc/bus/usb/devices|S:  Product=/*S:  Product=??</B></font></td>
+			<td width=140 align=center class=style6><font color="#006666"><B>USB ??_?/proc/bus/usb/devices|D:  Ver=/*D:  Ver= /[/*/] ??</B></font></td></tr>
+
+			<td width=135 align=center class=style6><font color="#006666"><B>??_?/proc/bus/usb/devices|S:  Manufacturer=??</B></font></td>
+			<td width=140 align=center class=style6><font color="#006666"><B>??_?/proc/bus/usb/devices|S:  Product=??</B></font></td>
+			<td width=140 align=center class=style6><font color="#006666"><B>USB ??_?/proc/bus/usb/devices|D:  Ver= /[/*/] ??</B></font></td></tr>
+
+			<td width=135 align=center class=style6><font color="#006666"><B>??_?/proc/bus/usb/devices|S:  Manufacturer=??</B></font></td>
+			<td width=140 align=center class=style6><font color="#006666"><B>??_?/proc/bus/usb/devices|S:  Product=??</B></font></td>
+			<td width=140 align=center class=style6><font color="#006666"><B>USB ??_?/proc/bus/usb/devices|D:  Ver= /[/*/] ??</B></font></td></tr>
+
+</table>
+<!--#include cgi="lsusb_table" -->
+<pre><!--#incl ude file="/proc/bus/usb/devices" --></pre>
+</body></html>

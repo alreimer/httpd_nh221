@@ -58,17 +58,17 @@ Periodically change the superuser name and password to ensure security.</td></tr
     if_changed "swap_enable"{
 	if "_%swap_enable:1/" {
 print "enabled";
-	    system "swapon -a";
+//	    system "swapon -a";
 	}
 	if "_%swap_enable:0/" {
 print "not_enabled";
-	    system "swapoff -a";
+//	    system "swapoff -a";
 	}
     }
 
 //    if_changed "sleep_mode"{
 //Take fresh value of sleep_mode. Command is getting from init.d/S11mount
-    shell "hdparm -S??_%sleep_mode?? /dev/sda";
+//    shell "hdparm -c1 -S??_%sleep_mode?? /dev/hda";
 //    }
 
     savecfg;

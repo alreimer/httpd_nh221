@@ -10,15 +10,15 @@
     <table>
 	<tr><td>Password:<input type="text" size="30" id="password"></td>
 	<td>
-		<form method="Get" name="soho"><input type="button" value="Submit" onclick="get_md5();"></form>
+	<form method="post" name="soho" action="index.htm"><input type="hidden" id="pwd" name="t" value=""><input type="button" value="Submit" onclick="get_md5();"></form>
 	</td></tr>
     </table>
 <!--    <input id="result">-->
     <script src="js/md5.js"></script>
 <script language = "Javascript">
 function get_md5(){
-//document.getElementById('result').value = md5(document.getElementById('password').value);
-document.soho.action = md5(document.getElementById('password').value);
+document.getElementById('pwd').value = md5(document.getElementById('password').value);
+//document.soho.action = md5(document.getElementById('password').value);
 document.soho.submit();
 }
 </script>

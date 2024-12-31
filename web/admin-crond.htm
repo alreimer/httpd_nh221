@@ -28,7 +28,7 @@ file="side.inc?i=3" -->
 </form>
 
 <!-- TABLE: cron_files
-#-> get_files: /etc/crontab
+#-> get_files: ./etc/crontab
 END_TABLE -->
 
 <table border="0" width="70%" height="50" align="center">
@@ -53,7 +53,7 @@ END_TABLE -->
 <tr><td colspan="4">
 <form method="post" name="host_" action="crontab.cgi">
 <textarea name="crontab" cols="80" rows="20" onkeydown="insertTab(this, event);">
-<!-- #include file="/etc/crontab/root" -->
+<!-- #include file="./etc/crontab/root" -->
 </textarea></td></tr>
 <!--see examples from ftp-conf, ftp-passw, ftp-mod and serv-ftp-->
 <tr><td></td><td><!--Example...--></td>
@@ -73,7 +73,7 @@ END_TABLE -->
 </body></html>
 <!-- CGI: crontab.cgi
 	remove_chars "\r::_#crontab";
-	save_file "_#crontab:/etc/crontab/root";
+	save_file "_#crontab:./etc/crontab/root";
 	write_par "_etc_save:1";
 	boot_page "admin-crond.htm";
 END_CGI -->
@@ -85,7 +85,7 @@ END_CGI -->
 	    print "<pre>False file</pre></td></tr></table><a href=\"admin-crond.htm\">Back</a></table></body></html>";
 	    exit_cgi ;
 	}
-	shell "touch \"/etc/crontab/??_#file??\"";
+	shell "touch \"./etc/crontab/??_#file??\"";
 	write_par "_etc_save:1";
 	boot_page "admin-crond.htm";
 END_CGI -->

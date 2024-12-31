@@ -1,135 +1,179 @@
 <!-- added by RAW -->
-<!--#include area="0:firmware" area="0:file_name" area="0:nfile"
-file="head.inc?name=Home%20Page" 
-file="side.inc?i=8&helper=1" -->
+<!--#include area="0:firmware" area="0:file_name" area="0:nfile"-->
+<!--#include exchange="dir.cgi" exchange="list_show.cgi" exchange="ch_lists.cgi" 
+exchange="file_upload.cgi" exchange="file_qremove.cgi" exchange="file_remove.cgi" exchange="pkg_install.cgi" -->
 
-<table id="maintab" height=290 align="center"><tr>
-<td align="center" valign="top"><br>
-<table id="header" align="center"><tr><td><b>Packages :: Upload/Remove-files and Install-pkg</b></td></tr></table>
-<br>
-<!--<table border="0" width="70%" height="40" align="center">
-
-<tr><td width=2% valign=top></td>
-<td width=80% align=left><font color="#FFFFFF" size=2 face="Arial, Helvetica, sans-serif"><b>Please provide .</b></font></td></tr></table>-->
-<br>
-<table border="0" width="70%" height="50" align="center">
-<tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;ls -l files:</font></b></td><td></td><td></td></tr>
-<tr><td colspan="4">
-<!-- TABLE:file
-#-> get_ofiles: /mnt/packages
+<!-- CGI: dir.cgi
+	free_tbl "file";
+	print "
+?TABLE: file
+#-> get_ofiles: mnt/packages
 check:/l.lipk\0
-END_TABLE -->
-<table border="0" width="100%" height="40" align="center">
-<!-- #include table="file:file::<tr><td><pre>?@@cd /mnt/packages/; ls -l \"?$\" @@?</pre></td><td><a href=\"file_remove.cgi?file_0=?#\">remove</a></td><td><a href=\"pkg_install.cgi?file_0=?#+\">install</a></td></tr>\n" -->
+END_TABLE?
+";
+	boot_cgi "list_show.cgi";
+END_CGI -->
+
+
+<!-- CGI: list_show.cgi
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=8&helper=1";
+
+print "
+<table id=\"maintab\" height=290 align=\"center\"><tr>
+<td align=\"center\" valign=\"top\"><br>
+<table id=\"header\" align=\"center\"><tr><td><b>Packages :: Upload/Remove-files and Install-pkg</b></td></tr></table>
+<br>";
+    my_shell "[ ! -d \"mnt/packages\" ] && echo -n \"<pre>Folder /mnt/packages not exist!</pre>\"";
+print "
+<br>
+<table border=\"0\" width=\"70%\" height=\"50\" align=\"center\">
+<tr><td></td><td id=\"varbox-list-name\"><b><font size=\"3\">&nbsp;ls -l files:</font></b></td><td></td><td></td></tr>
+<tr><td>";
+	    set_tbl "file != 0"{
+		print "<a href=\"ch_lists.cgi?dir=back\">back</a>";
+	    }
+print "</td><td></td><td id=\"varbox-list-val\"></td><td>";
+	    if "_**$file+20:" {
+		print "<a href=\"ch_lists.cgi?dir=next\">next</a>";
+	    }
+print "
+</td></tr>
+<tr><td colspan=\"4\">
+<table border=\"0\" width=\"100%\" height=\"40\" align=\"center\">
+?table?:20:file:file::<tr><td><pre>?@@cd mnt/packages/; ls -l \"?$\" @@?</pre></td><td><a href=\"file_qremove.cgi?file_0=?#\">remove</a></td><td><a href=\"pkg_install.cgi?file_0=?#+\">install</a></td></tr>\n
 </table>
 </td></tr>
+<tr><td>";
+	    set_tbl "file != 0"{
+		print "<a href=\"ch_lists.cgi?dir=back\">back</a>";
+	    }
+print "</td><td></td><td id=\"varbox-list-val\"></td><td>";
+	    if "_**$file+20:" {
+		print "<a href=\"ch_lists.cgi?dir=next\">next</a>";
+	    }
+print "
+</td></tr>
 <tr><td></td><td></td>
-<td id="varbox-list-val">
+<td id=\"varbox-list-val\">
 </td><td></td></tr>
 </table>
 
 <br>
-<table border="0" width="70%" height="50" align="center">
-<form name=form1 method="POST" enctype="multipart/form-data" action="file_upload.cgi">
-<tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;Upload file:</font></b></td><td></td><td></td></tr>
-<tr><td colspan="4">
+<table border=\"0\" width=\"70%\" height=\"50\" align=\"center\">
+<form name=form1 method=\"POST\" enctype=\"multipart/form-data\" action=\"file_upload.cgi\" onSubmit=\"return check_form()\">
+<tr><td></td><td id=\"varbox-list-name\"><b><font size=\"3\">&nbsp;Upload file:</font></b></td><td></td><td></td></tr>
+<tr><td colspan=\"4\">
 <br><b>Please input the file name with full path:</b></td></tr>
-<tr><td valign=top colspan="4">
-<input type=file name=ufile size=50 maxlength=50 value=""></td></tr>
+<tr><td valign=top colspan=\"4\">
+<input type=file name=ufile size=50 maxlength=50 value=\"\"></td></tr>
 
-<tr><td></td><td></td><td id="varbox-list-val"><input type=submit name=submit value="Apply" onclick="check_form()">&nbsp;<input type=reset value="Reset"></td></tr>
+<tr><td></td><td></td><td id=\"varbox-list-val\"><input type=submit name=submit value=\"Apply\">&nbsp;<input type=reset value=\"Reset\"></td></tr>
 </form></table>
 <br>
-<!--<table border="0" width="70%" height="50" align="center">
-<form method="GET" action="file_remove.cgi" name="file-remove">
-<tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;Remove file:</font></b></td><td></td><td></td></tr>
-<tr><td colspan="4"><input type="text" name="file_name" size="60"></td></tr>
-<tr><td></td><td>Example:...</td>
-<td id="varbox-list-val"><input type="submit" name="remove" value="Apply">&nbsp;<input type="reset" value="Cancel"></td><td></td></tr>
-</table></form>
-<br>-->
-
-<!--
-<table id="info" align="center">
-<tr><td><br>Syslog info <a href="syslog.cgi">here</a></td></tr>
-<tr><td>Smbpasswd <a href="serv-smb_add.htm">here</a></td></tr>
-</table>
--->
 <table><tr>
-<td align="center"><br><input type="button" value="Back" onclick="history.back()"></td></tr>
+<td align=\"center\"><br><input type=\"button\" value=\"Back\" onclick=\"history.back()\"></td></tr>
 </table>
 
 
-<script language="JavaScript">
+<script language=\"JavaScript\">
 function help_popUp() {
 var g = window.open('http://??_srv_ip??:??_srv_port??/help/pkgs-upload.help', 'name', 'toolbar=0,scrollbars=1,location=0,statusbar=1,menubar=0,resizable=1,width=700,height=700');
 }
 function check_form(){
     un = document.form1.ufile.value;
     if (check_un()==0){
-        warming_b("File Path");
+        warming_b(\"File Path\");
         document.form1.ufile.focus();
-        history.go(0);
-        return;
+//        history.go(0);
+        return false;
     }// else
 //        self.open('updatepop.html','OK','alwaysRaised,resizable,scrollbars,width=275,height=120');
 //        location.replace('updatepop.html');	//will be made by serever: rAW
+return true;
 }
 function check_un(){
     var ok=1;
 //    var count = document.form1.ufile.length;	//check, this unused value(undefined) : RAW
-//alert(un +"  "+ count);
-    if (un==null||un==""){
+//alert(un +\"  \"+ count);
+    if (un==null||un==\"\"){
         ok=0;
     }
     return ok;
 }
 function warming_b(){
-    alert(arguments[0]+": Can not be blank!");
+    alert(arguments[0]+\": Can not be blank!\");
 }
 </script>
-</td></tr></table></body></html>
+</td></tr></table></body></html>";
+END_CGI -->
+<!--#include cgi="dir.cgi" -->
+
+<!-- CGI: ch_lists.cgi
+	if "_#dir:back/" {
+	    set_tbl "file != 0"{
+		set_tbl "file -= 20";
+	    }
+	}
+
+	if "_#dir:next/" {
+	    if "_**$file+20:" {
+		set_tbl "file += 20";
+	    }
+	}
+
+	boot_cgi "list_show.cgi";
+END_CGI -->
+
+
 
 <!-- CGI: file_upload.cgi
     get_file "./JavaReturn_.inc?name=Home%20Page&i=8";
 
     print "<tr><td><pre>";
-//	save_bfile "ufile:0:/L/L/[/*.ipk/:/mnt/packages/*";
+//	save_bfile "ufile:0:/L/L/[/*.ipk/:mnt/packages/*";
 	save_bfile "ufile:0:firmware:file_name"{
-	    print "error</pre></td></tr></table><a href=\"pkgs-upload.htm\">Back</a></table></body></html>";
+	    print "error</pre></td></tr></table><a href=\"dir.cgi\">Back</a></table></body></html>";
 	    exit_cgi;
 	}
 	write_ppar "file_name:nfile:/L/L/[/*.ipk/"{
 	    print "Error: ??file_name?? not matches to parsestr
-</pre></td></tr></table><a href=\"pkgs-upload.htm\">Back</a></table></body></html>";
+</pre></td></tr></table><a href=\"dir.cgi\">Back</a></table></body></html>";
 	    exit_cgi;
 	}
-	save_file_full "firmware:/mnt/packages/??nfile??";
+	save_file_full "firmware:mnt/packages/??nfile??";
 
-    print "</pre></td></tr></table><a href=\"pkgs-upload.htm\">Back</a></table></body></html>";
+    print "</pre></td></tr></table><a href=\"dir.cgi\">Back</a></table></body></html>";
 
+END_CGI -->
+<!-- CGI: file_qremove.cgi
+	get_file "./JavaReturn_.inc?name=Home%20Page&i=8";
+	nnot "_@file:/\ "{
+	    print "<pre>False folder ID: ??_#file_0??</pre></td></tr></table><a href=\"list_show.cgi\">Back</a></table></body></html>";
+	    exit_cgi ;
+	}
+	print "Do You really want to delete folder: /mnt/packages/??_@file??</td></tr></table><a href=\"file_remove.cgi?file_0=??_#file_0??\">Yes</a>&nbsp;&nbsp;<a href=\"list_show.cgi\">No</a></table></body></html>";
 END_CGI -->
 <!-- CGI: file_remove.cgi
     get_file "./JavaReturn_.inc?name=Home%20Page&i=8";
 	nnot "_@file:/\ "{
-	    print "<pre>False folder ID: ??_#file_0??</pre></td></tr></table><a href=\"pkgs-upload.htm\">Back</a></table></body></html>";
+	    print "<pre>False folder ID: ??_#file_0??</pre></td></tr></table><a href=\"list_show.cgi\">Back</a></table></body></html>";
 	    exit_cgi ;
 	}
     print "<tr><td>Remove file:</td><td> ??_@file??</td></tr>
     <tr><td colspan=\"2\"><pre>";
-    my_shell "rm \"/mnt/packages/??_@file??\"; [ $? -eq 0 ] && echo \"File ??_@file?? removed\"";
-    print "</pre></td></tr></table><a href=\"pkgs-upload.htm\">Back</a></table></body></html>";
+    my_shell "rm \"mnt/packages/??_@file??\"; [ $? -eq 0 ] && echo \"File ??_@file?? removed\"";
+    print "</pre></td></tr></table><a href=\"dir.cgi\">Back</a></table></body></html>";
 
 END_CGI -->
 <!-- CGI: pkg_install.cgi
     get_file "./JavaReturn_.inc?name=Home%20Page&i=8";
 	nnot "_@file:/\ "{
-	    print "<pre>False folder ID: ??_#file_0??</pre></td></tr></table><a href=\"pkgs-upload.htm\">Back</a></table></body></html>";
+	    print "<pre>False folder ID: ??_#file_0??</pre></td></tr></table><a href=\"list_show.cgi\">Back</a></table></body></html>";
 	    exit_cgi ;
 	}
     print "<tr><td>Install pkg:</td><td> ??_@file??</td></tr>
     <tr><td colspan=\"2\"><pre>";
-    my_shell "ipkg-cl install \"/mnt/packages/??_@file??\"";
-    print "</pre></td></tr></table><a href=\"pkgs-upload.htm\">Back</a></table></body></html>";
+    my_shell "ipkg-cl install \"mnt/packages/??_@file??\"";
+    print "</pre></td></tr></table><a href=\"dir.cgi\">Back</a></table></body></html>";
 
 END_CGI -->

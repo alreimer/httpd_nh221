@@ -1,4 +1,4 @@
-<!--#include par="20:ip:IP:" par="3:port:ADMIN_PORT:" readcfg -->
+<!--#include par="20:ip:IP:" par="3:port:ADMIN_PORT:" readcfg area="0:firmware" area="0:file_name" area="0:nfile" -->
 <!--#include file="head.inc?name=Home%20Page" 
 file="side.inc?i=3" -->
 
@@ -11,22 +11,68 @@ file="side.inc?i=3" -->
 <tr><td bgcolor="#d6efff"><font color="#000000"><b>Restart the system</b></font></td><td width="30%" bgcolor="#FFFFFF" align="center"><input type="hidden" name="seconds" value="80"><input type="submit" name="reset" value="Yes"></td></tr></form>
 <tr><td align="left" colspan="2"><font size=2>It may take several minutes.<br>Please wait and ensure a safe operating environment.<br><br>Note: When the reboot is completed, it will return to the "Home" page.</font></td></tr>
 
-<form method="Get" action="Poweroff_System.cgi">
-<tr><td bgcolor="#d6efff"><font color="#000000"><b>Poweroff the system</b></font></td><td width="30%" bgcolor="#FFFFFF" align="center"><input type="hidden" name="seconds" value="80"><input type="submit" name="reset" value="Yes"></td></tr></form>
-<tr><td align="left" colspan="2"><font size=2>It may take several minutes.</font></td></tr>
-
 <form method="Get" action="Factory_default.cgi">
 <tr><td bgcolor="#d6efff"><font color="#000000"><b>Reset to factory default</b></font></td><td width="30%" bgcolor="#FFFFFF" align="center"><input type="hidden" name="seconds" value="80"><input type="submit" name="reset" value="Yes"></td></tr></form>
-<tr><td align="left" colspan="2"><font size=2>It may take several minutes. Current configuration will be lost. <br>Please wait and ensure a safe operating environment.<br><br>Note: When the reset is completed, it will return to the "Home" page.<br>/etc folder will be saved automatically.</font></td></tr>
+<tr><td align="left" colspan="2"><font size=2>It may take several minutes. Current configuration will be lost. <br>Please wait and ensure a safe operating environment.<br><br>Note: When the reset is completed, it will return to the "Home" page.</font></td></tr>
 
-</table><br>
+<form name=form1 method="POST" enctype="multipart/form-data" action="Firmware_upgrade.cgi">
+<!--<tr><tdalign=middle valign=center><p align=left>
+<!-- <form name=form1 method="POST" action="/Firmware_upgrade.cgi"> -->
+<!--<font size=2 face="Arial, Helvetica, sans-serif"><b>
 
+<!--<input type=radio value=url name=ufrom checked>-->
+<!--
+<input type=hidden value="url" name="ufrom">
+Please input the file name with full source URL<br>
+<font color="ff0000"></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Note: this URL must include "<b>http://</b>" protocol header.<br>&nbsp;</td></tr>
+<tr><td valign=top>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<input type=text name=ufile size=60 maxlength=150 value="http://">
+</td></tr>
+-->
+<tr><td bgcolor="#d6efff"><font color="#000000"><b>Download firmware <a href="_Get_firmware.cgi">here</a></b></font></td></tr>
+<tr><td bgcolor="#d6efff"><font color="#000000"><b>Upgrade the system</b></font></td></tr>
+<tr><TD valign=center colspan="2">
+<input type=hidden value="file" name="ufrom">
+<br><font color="#FFFFFF"><b>Please input the file name with full path:</b></font></td></tr>
+<tr><td valign=top colspan="2">
+<!-- <input type=radio value=local name=ufrom > -->
+<input type=file name=ufile size=50 maxlength=50 value=""></td></tr>
+
+<tr><td align="center"><br><input type=submit name=submit value="Apply" onclick="check_form()">&nbsp;<input type=reset value="Reset">&nbsp;<input type="button" value="Back" onclick="history.back()"></td></tr></form></table><br>
+
+
+
+<script language="JavaScript">
+function check_form(){
+    un = document.form1.ufile.value;
+    if (check_un()==0){
+        warming_b("File Path");
+        document.form1.ufile.focus();
+        history.go(0);
+        return;
+    }// else
+//        self.open('updatepop.html','OK','alwaysRaised,resizable,scrollbars,width=275,height=120');
+//        location.replace('updatepop.html');	//will be made by serever: rAW
+}
+function check_un(){
+    var ok=1;
+//    var count = document.form1.ufile.length;	//check, this unused value(undefined) : RAW
+//alert(un +"  "+ count);
+    if (un==null||un==""){
+        ok=0;
+    }
+    return ok;
+}
+function warming_b(){
+    alert(arguments[0]+": Can not be blank!");
+}
+</script>
 
 </table>
 </body>
 </html>
 <!-- CGI: Restart_System.cgi
-	get_file "./JavaReturn_h.htm";
+	get_file "./JavaReturn_.inc?name=Home%20Page&i=6";
         print "<td width=\"100%%\" bgcolor=\"#FFFFFF\">";
 	print "<form name=\"host\"><font size=3>&nbsp;&nbsp;The system will restart automatically and reload in <input type=\"text\" name=\"time\" value=\" ";
 	get_var "_#seconds";
@@ -43,28 +89,24 @@ file="side.inc?i=3" -->
 	    document.host.time.value = sec;
 	    timerId = setTimeout(\"settime()\", 1000);
 	    }else{
-	    top.location.href=('http://??_srv_ip??:??_srv_port??');}}
+	    top.location.href=('http://";
+	get_var "ip";
+	print ":";
+	get_var "port";
+	print "');}}
 	    </script></body></html>";
-
-	system "/sbin/reboot &";
-END_CGI -->
-<!-- CGI: Poweroff_System.cgi
-        print "PowerOff";
-
-	system "/sbin/poweroff &";
+//	system "/sbin/reboot";
 END_CGI -->
 <!-- CGI: Factory_default.cgi
-	get_file "./JavaReturn_h.htm";
+	get_file "./JavaReturn_.inc?name=Home%20Page&i=3";
     print "script not really work [/etc is busy]";
         print "<td width=\"100%%\" bgcolor=\"#FFFFFF\">";
 	print "<form name=\"host\"><font size=3>&nbsp;&nbsp;The system will reset to factory default automatically and reload in <input type=\"text\" name=\"time\" value=\" ";
 	get_var "_#seconds";
-	print " \" size=\"3\" readonly> seconds.<br>&nbsp;&nbsp;Please wait in order to ensure that the operating environment is safe.<br>&nbsp;&nbsp;/etc folder will be saved automatically.</font></FORM></td></tr>";
+	print " \" size=\"3\" readonly> seconds.<br>&nbsp;&nbsp;Please wait in order to ensure that the operating environment is safe.</font></FORM></td></tr>";
 	print "<tr height=\"5\"><td></td></tr>
 	</table>";
 
-system "sync;sync;sync; cd /; /bin/umount /etc";
-init;
     	print "<script language=\"javascript\">
 	    sec = document.host.time.value;
 	    settime();
@@ -74,12 +116,84 @@ init;
 	    document.host.time.value = sec;
 	    timerId = setTimeout(\"settime()\", 1000);
 	    }else{
-	    top.location.href=('http://??_srv_ip??:??_srv_port??');}}
+	    top.location.href=('http://";
+	get_var "ip";
+	print ":";
+	get_var "port";
+	print "');}}
 	    </script></body></html>";
 
-	system "/etc/save_config.sh";
-	system "/sbin/reboot &";
+
 //    my_system "/etc/btn_config.sh rstbtn_long" ; //restore to default (script not really work [/etc is busy])
-//	system "/etc/reset_config.sh";
+END_CGI -->
+<!-- CGI: Firmware_upgrade.cgi
+	get_file "./JavaReturn_.htm";
+
+        print "<td width=\"100%%\" bgcolor=\"#FFFFFF\">";
+	print "<form name=\"host\"><font size=3>&nbsp;&nbsp;The auto firmware update will connect to web site within <input type=\"text\" name=\"time\" ";
+     //time to upgrade
+	print "value=\"80\" ";
+	print "size=\"3\" readonly> seconds.<br>&nbsp;&nbsp;Please wait in order to ensure that the operating environment is safe.</font></form></td></tr>";
+	print "<tr height=\"5\"><td></td></tr>
+	</table>";
+
+    	print "<script language=\"javascript\">
+	    sec = document.host.time.value;
+	    settime();
+	    function settime(){
+	    if (sec > 0) {
+	    sec--;
+	    document.host.time.value = sec;
+	    timerId = setTimeout(\"settime()\", 1000);
+	    }else{
+	    top.location.href=('http://";
+	get_var "ip";
+	print ":";
+	get_var "port";
+	print "');}}
+	    </script></body></html>";
+
+/*
+    //andy 20040927
+//    system "/etc/inetd stop";
+    print "/etc/inetd stop\n";
+    // stop smbd,nmbd,pnmd,inetd
+//    system "/etc/smb stop";
+    print "/etc/smb stop\n";
+//    system "/etc/pnmd stop";
+    print "/etc/pnmd stop\n";
+//	system "/etc/init.d/upnp.sh stop";
+	print "/etc/init.d/upnp.sh stop\n";
+
+#define UPDATE_STORAGE			"/dev/mtdblock5"
+#define UPDATE_STORAGE1	    "/dev/mtd_kernel"
+#define UPDATE_STORAGE2	    "/dev/mtd_root_fs"
+#define UPDATE_STORAGE3	    "/dev/mtd_ap_fs"
+*/
+
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=6";
+
+    print "<tr><td><pre>";
+//	save_bfile "ufile:10000:/[/*.web/:mnt/firmware.txt";
+	save_bfile "ufile:10000:firmware:file_name"{
+	    print "error</pre></td></tr></table><a href=\"admin-reset.htm\">Back</a></table></body></html>";
+	    exit_cgi;
+	}
+	write_ppar "file_name:nfile:/[/*.web/"{
+	    print "Error: ??file_name?? not matches to parsestr
+</pre></td></tr></table><a href=\"admin-reset.htm\">Back</a></table></body></html>";
+	    exit_cgi;
+	}
+	save_file_full "firmware:/mnt/firmware.txt";
+
+    print "</pre></td></tr></table><a href=\"admin-reset.htm\">Back</a></table></body></html>";
+
+//	system "/sbin/reboot";
+
 END_CGI -->
 
+<!-- CGI: _Get_firmware.cgi
+	print "HTTP/1.0 200 OK\nContent-Disposition: attachment; filename=firmware.web;\n Server: thttpd/2.25b\nExpires: 0\n\n";
+//#define UPDATE_STORAGE			"/dev/mtdblock5"
+	get_file "./tmp/firmware.web";
+END_CGI -->

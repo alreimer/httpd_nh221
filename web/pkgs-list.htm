@@ -1,60 +1,101 @@
 <!-- added by RAW -->
 <!--#include area="92100:AREA-1" -->
-<!--#include file="head.inc?name=Home%20Page" 
-file="side.inc?i=8&helper=1" -->
+<!--#include exchange="dir.cgi" exchange="list_show.cgi" exchange="ch_lists.cgi" 
+exchange="pkg_remove.cgi" -->
 
-<script language="JavaScript">
+<!-- CGI: dir.cgi
+	free_tbl "list";
+	write_system ":AREA-1:ipkg-cl -V 0 list_installed 2>/dev/null | cut -d' ' -f1";
+	print "
+?TABLE: list
+#-> parse_area: AREA-1
+while:/[/*/]\n
+if:
+END_TABLE?
+";
+	boot_cgi "list_show.cgi";
+END_CGI -->
+
+
+<!-- CGI: list_show.cgi
+    get_file "./JavaReturn_.inc?name=Home%20Page&i=8&helper=1";
+
+print "
+<script language=\"JavaScript\">
 function help_popUp() {
 var g = window.open('http://??_srv_ip??:??_srv_port??/help/pkgs-list.help', 'name', 'toolbar=0,scrollbars=1,location=0,statusbar=1,menubar=0,resizable=1,width=700,height=700');
 }
 </script>
-<table id="maintab" height=290 align="center"><tr>
-<td align="center" valign="top"><br>
-<table id="header" align="center"><tr><td><b>Packages :: List and Remove packages</b></td></tr></table>
+<table id=\"maintab\" height=290 align=\"center\"><tr>
+<td align=\"center\" valign=\"top\"><br>
+<table id=\"header\" align=\"center\"><tr><td><b>Packages :: List and Remove packages</b></td></tr></table>
 <br>
-<!--<table border="0" width="70%" height="40" align="center">
-
-<tr><td width=2% valign=top></td>
-<td width=80% align=left><font color="#FFFFFF" size=2 face="Arial, Helvetica, sans-serif"><b>Please provide .</b></font></td></tr></table>-->
 <br>
-<table border="0" width="70%" height="50" align="center">
-<tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;List of packages:</font></b></td><td></td><td></td></tr>
-<tr><td colspan="4">
-<!--#include wr_shell=":AREA-1:ipkg-cl -V 0 list_installed 2>/dev/null | cut -d' ' -f1" -->
-<!-- TABLE:list
-#-> parse_area: AREA-1
-while:/[/*/]\n
-if:
-END_TABLE -->
-<table border="0" width="100%" height="40" align="center">
-<!--#include table="list_0:list_0::<tr><td><pre>?@@ ipkg-cl -V 0 list \"?$\" 2>/dev/null @@?</pre></td><td><a href=\"pkg_remove.cgi?list_0=?#+\">remove</a></td></tr>\n" -->
+<table border=\"0\" width=\"70%\" height=\"50\" align=\"center\">
+<tr><td></td><td id=\"varbox-list-name\"><b><font size=\"3\">&nbsp;List of packages:</font></b></td><td></td><td></td></tr>
+<tr><td>";
+	    set_tbl "list != 0"{
+		print "<a href=\"ch_lists.cgi?dir=back\">back</a>";
+	    }
+print "</td><td></td><td id=\"varbox-list-val\"></td><td>";
+	    if "_**$list+20:" {
+		print "<a href=\"ch_lists.cgi?dir=next\">next</a>";
+	    }
+print "
+</td></tr>
+<tr><td colspan=\"4\">
+<table border=\"0\" width=\"100%\" height=\"40\" align=\"center\">
+?table?:20:list_0:list_0::<tr><td><pre>?@@ ipkg-cl -V 0 list \"?$\" 2>/dev/null @@?</pre></td><td><a href=\"pkg_remove.cgi?list_0=?#+\">remove</a></td></tr>\n
 </table>
 </td></tr>
+<tr><td>";
+	    set_tbl "list != 0"{
+		print "<a href=\"ch_lists.cgi?dir=back\">back</a>";
+	    }
+print "</td><td></td><td id=\"varbox-list-val\"></td><td>";
+	    if "_**$list+20:" {
+		print "<a href=\"ch_lists.cgi?dir=next\">next</a>";
+	    }
+print "
+</td></tr>
 <tr><td></td><td></td>
-<td id="varbox-list-val">
+<td id=\"varbox-list-val\">
 </td><td></td></tr>
 </table>
 
-<!--
-<table id="info" align="center">
-<tr><td><br>Syslog info <a href="syslog.cgi">here</a></td></tr>
-<tr><td>Smbpasswd <a href="serv-smb_add.htm">here</a></td></tr>
-</table>
--->
 <table><tr>
-<td align="center"><br><input type="button" value="Back" onclick="history.back()"></td></tr>
+<td align=\"center\"><br><input type=\"button\" value=\"Back\" onclick=\"history.back()\"></td></tr>
 </table>
 
-</td></tr></table></body></html>
+</td></tr></table></body></html>";
+END_CGI -->
+<!--#include cgi="dir.cgi" -->
+
+<!-- CGI: ch_lists.cgi
+	if "_#dir:back/" {
+	    set_tbl "list != 0"{
+		set_tbl "list -= 20";
+	    }
+	}
+
+	if "_#dir:next/" {
+	    if "_**$list+20:" {
+		set_tbl "list += 20";
+	    }
+	}
+
+	boot_cgi "list_show.cgi";
+END_CGI -->
+
 <!-- CGI: pkg_remove.cgi
     get_file "./JavaReturn_.inc?name=Home%20Page&i=8";
 	nnot "_@list:/\ "{
-	    print "<pre>False folder ID: ??_#list_0??</pre></td></tr></table><a href=\"pkgs-list.htm\">Back</a></table></body></html>";
+	    print "<pre>False folder ID: ??_#list_0??</pre></td></tr></table><a href=\"list_show.cgi\">Back</a></table></body></html>";
 	    exit_cgi ;
 	}
     print "<tr><td>Remove package:</td><td> ??_@list??</td></tr>
     <tr><td colspan=\"2\"><pre>";
     my_shell "ipkg-cl remove \"??_@list??\"";
-    print "</pre></td></tr></table><a href=\"pkgs-list.htm\">Back</a></table></body></html>";
+    print "</pre></td></tr></table><a href=\"dir.cgi\">Back</a></table></body></html>";
 
 END_CGI -->

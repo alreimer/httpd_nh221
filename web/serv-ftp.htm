@@ -5,6 +5,7 @@
 <!--#include readcfg -->
 <!--#include file="head.inc?name=Home%20Page&body=onload%3D\"check_ftp()\"" 
 file="side.inc?i=4" -->
+
 <script src="/js/tools.js"></script>
 
 <table id="maintab" height=290 align="center"><tr>
@@ -54,7 +55,7 @@ file="side.inc?i=4" -->
 <tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;FTP Config File:</font></b></td><td></td><td></td></tr>
 <tr><td colspan="4">
 <textarea name="ftp_cfg" cols="80" rows="20" onkeydown="insertTab(this, event);">
-<!--#include file="/etc/vsftpd.conf" -->
+<!--#include file="etc/vsftpd.conf" -->
 </textarea></td></tr>
 <!--see examples from ftp-conf, ftp-passw, ftp-mod and serv-ftp-->
 <tr><td></td><td></td>
@@ -127,38 +128,27 @@ else
 <!-- CGI: Set_FTP.cgi
     fill_cfg "ftp_enable:ftp_port";
 
-    set "a = 0";
-    if_changed "ftp_enable"{
-	set "a = 1";
-    }
-    if_changed "ftp_port"{
-	set "a = 2";
-    }
-    if_set "a >= 1"{
     if "_&ftp_enable:1/" {
-	    change_line "/etc/inetd.conf:/*vsftpd:??_&ftp_port??		stream	tcp	nowait	root	/sbin/vsftpd /sbin/vsftpd\n"{
-		shell "echo \"??_&ftp_port??		stream	tcp	nowait	root	/sbin/vsftpd /sbin/vsftpd\" >> /etc/inetd.conf";
+	    change_line "./etc/inetd.conf:/*vsftpd:??_&ftp_port??		stream	tcp	nowait	root	/sbin/vsftpd /sbin/vsftpd\n"{
+		shell "echo \"??_&ftp_port??		stream	tcp	nowait	root	/sbin/vsftpd /sbin/vsftpd\" >> ./etc/inetd.conf";
 	    }
     }
     if "_&ftp_enable:0/" {
-	    change_line "/etc/inetd.conf:/*vsftpd:#??_&ftp_port??		stream	tcp	nowait	root	/sbin/vsftpd /sbin/vsftpd\n"{
-		shell "echo \"#??_&ftp_port??		stream	tcp	nowait	root	/sbin/vsftpd /sbin/vsftpd\" >> /etc/inetd.conf";
+	    change_line "./etc/inetd.conf:/*vsftpd:#??_&ftp_port??		stream	tcp	nowait	root	/sbin/vsftpd /sbin/vsftpd\n"{
+		shell "echo \"#??_&ftp_port??		stream	tcp	nowait	root	/sbin/vsftpd /sbin/vsftpd\" >> ./etc/inetd.conf";
 	    }
-    }
-    system "killall vsftpd";
-    // system "/etc/cfg_inetd";
-    system "/etc/init.d/S30inetd restart";
     }
 
     savecfg;
+    // system "etc/cfg_inetd";
+    // system "etc/init.d/S30inetd restart";
     boot_page "serv-ftp.htm";
 END_CGI -->
 
 <!-- CGI: Set_FTP_1.cgi
     remove_chars "\r::_#ftp_cfg";
-    save_file "_#ftp_cfg:/etc/vsftpd.conf";
-    system "killall vsftpd";
-    system "etc/init.d/S30inetd restart";
+    save_file "_#ftp_cfg:/vsftp.conf";
+    // system "etc/init.d/S30inetd restart";
     write_par "_etc_save:1";
     boot_page "serv-ftp.htm";
 END_CGI -->

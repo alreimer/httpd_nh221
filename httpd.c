@@ -3,7 +3,7 @@
  * Copyright (c) 1997-1999 D. Jeff Dionne <jeff@rt-control.com>
  * Copyright (c) 1998	   Kenneth Albanowski <kjahds@kjahds.com>
  * Copyright (c) 1999	   Nick Brok <nick@nbrok.iaehv.nl>
- * Copyright (c) 2009-2020 Alexander Reimer <alex_raw@rambler.ru>
+ * Copyright (c) 2009-2021 Alexander Reimer <alex_raw@rambler.ru>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,6 +50,8 @@
 #define O_BINARY 0
 #endif
 
+int Get_Security(char *test_ip);
+
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define FIRMWARE_BUF_SIZE	1024*80
 #define FIRMWARE_4M		    1000*950*4	  // 4M + 512 bytes, 4M for image, 512 bytes for version header
@@ -57,8 +59,6 @@
 
 config CONFIG;
 #include "include/config.h"
-
-int Get_Security(char *test_ip);
 
 //add by snop to get the method
 int method;
@@ -84,8 +84,10 @@ char check_ip[20];		//if == '\0'- so release ip.
 char dns_name[128];
 char etc_save[2];
 char buf[16384];
+//char buffer_[1024];//used in copy.c for showing values of stack or value_ or number
 //char *arg;
 char *file;
+char *file_path;
 //char os[6];
 
 int wauth;
@@ -155,6 +157,7 @@ int DoHTML(FILE *f, char *name, char *type){
     fprintf(f, print200ok_mime, type);
     //copy(infile,f); /* prints the page */
 //  handle_get(infile,f);
+    free_ticket();
     free_page_mem();		//free memory of page includes
     handle_get(data,f);
     free(data);
@@ -225,11 +228,12 @@ MIME_TYPES mime[] = {
 {".htm", "text/html", DoHTML},
 {".html", "text/html", DoHTML},
 {".help", "text/html", DoFile},
-{".css", "text/c6ss", DoFile},
+{".css", "text/css", DoFile},//was c6ss
 {".class", "application/java-vm", DoFile},
 {".js", "application/x-javascript", DoFile},
 {".txt", "text/plain", DoFile},
 {".tgz", "text/plain", DoFile},
+{".ico", "image/ico", DoFile},
 {"", "", NULL},
 };
 
@@ -293,6 +297,7 @@ int ParseReq(FILE *f, char *c){
 	r1++;
     }
     httpd_decode(c);
+//printf("decoded: %s\n", c);
     tt = check_ticket(c, 0);	//exchange ticket to file name
     if(tt != NULL) c = tt;
     tt = check_ticket(c, 1);	//get this filename throw password free
@@ -304,7 +309,7 @@ int ParseReq(FILE *f, char *c){
 	    fprintf(stderr, "MSG: ./ in string!\n");
 	    return 0;
 	}
-	if(*r == '/'){
+	if(*r == '/' && *(r+1) != '\0'){
 	    file = r + 1;
 	}
 	r++;
@@ -329,20 +334,25 @@ int ParseReq(FILE *f, char *c){
     printf("c='%s', r='%s'\narg='%s' file='%s'\n", c, r, arg, file);
 #endif
 
+    switch(method){
+	case M_GET:
+//printf("arg:%s\n", arg);
+	    handle_arg(0, arg);
+	    break;
+	case M_POST:
+	    if(method1 == POST_WEB_ENCODED){
+		handle_arg(0, postdata);
+	    }
+	    break;
+    }
+
 //printf("WEB_LOGIN: %s\n", CONFIG.WEB_LOGIN);
 if(wauth && tt == NULL){
-    if(wauth > 3){
-	fprintf(f, "HTTP/1.0 404 Not Found\n"
-		    "Content-type: text/html\n\n"
-		    "<html>\n<head><title>404 Authorisation overflow</title></head>\n"
-		    "<body bgcolor=\"#cc9999\" text=\"#000000\" link=\"#2020ff\" vlink=\"#4040cc\">\n"
-		    "<h2>Authorisation overflow</h2>\n"
-		    "<p>Login error. 3 Times. Please <a href=\"http://%s:%s\">try again</a> in a minute.</p></body>\n</html>\n",CONFIG.IP,CONFIG.ADMIN_PORT);
-	return 0;
-    }
-    if(*(CONFIG.WEB_LOGIN) != '\0'){
+    if((wauth <= 3) && *(CONFIG.WEB_LOGIN) != '\0'){
 //	printf("WEB_LOGIN isnot empty!\n");
-	if(!strcmp(file, CONFIG.WEB_LOGIN)){
+//	if(!strcmp(file, CONFIG.WEB_LOGIN)){
+	c = get_arg("t", NULL, 0);
+	if(c && !strcmp(c, CONFIG.WEB_LOGIN)){
 	    wauth = 0;
 	    c = "./index.htm";
 	} else {
@@ -350,6 +360,16 @@ if(wauth && tt == NULL){
 	    c = "./login.htm";
 	}
 	r = c + strlen(c);
+    }
+    if(wauth > 3){
+	fprintf(f, "HTTP/1.0 404 Not Found\n"
+		    "Content-type: text/html\n\n"
+		    "<html>\n<head><title>404 Authorisation overflow</title></head>\n"
+		    "<body bgcolor=\"#cc9999\" text=\"#000000\" link=\"#2020ff\" vlink=\"#4040cc\">\n"
+		    "<h2>Authorisation overflow</h2>\n"
+		    "<p>Login error. 3 Times. Please <a href=\"http://%s:%s\">try again</a> in a minute.</p></body>\n</html>\n",CONFIG.IP,CONFIG.ADMIN_PORT);
+	free_arg(0);
+	return 0;
     }
 }
 //printf("LOGIN:%s\n", c);
@@ -365,22 +385,12 @@ if(wauth && tt == NULL){
 //   |    |       ||
 //   c    file   r arg
 
-    switch(method){
-	case M_GET:
-	    handle_arg(0, arg);
-	    break;
-	case M_POST:
-	    if(method1 == POST_WEB_ENCODED){
-		handle_arg(0, postdata);
-	    }
-	    break;
-    }
 
     if (c[0] == '\0'){	strcat(c,"."); r++;}
 #ifdef DEBUG
     printf("c %s\n", c);
 #endif
-
+    file_path = c;
     if(!stat(c, &stbuf)){
 
 	if(tt == NULL){
@@ -397,7 +407,7 @@ if(wauth && tt == NULL){
 //		    r = end + 10;
 		}
 		r = buff + sprintf(buff, "%s/%s", c, r1);//to parse it after(r - points to end of name)
-		c = buff;
+		file_path = c = buff;
 		if(stat(c, &stbuf)){	// %dir%/index.htm - such file not exist
 #ifdef DO_DIR
 		    while(*c){if(*c == '/') r1=c; c++;}
@@ -446,17 +456,31 @@ NotFound:
     free_arg(0);
     return 0;
 }
+/*
+void my_fgetsss(char *b, unsigned int i, FILE *filef){
+    unsigned int len = 0;
+    int buf;
 
+    while(len < i){
+//	fflush(file);
+	buf = getc(filef);
+if(buf == '\r') printf("RR");
+printf("%c", buf);
+	if((buf == EOF) || (buf == '\n')){ b[len] = '\0'; break;}
+	b[len] = buf;
+	len++;
+    }
+    return;
+}
+*/
 int HandleConnect(int fd){
 
     FILE *f;
     //extend the buffer size (1024->2048)
-    //this accomodates Wget.cgi (extra long GET request)
     char buf[2048];
     char buf1[2048];
     char *password, *c, *file_name;
     int agent = 0, auth = 0;
-
     f = fdopen(fd,"r+");    //FILE *out, LATER
     if(!f){
 	fprintf(stderr, "httpd: Unable to open httpd input fd, error %d\n", errno);
@@ -467,7 +491,6 @@ int HandleConnect(int fd){
     }
 //    setbuf(f, 0);
 
-    fdcr = f;
 //    alarm(TIMEOUT);
 /*
 FILE *fp;
@@ -480,10 +503,12 @@ printf("printfcopy %d  %s\n", strlen(buf), buf);
 fclose(fp);
 */
 
+//printf("run\n");		
 /*here is the problem with microsoft EDGE - it doesnot send the method on 1st click
 needed 2 clicks*/
 
 /**Get a method and HTTP version line maxlinesize=2048**/
+//my_fgetsss(buf, 2048, f);
     if(!fgets(buf, 2048, f)){
 	fprintf(stderr, "httpd: Error reading connection, error %d\n", errno);
 	fclose(f);
@@ -492,8 +517,10 @@ needed 2 clicks*/
     }
     buf[2047] = '\0';
 
+    fdcr = f;
+
 #ifdef DEBUG
-  printf("\nbuf = '%s'\n", buf);
+  printf("buf = %s", buf);
 #endif
 
 
@@ -503,8 +530,8 @@ needed 2 clicks*/
     method1 = POST_NO;
 //    if(!strncmp(buf,"GET",3))		method = M_GET;
 //    else if(!strncmp(buf,"POST",4))	method = M_POST;
-    if(file_name = parsestr1(buf, "GET ///././[/!/B/!/*/] HTTP///\\/{C/*.///}/*/<1?\\0/>/E")) method = M_GET;
-    else if(file_name = parsestr1(buf, "POST ///././[/!/B/!/*/] HTTP///\\/*?/\\/*.///E")) method = M_POST;
+    if(file_name = parsestr(buf, "GET ///././[/!/B/!/*/] HTTP///\\/{C/*.///}/*/<1?\\0/>/E")) method = M_GET;
+    else if(file_name = parsestr(buf, "POST ///././[/!/B/!/*/] HTTP///\\/*?/\\/*.///E")) method = M_POST;
 #ifdef SP_OPTIONS
     else if(!strncmp(buf,"OPTIONS",7))	method = M_OPTIONS;
 #endif
@@ -537,7 +564,7 @@ needed 2 clicks*/
 #endif
 
 	//adds for authentication
-		if((log_time <= 10) && (c = parsestr1(buf1,"Authorization:/ Basic/ /[/*/]/<1\r\n\\0/>"))){
+		if((log_time <= 10) && (c = parsestr(buf1,"Authorization:/ Basic/ /[/*/]/<1\r\n\\0/>"))){
 		    decodebase64(c);
 		    password = strchr(c,':');
 		    *password = '\0';
@@ -553,22 +580,22 @@ needed 2 clicks*/
 			log_time++;
 		    }
 
-		}else if(c = parsestr1(buf1, "Refer/,r,er:/ ")){
+		}else if(c = parsestr(buf1, "Refer/,r,er:/ ")){
 	            strmycpy(referer, c, 128);
-		}else if(c = parsestr1(buf1, "Content-/<1Ll/>ength:/ ")){
+		}else if(c = parsestr(buf1, "Content-/<1Ll/>ength:/ ")){
 		    content_length = atol(c);
-		}else if (c = parsestr1(buf1, "Content-/<1Tt/>ype:/ ")){
+		}else if (c = parsestr(buf1, "Content-/<1Tt/>ype:/ ")){
 //printf(buf1);
-		    if(parsestr1(c, "application//x-www-form-urlencoded")){	//web_encoded
+		    if(parsestr(c, "application//x-www-form-urlencoded")){	//web_encoded
 			method1 = POST_WEB_ENCODED;
-		    }else if(c = parsestr1(c, "multipart//form-data;/ ")){		//boundary (data-upload) is comming
-			if(c = parsestr1(c, "boundary=/[/*/]/<1\r\n\\0/>")){
+		    }else if(c = parsestr(c, "multipart//form-data;/ ")){		//boundary (data-upload) is comming
+			if(c = parsestr(c, "boundary=/[/*/]/<1\r\n\\0/>")){
 			    method1 = POST_BOUNDARY;
 			    strmycpy(boundary, c, 1024);
 //			    printf(boundary);
 			}
 		    }
-		}else if(c = parsestr1(buf1, "User-Agent:/ ")){    //To identify the OS
+		}else if(c = parsestr(buf1, "User-Agent:/ ")){    //To identify the OS
 	            strmycpy(user_agent, c, 128);
 		    agent = 1;
 /*		    if(strstr(c,"Linux"))	//used in post parsing only!
@@ -692,6 +719,7 @@ void sig_handler(int signo){
 	    else if(alrm_counter == 10){
 		    check_ip[0] = '\0';		//ip is released
 		    wauth = 1;
+		    free_ticket_all();//including mfexchange=""
 		    free_page_mem();
 //		    close(fd);
 	    }
@@ -705,6 +733,7 @@ void sig_handler(int signo){
     }
     free_arg(0);
     free_arg(1);
+    free_ticket_all();	//including mfexchange=""
     free_page_mem();	//clear all memory used for page
     exit(0);
 }
@@ -725,7 +754,7 @@ int main(int argc, char *argv[]){
     wauth = 1;			//not authenticated
     char no_dns[] = ".";
 
-    printf("Starting main()!!\n");
+    printf("Alex Reimer\n");
 
     signal(SIGCHLD, SIG_IGN);	//ignore
     signal(SIGPIPE, SIG_IGN);	//ignore
@@ -833,7 +862,7 @@ printf("%d == %d\n", ec.sin_addr.s_addr,inet_addr("127.0.0.1"));//important!!!
 	}
 
 //	printf("dns: %s\n", CONFIG.DNS_PARSE);
-	    if(!parsestr1(dns_name, CONFIG.DNS_PARSE)){		//if not parse clean
+	    if(!parsestr(dns_name, CONFIG.DNS_PARSE)){		//if not parse clean
 		close(fd);
 		continue;
 	    }
@@ -843,7 +872,6 @@ printf("%d == %d\n", ec.sin_addr.s_addr,inet_addr("127.0.0.1"));//important!!!
 	    close(fd);
 	    continue;
 	}
-
 
 	HandleConnect(fd);
 	}

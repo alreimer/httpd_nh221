@@ -27,7 +27,7 @@ var g = window.open('http://??_srv_ip??:??_srv_port??/help/access-user.help', 'n
 </table></form>
 
 <!-- TABLE:user_
-#-> parse_file: /etc/passwd
+#-> parse_file: ./etc/passwd
 while:/[/*/]\n
 if:/[/*/]:/*:/*:/*:/*:/*:
 END_TABLE -->
@@ -42,12 +42,12 @@ END_TABLE -->
 </table></form>
 
 <br>
-<form method="post" name="host_" action="user_passwd.cgi">
+<form method="post" name="host_" action="user_passwd.cgi" onsubmit="return check_form()">
 <table border="0" width="70%" height="50" align="center">
 <tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;Password File:</font></b></td><td></td><td></td></tr>
 <tr><td colspan="4">
 <textarea name="passwd" cols="80" rows="20">
-<!-- #include file="/etc/passwd" -->
+<!-- #include file="etc/passwd" -->
 </textarea></td></tr>
 <!--see examples from ftp-conf, ftp-passw, ftp-mod and serv-ftp-->
 <tr><td></td><td>user:*:0:0:user:/mnt:/bin/sh</td>
@@ -55,12 +55,12 @@ END_TABLE -->
 </table></form>
 
 <br>
-<form method="post" name="host_" action="user_group.cgi">
+<form method="post" name="host_" action="user_group.cgi" onsubmit="return check_form()">
 <table border="0" width="70%" height="50" align="center">
 <tr><td></td><td id="varbox-list-name"><b><font size="3">&nbsp;Group File:</font></b></td><td></td><td></td></tr>
 <tr><td colspan="4">
 <textarea name="group" cols="80" rows="20">
-<!-- #include file="/etc/group" -->
+<!-- #include file="etc/group" -->
 </textarea></td></tr>
 <!--see examples from ftp-conf, ftp-passw, ftp-mod and serv-ftp-->
 <tr><td></td><td></td>
@@ -90,13 +90,13 @@ here must be applet adduser
 
 */
     remove_chars "\r::_#passwd";
-    save_file "_#passwd:/etc/passwd";
+    save_file "_#passwd:/passwd";
     write_par "_etc_save:1";
     boot_page "access-user.htm";
 END_CGI -->
 <!-- CGI: user_group.cgi
     remove_chars "\r::_#group";
-    save_file "_#group:/etc/group";
+    save_file "_#group:/group";
     write_par "_etc_save:1";
     boot_page "access-user.htm";
 END_CGI -->
@@ -132,8 +132,8 @@ END_CGI -->
 //    get_file "./JavaReturn_.inc?name=Home%20Page&i=5";
     not "AREAun:/"{
     not "AREApw:/"{
-    change_line "/etc/passwd:/?AREAun?/:[?/?AREAun?/:?]??AREAun??:??AREApw??{?/*:/*/[:?}"{
-	shell "echo \"??AREAun??:??AREApw??:0:0:user:/home/??AREAun??:/bin/sh\" >> /etc/passwd";
+    change_line "etc/passwd:/?AREAun?/:[?/?AREAun?/:?]??AREAun??:??AREApw??{?/*:/*/[:?}"{
+	shell "echo \"??AREAun??:??AREApw??:0:0:user:/home/??AREAun??:/bin/sh\" >> etc/passwd";
     }
     write_par "_etc_save:1";
     boot_page "access-user.htm";
@@ -154,7 +154,7 @@ END_CGI -->
 	exit_cgi ;
     }
 
-    change_line "/etc/passwd:/?_@user_?/:";
+    change_line "etc/passwd:/?_@user_?/:";
     write_par "_etc_save:1";
     boot_page "access-user.htm";
 
